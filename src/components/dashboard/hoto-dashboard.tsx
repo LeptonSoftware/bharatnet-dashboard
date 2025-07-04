@@ -1,27 +1,27 @@
 import { useEffect, useState } from "react";
 import { SurveyData } from "@/types";
 import { fetchData } from "@/lib/api";
-import { 
+import {
   calculateSurveySummaryStats,
   getSurveyDistrictSummaries,
   getSurveyProgressData,
-  getSurveyStatusDistribution
+  getSurveyStatusDistribution,
 } from "@/lib/survey-utils";
 import { StatusCard } from "./status-card";
 import { SurveyOverviewChart } from "./survey-overview-chart";
 import { SurveyDistrictProgress } from "./survey-district-progress";
 import { SurveyBlocksTable } from "./survey-blocks-table";
 import { SurveyProgress } from "./survey-progress";
-import { 
-  CheckCircle, 
-  Clock, 
-  FileQuestion, 
-  Map, 
-  Cable, 
+import {
+  CheckCircle,
+  Clock,
+  FileQuestion,
+  Map,
+  Cable,
   Router,
   LayoutDashboard,
   Building2,
-  Table
+  Table,
 } from "lucide-react";
 
 interface HotoDashboardProps {
@@ -37,9 +37,13 @@ export function HotoDashboard({ circle }: HotoDashboardProps) {
     async function loadData() {
       try {
         setIsLoading(true);
-        const response = await fetchData(circle, 'survey');
+        const response = await fetchData(circle, "survey");
         const circleData = response[`${circle}Survey`] as SurveyData[];
-        setData(circleData?.filter(item => Boolean(item.sNo) && item.block != "B-1") || []);
+        setData(
+          circleData?.filter(
+            (item) => Boolean(item.sNo) && item.block != "B-1"
+          ) || []
+        );
       } catch (err) {
         setError("Failed to load data");
         console.error(err);
@@ -47,23 +51,23 @@ export function HotoDashboard({ circle }: HotoDashboardProps) {
         setIsLoading(false);
       }
     }
-    
+
     loadData();
   }, [circle]);
 
   if (isLoading || !data.length) return null;
   if (error) return <div className="text-destructive">{error}</div>;
 
-  const stats = calculateSurveySummaryStats(data, 'hoto');
-  const districts = getSurveyDistrictSummaries(data, 'hoto');
-  const statusDistribution = getSurveyStatusDistribution(data, 'hoto');
+  const stats = calculateSurveySummaryStats(data, "hoto");
+  const districts = getSurveyDistrictSummaries(data, "hoto");
+  const statusDistribution = getSurveyStatusDistribution(data, "hoto");
   const kmDistribution = {
-    labels: ['surveyed', 'remaining'],
-    data: [stats.completedKm || 0, stats.pendingKm || 0]
+    labels: ["surveyed", "remaining"],
+    data: [stats.completedKm || 0, stats.pendingKm || 0],
   };
 
   return (
-    <div className="space-y-6">      
+    <div className="space-y-6">
       <div>
         <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
           <LayoutDashboard className="h-5 w-5" />
@@ -131,7 +135,9 @@ export function HotoDashboard({ circle }: HotoDashboardProps) {
           />
           <StatusCard
             title="Progress"
-            value={(stats.completedKm || 0) / (stats.totalExistingKm || 1) * 100}
+            value={
+              ((stats.completedKm || 0) / (stats.totalExistingKm || 1)) * 100
+            }
             icon={<FileQuestion />}
             description="Survey completion percentage"
             className="bg-purple-50 dark:bg-purple-950/20"
@@ -141,7 +147,7 @@ export function HotoDashboard({ circle }: HotoDashboardProps) {
       </div>
 
       <div className="grid gap-4 mb-6 grid-cols-1 xl:grid-cols-12">
-        <SurveyOverviewChart 
+        <SurveyOverviewChart
           blockDistribution={statusDistribution}
           kmDistribution={kmDistribution}
         />
