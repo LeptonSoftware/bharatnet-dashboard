@@ -1,26 +1,26 @@
 import { useEffect, useState } from "react";
 import { SurveyData } from "@/types";
 import { fetchData } from "@/lib/api";
-import { 
+import {
   calculateSurveySummaryStats,
   getSurveyDistrictSummaries,
   getSurveyProgressData,
-  getSurveyStatusDistribution
+  getSurveyStatusDistribution,
 } from "@/lib/survey-utils";
 import { StatusCard } from "./status-card";
 import { SurveyOverviewChart } from "./survey-overview-chart";
 import { SurveyDistrictProgress } from "./survey-district-progress";
 import { SurveyBlocksTable } from "./survey-blocks-table";
-import { 
-  CheckCircle, 
-  Clock, 
-  FileQuestion, 
-  Map, 
-  Cable, 
+import {
+  CheckCircle,
+  Clock,
+  FileQuestion,
+  Map,
+  Cable,
   Router,
   LayoutDashboard,
   Building2,
-  Table
+  Table,
 } from "lucide-react";
 
 interface FeasibilityDashboardProps {
@@ -36,10 +36,14 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
     async function loadData() {
       try {
         setIsLoading(true);
-        const response = await fetchData(circle, 'survey');
+        const response = await fetchData(circle, "survey");
         const circleData = response[`${circle}Survey`] as SurveyData[];
-        
-        setData(circleData?.filter(item => Boolean(item.sNo) && item.block != "B-1") || []);
+
+        setData(
+          circleData?.filter(
+            (item) => Boolean(item.sNo) && item.block != "B-1"
+          ) || []
+        );
       } catch (err) {
         setError("Failed to load data");
         console.error(err);
@@ -47,19 +51,19 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
         setIsLoading(false);
       }
     }
-    
+
     loadData();
   }, [circle]);
 
   if (isLoading || !data.length) return null;
   if (error) return <div className="text-destructive">{error}</div>;
 
-  const stats = calculateSurveySummaryStats(data, 'feasibility');
-  const districts = getSurveyDistrictSummaries(data, 'feasibility');
-  const statusDistribution = getSurveyStatusDistribution(data, 'feasibility');
+  const stats = calculateSurveySummaryStats(data, "feasibility", circle);
+  const districts = getSurveyDistrictSummaries(data, "feasibility", circle);
+  const statusDistribution = getSurveyStatusDistribution(data, "feasibility");
   const kmDistribution = {
-    labels: ['surveyed', 'remaining'],
-    data: [stats.completedKm || 0, stats.pendingKm || 0]
+    labels: ["surveyed", "remaining"],
+    data: [stats.completedKm || 0, stats.pendingKm || 0],
   };
 
   return (
@@ -131,7 +135,9 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
           />
           <StatusCard
             title="Progress"
-            value={(stats.completedKm || 0) / (stats.totalPlannedKm || 1) * 100}
+            value={
+              ((stats.completedKm || 0) / (stats.totalPlannedKm || 1)) * 100
+            }
             icon={<FileQuestion />}
             description="Survey completion percentage"
             className="bg-purple-50 dark:bg-purple-950/20"
@@ -141,7 +147,7 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
       </div>
 
       <div className="grid gap-4 mb-6 grid-cols-1 xl:grid-cols-12">
-        <SurveyOverviewChart 
+        <SurveyOverviewChart
           blockDistribution={statusDistribution}
           kmDistribution={kmDistribution}
         />
