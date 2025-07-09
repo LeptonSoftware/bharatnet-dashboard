@@ -11,6 +11,7 @@ import { DataTableProvider } from "@/components/data-table/data-table-provider";
 import { DataTableAdvancedToolbar } from "@/components/data-table/data-table-advanced-toolbar";
 import { DataTableFilterList } from "@/components/data-table/data-table-filter-list";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
+import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { Skeleton } from "@rio.js/ui/components/skeleton";
 import {
   Select,
