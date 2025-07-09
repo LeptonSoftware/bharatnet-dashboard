@@ -8,12 +8,9 @@ import { circleMap } from "@/lib/utils";
 import { Link } from "react-router";
 import { cn } from "@rio.js/ui/lib/utils";
 import { DataTableProvider } from "@/components/data-table/data-table-provider";
-import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { DataTableAdvancedToolbar } from "@/components/data-table/data-table-advanced-toolbar";
 import { DataTableFilterList } from "@/components/data-table/data-table-filter-list";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { Tabs, TabsList, TabsTrigger } from "@rio.js/ui/components/tabs";
 import { Skeleton } from "@rio.js/ui/components/skeleton";
 import {
   Select,
