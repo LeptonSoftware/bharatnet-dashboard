@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/page-header";
-import { InsightsTable } from "./insights-table";
+import { DashboardTable } from "./dashboard-table";
 
-export default function InsightsPage() {
+export default function DashboardPage() {
   return (
     <>
       <PageHeader
@@ -13,7 +13,7 @@ export default function InsightsPage() {
         ]}
       />
       <div className="p-6 overflow-y-auto">
-        <InsightsTable />
+        <DashboardTable />
       </div>
     </>
   );

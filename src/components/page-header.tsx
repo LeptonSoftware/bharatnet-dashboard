@@ -17,7 +17,7 @@ export function PageHeader({
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) group-has-data-[variant=floating]/sidebar-wrapper:h-[calc(var(--header-height)+var(--spacing)*2)]">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
-        <img src="/lepton-logo.png" alt="Lepton Logo" className="h-8 w-auto" />
+        <img src="/lepton-logo.png" alt="Lepton Logo" className="h-6 w-auto" />
         <Separator
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"

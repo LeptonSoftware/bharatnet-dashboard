@@ -14,6 +14,7 @@ import { DataTableFilterList } from "@/components/data-table/data-table-filter-l
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { Tabs, TabsList, TabsTrigger } from "@rio.js/ui/components/tabs";
+import { Skeleton } from "@rio.js/ui/components/skeleton";
 import {
   Select,
   SelectContent,
@@ -22,7 +23,53 @@ import {
   SelectValue,
 } from "@rio.js/ui/components/select";
 
-export function InsightsTable() {
+function TableSkeleton() {
+  return (
+    <div className="space-y-4 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex gap-2">
+            <Skeleton className="h-9 w-[150px]" />
+            <Skeleton className="h-9 w-[120px]" />
+          </div>
+          <Skeleton className="h-9 w-[100px]" />
+        </div>
+        <div className="border rounded-lg">
+          <div className="border-b bg-muted/50 p-4">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-4 w-[200px]" />
+              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="h-4 w-[100px]" />
+            </div>
+          </div>
+          <div className="divide-y">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="p-4">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <Skeleton className="h-4 w-[200px]" />
+                  <Skeleton className="h-4 w-[100px]" />
+                  <Skeleton className="h-4 w-[150px]" />
+                  <Skeleton className="h-4 w-[100px]" />
+                  <Skeleton className="h-4 w-[100px]" />
+                  <Skeleton className="h-4 w-[150px]" />
+                  <Skeleton className="h-4 w-[100px]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function DashboardTable() {
   const [data, setData] = useState<NationalRowData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,8 +91,7 @@ export function InsightsTable() {
     loadData();
   }, []);
 
-  if (isLoading)
-    return <div className="text-center p-8">Loading insights data...</div>;
+  if (isLoading) return <TableSkeleton />;
   if (error)
     return <div className="text-destructive text-center p-8">{error}</div>;
   if (!data.length)
@@ -192,6 +238,34 @@ export function InsightsTable() {
                 {newKms.toLocaleString()} new
               </span>
             </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "financialProgress",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Financial Progress"
+          className="mx-auto"
+        />
+      ),
+      cell: ({ row }) => {
+        const value = row.getValue("financialProgress");
+        if (!value) return <div className="text-center">N/A</div>;
+
+        // Ensure value is string and handle the split
+        const parts = String(value).split("\n");
+        const amount = parts[0] || "N/A";
+        const date = parts[1] || "";
+
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <div className="font-medium">{amount}</div>
+            {date && (
+              <div className="text-xs text-muted-foreground">{date}</div>
+            )}
           </div>
         );
       },

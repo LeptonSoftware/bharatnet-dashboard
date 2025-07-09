@@ -57,6 +57,7 @@ import {
   SelectValue,
 } from "@rio.js/ui/components/select";
 import { cn } from "@rio.js/ui/lib/utils";
+import { NationalDashboardSkeleton } from "./loading-skeleton";
 
 export function NationalDashboard() {
   const [data, setData] = useState<NationalRowData[]>([]);
@@ -80,8 +81,7 @@ export function NationalDashboard() {
     loadData();
   }, []);
 
-  if (isLoading)
-    return <div className="text-center p-8">Loading national dashboard...</div>;
+  if (isLoading) return <NationalDashboardSkeleton />;
   if (error)
     return <div className="text-destructive text-center p-8">{error}</div>;
   if (!data.length)
