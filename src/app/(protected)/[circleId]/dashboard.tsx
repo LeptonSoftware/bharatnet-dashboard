@@ -9,7 +9,7 @@ import {
 import { DtpDashboard } from "./dashboard/dtp-dashboard";
 import { FeasibilityDashboard } from "./dashboard/feasibility-dashboard";
 import { HotoDashboard } from "./dashboard/hoto-dashboard";
-import { DashboardSkeleton } from "./dashboard/loading-skeleton";
+import { NationalDashboardSkeleton } from "./dashboard/loading-skeleton";
 import { FileText, Search, Cable } from "lucide-react";
 import { getCircleName } from "@/lib/utils";
 
@@ -33,7 +33,7 @@ export function Dashboard() {
         <h1 className="text-2xl sm:text-3xl font-bold mb-6">
           Project Dashboard
         </h1>
-        <DashboardSkeleton />
+        <NationalDashboardSkeleton />
       </div>
     );
   }

@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rio.js/ui/components/select";
+import { Table } from "lucide-react";
 
 function TableSkeleton() {
   return (
@@ -29,8 +30,7 @@ function TableSkeleton() {
       <div className="flex-1 flex flex-col min-h-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex gap-2">
-            <Skeleton className="h-9 w-[150px]" />
-            <Skeleton className="h-9 w-[120px]" />
+            <Skeleton className="h-9 w-[200px]" />
           </div>
           <Skeleton className="h-9 w-[100px]" />
         </div>
@@ -287,6 +287,10 @@ export function DashboardTable() {
 
   return (
     <div className="space-y-4 flex flex-col ">
+      <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
+        <Table className="h-5 w-5" />
+        State-wise Progress
+      </h2>
       <DataTableProvider<NationalRowData> columns={columns} data={data}>
         <div className="flex-1 flex flex-col min-h-0">
           <DataTableAdvancedToolbar>
