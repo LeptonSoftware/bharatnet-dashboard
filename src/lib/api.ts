@@ -1,4 +1,14 @@
 import { ApiResponse, NationalRowData } from "@/types";
+import { createClient } from "./supabase/client";
+
+// Types for circle roles
+interface CircleRole {
+  id: number;
+  user_id: string;
+  circles: string[];
+  role: string;
+  created_at: string;
+}
 
 const BASE_API_URL =
   "https://api.sheety.co/632604ca09353483222880568eb0ebe2/bharatNetPhase3ProjectReport";
@@ -97,6 +107,57 @@ export async function fetchNationalData(): Promise<NationalRowData[]> {
     return data.dashboard || [];
   } catch (error) {
     console.error("Error fetching national data:", error);
+    throw error;
+  }
+}
+export async function fetchrelevantCircleData(
+  circle: string
+): Promise<ApiResponse> {
+  try {
+    const response = await fetch(`${BASE_API_URL}/${circle}`);
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching relevant circle data:", error);
+    throw error;
+  }
+}
+
+export async function fetchUserCircleRoles(): Promise<CircleRole | null> {
+  try {
+    const supabase = createClient();
+
+    // Get current user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError) throw userError;
+    console.log(user);
+    if (!user) return null;
+
+    // Fetch circle roles for the user
+    const { data: circleRoles, error: rolesError } = await supabase
+      .from("circle_roles")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (rolesError) {
+      return {
+        id: 0,
+        user_id: user.id,
+        circles: [],
+        role: "",
+        created_at: new Date().toISOString(),
+      };
+    }
+    return circleRoles;
+  } catch (error) {
+    console.error("Error fetching user circle roles:", error);
     throw error;
   }
 }

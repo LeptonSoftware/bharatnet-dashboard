@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from "react";
-import { fetchNationalData } from "@/lib/api";
+import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api";
 import { NationalRowData } from "@/types";
 import { DataTable } from "@/components/data-table/data-table";
 import { ColumnDef } from "@tanstack/react-table";
@@ -69,6 +69,7 @@ function TableSkeleton() {
 
 export function DashboardTable() {
   const [data, setData] = useState<NationalRowData[]>([]);
+  const [circleRoles, setCircleRoles] = useState<CircleRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,7 +78,21 @@ export function DashboardTable() {
       try {
         setIsLoading(true);
         const nationalData = await fetchNationalData();
-        setData(nationalData);
+        const userCircleRoles = await fetchUserCircleRoles();
+        setCircleRoles(userCircleRoles);
+
+        // Filter national data based on circle roles
+        if (userCircleRoles && userCircleRoles.circles.length > 0) {
+          const allowedCircles = userCircleRoles.circles.map((c) =>
+            c.circle.toLowerCase()
+          );
+          const filteredData = nationalData.filter((row) =>
+            allowedCircles.includes(row.abbreviation.toLowerCase())
+          );
+          setData(filteredData);
+        } else {
+          setData(nationalData);
+        }
       } catch (err) {
         setError("Failed to load national data");
         console.error(err);

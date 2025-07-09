@@ -6,9 +6,9 @@ import {
   z,
 } from "@rio.js/env/utils";
 
-const SUPABASE_URL = "https://tjlsladttbolowooisrp.supabase.co/";
+const SUPABASE_URL = "https://hzgytqitccsaffrvvdff.supabase.co/";
 const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqbHNsYWR0dGJvbG93b29pc3JwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODExMjA0OTEsImV4cCI6MTk5NjY5NjQ5MX0.QagJQDLcP3Il2LABRyKHFFE_PpqdcF7RXwpv6z4Bdwo";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Z3l0cWl0Y2NzYWZmcnZ2ZGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5ODc4MDYsImV4cCI6MjA1NTU2MzgwNn0.L26B3duhlES6yEPLJ2ZmeSdpmkfjsBbTxAdbtz9UhEg";
 
 // Base CSP values that should always be present
 const getBaseCSP = (publicRioEngineUrl = SUPABASE_URL) =>

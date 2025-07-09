@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from "react";
-import { fetchNationalData } from "@/lib/api";
+import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api";
 import { NationalRowData } from "@/types";
 import { StatusCard } from "./status-card";
 import {
@@ -59,9 +59,19 @@ import {
 import { cn } from "@rio.js/ui/lib/utils";
 import { NationalDashboardSkeleton } from "./loading-skeleton";
 
+// Add CircleRole type
+interface CircleRole {
+  id: number;
+  created_at: string;
+  user_id: string;
+  circles: Array<{ circle: string }>;
+  role: string;
+}
+
 export function NationalDashboard() {
   const [data, setData] = useState<NationalRowData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [circleRoles, setCircleRoles] = useState<CircleRole | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -69,7 +79,21 @@ export function NationalDashboard() {
       try {
         setIsLoading(true);
         const nationalData = await fetchNationalData();
-        setData(nationalData);
+        const userCircleRoles = await fetchUserCircleRoles();
+        setCircleRoles(userCircleRoles);
+
+        // Filter national data based on circle roles
+        if (userCircleRoles && userCircleRoles.circles.length > 0) {
+          const allowedCircles = userCircleRoles.circles.map((c) =>
+            c.circle.toLowerCase()
+          );
+          const filteredData = nationalData.filter((row) =>
+            allowedCircles.includes(row.abbreviation.toLowerCase())
+          );
+          setData(filteredData);
+        } else {
+          setData(nationalData);
+        }
       } catch (err) {
         setError("Failed to load national data");
         console.error(err);

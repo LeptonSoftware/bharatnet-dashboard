@@ -1,6 +1,8 @@
 import { Separator } from "@rio.js/ui/components/separator";
 import { SidebarTrigger } from "@rio.js/ui/components/sidebar";
 import { format } from "date-fns";
+import { Button } from "@rio.js/ui/components/button";
+import { RefreshCw } from "lucide-react";
 
 export function PageHeader({
   breadcrumbs,
@@ -44,6 +46,15 @@ export function PageHeader({
         <div className="ml-auto text-sm text-muted-foreground">
           {format(new Date(), "MMMM d, yyyy")}
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="ml-2"
+          onClick={() => window.location.reload()}
+        >
+          <RefreshCw className="h-4 w-4" />
+          <span className="sr-only">Reload page</span>
+        </Button>
         {children}
       </div>
     </header>

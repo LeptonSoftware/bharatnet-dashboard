@@ -14,7 +14,7 @@ import { FileText, Search, Cable } from "lucide-react";
 import { getCircleName } from "@/lib/utils";
 
 export function Dashboard() {
-  const { circle = "upe" } = useParams();
+  const { circleId: circle = "upe" } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
