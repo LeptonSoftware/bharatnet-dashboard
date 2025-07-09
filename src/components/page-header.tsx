@@ -1,16 +1,17 @@
-import { Separator } from "@rio.js/ui/components/separator"
-import { SidebarTrigger } from "@rio.js/ui/components/sidebar"
+import { Separator } from "@rio.js/ui/components/separator";
+import { SidebarTrigger } from "@rio.js/ui/components/sidebar";
+import { format } from "date-fns";
 
 export function PageHeader({
   breadcrumbs,
   children,
 }: {
   breadcrumbs?: {
-    icon?: React.ReactNode
-    title: string
-    url?: string
-  }[]
-  children?: React.ReactNode
+    icon?: React.ReactNode;
+    title: string;
+    url?: string;
+  }[];
+  children?: React.ReactNode;
 }) {
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) group-has-data-[variant=floating]/sidebar-wrapper:h-[calc(var(--header-height)+var(--spacing)*2)]">
@@ -39,8 +40,11 @@ export function PageHeader({
             </>
           ))}
         </h1>
+        <div className="ml-auto text-sm text-muted-foreground">
+          {format(new Date(), "MMMM d, yyyy")}
+        </div>
         {children}
       </div>
     </header>
-  )
+  );
 }
