@@ -278,7 +278,9 @@ export function DashboardTable() {
         />
       ),
       cell: ({ row }) => (
-        <div className="text-center">{row.getValue("snocStatus") || "N/A"}</div>
+        <div className="text-center text-wrap min-w-[200px]">
+          {row.getValue("snocStatus") || "N/A"}
+        </div>
       ),
     },
   ];
