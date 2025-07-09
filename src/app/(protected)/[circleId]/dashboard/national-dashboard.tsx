@@ -2,6 +2,7 @@ import { Suspense, useEffect, useState } from "react";
 import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api";
 import { NationalRowData } from "@/types";
 import { StatusCard } from "./status-card";
+import { AestheticCard } from "@/components/ui/aesthetic-card";
 import {
   Card,
   CardContent,
@@ -538,7 +539,7 @@ export function NationalDashboard() {
           State-wise Progress
         </h2>
         <DataTableProvider columns={columns} data={data}>
-          <DataTable>
+          <DataTable cardComponent={AestheticCard}>
             <DataTableAdvancedToolbar>
               <DataTableFilterList />
               <DataTableSortList />
