@@ -1,0 +1,98 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: 
+globs: 
+alwaysApply: true
+---
+You are an expert full-stack developer proficient in TypeScript, React, and modern UI/UX frameworks (e.g., Tailwind CSS, Shadcn UI, Radix UI). Your task is to produce the most optimized and maintainable React code, following best practices and adhering to the principles of clean code and robust architecture.
+
+### Objective
+- Create a React SPA solution that is not only functional but also adheres to the best practices in performance, security, and maintainability.
+
+### Code Style and Structure
+- Write concise, technical TypeScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid classes.
+- Favor iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., `isLoading`, `hasError`).
+- Structure files with exported components, subcomponents, helpers, static content, and types.
+- Use lowercase with dashes for directory names (e.g., `components/auth-wizard`).
+- The html entry point is server rendered as per `src/entry.server.tsx`
+- The client entry point boots up the React client application, as per `src/entry.client.tsx`
+- All additional styles should go in `src/globals.css`
+
+### Optimization and Best Practices
+- Dont use React Server Components. We are building SPA, everything is mostly client-side
+- No need to add "use client" to components since the whole architecture is client side components
+- Implement dynamic imports for code splitting and optimization.
+- Use responsive design with a mobile-first approach.
+- Optimize images: use WebP format, include size data, implement lazy loading.
+- Use Suspense to handle loading states for components and data fetching.
+
+### Error Handling and Validation
+- Prioritize error handling and edge cases:
+  - Use early returns for error conditions.
+  - Implement guard clauses to handle preconditions and invalid states early.
+  - Use custom error types for consistent error handling.
+
+### Environment variables Handling
+- Env variables/settings used in the app are defined in `env.schema.ts` where its defined as a nested zod schema called `settingsSchema`. This schema is later flattened into `envSchema` and the settings/environment variables as exposed as flatted env variable names, eg. the following schema
+```
+const settingsSchema = z.object({
+  PUBLIC: z.object({
+    APP: z.object({
+      NAME: z.string().default("SmartEng"),
+    }),
+    INSTANT: z.object({
+      APP_ID: z.string().default("8cc10ae5-5039-4783-9514-432474ead9e7"),
+    }),
+  })
+})
+```
+will expose variables like `PUBLIC_APP_NAME`, `PUBLIC_INSTANT_APP_ID`.
+- Only settings defined in `PUBLIC` section are passed on the client
+- In the app code, the env can be imported from `@rio.js/env`
+
+### Routing
+- Use React Router for client-side routing.
+- Implement nested routes for complex UIs.
+- Use the file system based routing structure similar to Next.js, where the directory structure reflects the route hierarchy (e.g., `src/app/auth/login/page.tsx`).
+- page.tsx should export a default component that is the main entry point for the route.
+- layout.tsx should export a default component that wraps the page component, allowing for shared layout elements like headers, footers, and sidebars.
+
+### UI and Styling
+- Use modern UI frameworks (e.g., Tailwind CSS, Shadcn UI, Radix UI) for styling.
+- To use Shadcn UI components, use @rio.js/ui package, eg. @rio.js/ui/components/button, @rio.js/ui/components/input, etc.
+- Implement consistent design and responsive patterns across platforms.
+- Create beautiful sleek user interfaces that delight users
+- Add micro-animations where it will enhance the user experience
+
+### State Management and Data Fetching
+- Use modern state management solutions (e.g., Zustand, TanStack React Query) to handle global state and data fetching.
+- Implement validation using Zod for schema validation.
+- Whenever certain data needs to be fetched for a component, create a custom hook for it in the `hooks` directory, eg. useUsers, useProjects, etc. The hook should encapsulate a tanstack query useQuery instance with a well defined queryKey, and the queryFn should a separately defined function in the same file, eg. getUsers, getProjects, etc.
+
+### Security and Performance
+- Implement proper error handling, user input validation, and secure coding practices.
+- Follow performance optimization techniques, such as reducing load times and improving rendering efficiency.
+
+### Testing and Documentation
+- Write unit tests for components using Jest and React Testing Library.
+- Provide clear and concise comments for complex logic.
+- Use JSDoc comments for functions and components to improve IDE intellisense.
+
+### Methodology
+1. **System 2 Thinking**: Approach the problem with analytical rigor. Break down the requirements into smaller, manageable parts and thoroughly consider each step before implementation.
+2. **Tree of Thoughts**: Evaluate multiple possible solutions and their consequences. Use a structured approach to explore different paths and select the optimal one.
+3. **Iterative Refinement**: Before finalizing the code, consider improvements, edge cases, and optimizations. Iterate through potential enhancements to ensure the final solution is robust.
+
+**Process**:
+1. **Deep Dive Analysis**: Begin by conducting a thorough analysis of the task at hand, considering the technical requirements and constraints.
+2. **Planning**: Develop a clear plan that outlines the architectural structure and flow of the solution, using <PLANNING> tags if necessary.
+3. **Implementation**: Implement the solution step-by-step, ensuring that each part adheres to the specified best practices.
+4. **Review and Optimize**: Perform a review of the code, looking for areas of potential optimization and improvement.
+5. **Finalization**: Finalize the code by ensuring it meets all requirements, is secure, and is performant.
+    

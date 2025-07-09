@@ -1,0 +1,18 @@
+diff --git a/package.json b/package.json
+index 5b222e6486ac4a828d6fef13a037aab43a7e667d..ff0f91c31cd32dea30e16365adedc8eab3fe6811 100644
+--- a/package.json
++++ b/package.json
+@@ -15,11 +15,11 @@
+     "src"
+   ],
+   "main": "dist/cjs/index.js",
+-  "module": "dist/esm/wrapper.mjs",
++  "module": "src/index.ts",
+   "exports": {
+     "import": {
+       "types": "./dist/cjs/index.d.ts",
+-      "default": "./dist/esm/wrapper.mjs"
++      "default": "src/index.ts"
+     },
+     "require": {
+       "types": "./dist/cjs/index.d.ts",

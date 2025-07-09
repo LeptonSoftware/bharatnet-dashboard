@@ -1,0 +1,334 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Data Table Implementation Pattern
+
+All data tables in the application must follow the established pattern demonstrated in the TeamsTable component. This ensures consistency, maintainability, and proper user experience across all data tables.
+
+## Required Structure
+
+### 1. Custom Hook for Data Fetching
+- Each data table must use a custom hook for data fetching (e.g., `useTeams`, `useWorkflows`, `useMembers`)
+- The hook should encapsulate a TanStack Query `useQuery` instance
+- The hook should be defined in the `src/hooks/` directory
+- The hook should return `{ data, isLoading, isEmpty }` at minimum
+
+### 2. Loading State Handling
+- **No separate skeleton component needed** - `DataTableProvider` handles loading states internally
+- Use `DataTableProvider` with `isLoading` and `skeletonRow` props
+- The `skeletonRow` prop should contain all properties from real data with empty/default values
+- **Critical**: Use shared column definitions between skeleton and real table (DRY principle)
+- **Column Hook**: Create a `use{EntityName}Columns` hook that returns column definitions
+- **Conditional Rendering**: Use `row.original.id.startsWith('skeleton-')` to detect skeleton data
+- **Interactive Elements**: Disable checkboxes and other interactive elements when skeleton data is detected
+
+### 3. Empty State Handling
+- Use `isEmpty` from the custom hook instead of manual null/empty checks
+- Must include proper empty state with:
+  - Icon (using `@iconify/react` with appropriate icon)
+  - Descriptive heading
+  - Helper text explaining what the empty state means
+  - Call-to-action button when appropriate
+- Empty state should be wrapped in a Card component
+
+### 4. Column Definition Pattern
+- Create a `use{EntityName}Columns` hook that returns column definitions
+- Use `createColumnHelper<Row<typeof useCustomHook>>()` for type safety
+- Define columns using `useMemo` to prevent unnecessary re-renders
+- Always include a selection column with checkboxes for bulk actions
+- Use `DataTableColumnHeader` component for sortable headers
+- **Conditional Cell Rendering**: Check `row.original.id.startsWith('skeleton-')` to render skeleton vs real content
+- **Disable Interactions**: Disable checkboxes and buttons when skeleton data is detected
+- Define column meta properties for filtering:
+  ```typescript
+  meta: {
+    label: "Display Name",
+    placeholder: "Search placeholder...",
+    variant: "text" | "select" | "range" | "date",
+    icon: IconComponent,
+  }
+  ```
+
+### 5. Data Table Provider Pattern
+- Use `DataTableProvider` with `columns`, `data`, `isLoading`, and `skeletonRow` props
+- Use `DataTable` component with `actionBar` prop
+- Wrap toolbar components in `DataTableAdvancedToolbar`:
+  - `DataTableFilterList`
+  - `DataTableSortList`
+
+### 6. Required Imports
+All data table components must import:
+```typescript
+import { createColumnHelper, type ColumnDef } from "@tanstack/react-table"
+import { useMemo } from "react"
+import { Icon } from "@iconify/react"
+import { Plus } from "lucide-react"
+import { Button } from "@rio.js/ui/components/button"
+import { Card, CardContent } from "@rio.js/ui/components/card"
+import { Checkbox } from "@rio.js/ui/components/checkbox"
+import { Skeleton } from "@rio.js/ui/components/skeleton"
+import {
+  DataTable,
+  DataTableProvider,
+  DataTableAdvancedToolbar,
+  DataTableFilterList,
+  DataTableSortList,
+  DataTableActionBar,
+  DataTableColumnHeader,
+} from "@/components/data-table"
+```
+
+## Example Implementation Template
+
+```typescript
+// Shared column definitions hook
+function use{EntityName}Columns() {
+  const columnHelper = createColumnHelper<Row<typeof use{EntityName}>>()
+
+  return useMemo(
+    () => [
+      columnHelper.display({
+        id: "select",
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+            disabled={table.getRowModel().rows.some(row => row.original.id.startsWith('skeleton-'))}
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+            disabled={row.original.id.startsWith('skeleton-')}
+          />
+        ),
+        size: 32,
+        enableSorting: false,
+        enableHiding: false,
+      }),
+      columnHelper.accessor("name", {
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Name" />
+        ),
+        id: "name",
+        cell: ({ row }) => {
+          const isSkeleton = row.original.id.startsWith('skeleton-')
+          
+          if (isSkeleton) {
+            return (
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <div>
+                  <Skeleton className="h-4 w-[120px] mb-1" />
+                  <Skeleton className="h-3 w-[80px]" />
+                </div>
+              </div>
+            )
+          }
+          
+          return (
+            <div className="flex items-center gap-3">
+              <Avatar member={row.original} />
+              <div>
+                <div className="font-medium">{row.original.name}</div>
+                <div className="text-sm text-muted-foreground">
+                  {row.original.id}
+                </div>
+              </div>
+            </div>
+          )
+        },
+        meta: {
+          label: "Name",
+          placeholder: "Search {entities}...",
+          variant: "text" as const,
+          icon: IconComponent,
+        },
+        enableColumnFilter: true,
+      }),
+      // Add more columns with conditional rendering
+    ] satisfies ColumnDef<Row<typeof use{EntityName}>, any>[],
+    [],
+  )
+}
+
+// Main table component
+function {EntityName}Table() {
+  const { data: {entities}, isLoading, isEmpty } = use{EntityName}()
+  const columns = use{EntityName}Columns()
+
+  if (isEmpty) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <Icon
+              icon="appropriate-icon"
+              className="h-12 w-12 text-muted-foreground mx-auto mb-4"
+            />
+            <h3 className="text-lg font-semibold mb-2">No {entities} found</h3>
+            <p className="text-muted-foreground mb-4">
+              Descriptive text about the empty state.
+            </p>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Create {EntityName}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <DataTableProvider
+      columns={columns}
+      data={{entities}}
+      isLoading={isLoading}
+      skeletonRow={{
+        id: "",
+        name: "",
+        // Add all other properties from real data with empty/default values
+      }}
+    >
+      <DataTable actionBar={<DataTableActionBar />}>
+        <DataTableAdvancedToolbar>
+          <DataTableFilterList />
+          <DataTableSortList />
+        </DataTableAdvancedToolbar>
+      </DataTable>
+    </DataTableProvider>
+  )
+}
+```
+
+## Mandatory Requirements
+
+1. **Type Safety**: All data tables must use proper TypeScript types with `Row<typeof useCustomHook>`
+2. **Consistent Naming**: Follow the pattern `{EntityName}Table`, `use{EntityName}`, `use{EntityName}Columns`
+3. **DRY Principle**: Use shared column definitions via `use{EntityName}Columns` hook
+4. **Skeleton Detection**: Use `row.original.id.startsWith('skeleton-')` pattern for conditional rendering
+5. **Error Handling**: Include proper error states (can be handled by the custom hook)
+6. **Accessibility**: Include proper ARIA labels for checkboxes and interactive elements
+7. **Performance**: Use `useMemo` for column definitions to prevent unnecessary re-renders
+8. **Consistency**: All tables should look and behave the same way across the application
+9. **Simplified Loading**: Use `DataTableProvider` with `isLoading` and `skeletonRow` props instead of separate skeleton components
+
+## Column Meta Properties
+
+When defining columns, always include meta properties for proper filtering:
+- `label`: Display name for the column
+- `placeholder`: Placeholder text for search/filter inputs
+- `variant`: Type of filter (`text`, `select`, `range`, `date`)
+- `icon`: Icon component for the filter UI
+
+This ensures that all data tables maintain consistency and provide a unified user experience throughout the application.
+
+## Skeleton Implementation Requirements
+
+### Skeleton Structure
+1. **No Separate Component**: Use `DataTableProvider` with `skeletonRow` prop instead of separate skeleton components
+2. **Shared Columns**: Use the same `use{EntityName}Columns` hook for both skeleton and real data
+3. **Conditional Rendering**: Detect skeleton data using `row.original.id.startsWith('skeleton-')`
+4. **Automatic Disabling**: Interactive elements are automatically disabled when skeleton data is detected
+
+### Skeleton Row Definition
+```typescript
+// Define skeleton row that matches the real data structure
+skeletonRow={{
+  id: "", // Will be automatically prefixed with 'skeleton-' by DataTableProvider
+  name: "",
+  email: "",
+  created_at: 0,
+  // Include ALL properties from real data with empty/default values
+}}
+```
+
+### Conditional Cell Rendering Pattern
+```typescript
+cell: ({ row }) => {
+  const isSkeleton = row.original.id.startsWith('skeleton-')
+  
+  if (isSkeleton) {
+    // Return skeleton content
+    return <Skeleton className="h-4 w-[120px]" />
+  }
+  
+  // Return real content
+  return <span>{row.original.name}</span>
+}
+```
+
+### Cell Rendering Examples
+```typescript
+// Simple text cell with conditional rendering
+cell: ({ row }) => {
+  const isSkeleton = row.original.id.startsWith('skeleton-')
+  
+  if (isSkeleton) {
+    return <Skeleton className="h-4 w-[120px]" />
+  }
+  
+  return <span>{row.original.name}</span>
+}
+
+// Complex cell with avatar and text
+cell: ({ row }) => {
+  const isSkeleton = row.original.id.startsWith('skeleton-')
+  
+  if (isSkeleton) {
+    return (
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-8 w-8 rounded-full" />
+        <div>
+          <Skeleton className="h-4 w-[120px] mb-1" />
+          <Skeleton className="h-3 w-[80px]" />
+        </div>
+      </div>
+    )
+  }
+  
+  return (
+    <div className="flex items-center gap-3">
+      <Avatar member={row.original} />
+      <div>
+        <div className="font-medium">{row.original.name}</div>
+        <div className="text-sm text-muted-foreground">
+          {row.original.id}
+        </div>
+      </div>
+    </div>
+  )
+}
+```
+
+### Skeleton Best Practices
+- **Realistic Widths**: Use appropriate skeleton widths for different content types:
+  - Names: `w-[120px]` to `w-[200px]`
+  - Emails: `w-[160px]` to `w-[240px]`
+  - Dates: `w-[80px]` to `w-[100px]`
+  - IDs: `w-[60px]` to `w-[80px]`
+  - Badges: `w-[40px]` to `w-[60px]`
+- **Row Count**: DataTableProvider uses 6 skeleton rows by default for good visual balance
+- **Preserve Icons**: Keep actual icons in skeleton cells to maintain visual context
+- **Automatic Handling**: DataTableProvider automatically handles skeleton data generation and detection
+
+### Skeleton Benefits
+- **DRY Principle**: Single source of truth for column definitions eliminates duplication
+- **No Layout Shift**: Prevents jarring transitions when data loads
+- **Clear Expectations**: Users see exactly what the table structure will be
+- **Professional Feel**: Maintains visual consistency during loading states
+- **Maintainability**: Changes to columns only need to be made in one place
+- **Type Safety**: Shared types ensure skeleton and real data structures match
+- **Accessibility**: Proper ARIA labels on disabled interactive elements
+- **Simplified Code**: No need for separate skeleton components or manual skeleton data creation

@@ -1,0 +1,13 @@
+diff --git a/package.json b/package.json
+index 8ce3a1d03fc5b4adb0a4b323ec406a32ac6790ff..63f3392626f6f184ce03934266ccb387f8e14379 100644
+--- a/package.json
++++ b/package.json
+@@ -7,6 +7,8 @@
+     "description": "A light-weight module that brings window.fetch to node.js",
+     "main": "lib/index.js",
+     "browser": "./browser.js",
++    "type": "module",
++    "module": "./lib/index.mjs",
+     "files": [
+         "lib/index.js",
+         "lib/index.mjs",

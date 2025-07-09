@@ -1,0 +1,52 @@
+diff --git a/dist/main/index.js b/dist/main/index.js
+index 05be33791d6fa69b6310cdc79d63c453b169fd9a..9af75ebb18fb5c518fce0eb176d81e2e042f2227 100644
+--- a/dist/main/index.js
++++ b/dist/main/index.js
+@@ -43,7 +43,7 @@ const RealtimeChannel_1 = __importStar(require("./RealtimeChannel"));
+ exports.RealtimeChannel = RealtimeChannel_1.default;
+ Object.defineProperty(exports, "REALTIME_LISTEN_TYPES", { enumerable: true, get: function () { return RealtimeChannel_1.REALTIME_LISTEN_TYPES; } });
+ Object.defineProperty(exports, "REALTIME_POSTGRES_CHANGES_LISTEN_EVENT", { enumerable: true, get: function () { return RealtimeChannel_1.REALTIME_POSTGRES_CHANGES_LISTEN_EVENT; } });
+-Object.defineProperty(exports, "REALTIME_SUBSCRIBE_STATES", { enumerable: true, get: function () { return RealtimeChannel_1.REALTIME_SUBSCRIBE_STATES; } });
++Object.defineProperty(exports, "REALTIME_SUBSCRIBE_STATES", { enumerable: true, get: function () { return RealtimeChannel_1.wREALTIME_SUBSCRIBE_STATES; } });
+ Object.defineProperty(exports, "REALTIME_CHANNEL_STATES", { enumerable: true, get: function () { return RealtimeChannel_1.REALTIME_CHANNEL_STATES; } });
+ const RealtimePresence_1 = __importStar(require("./RealtimePresence"));
+ exports.RealtimePresence = RealtimePresence_1.default;
+diff --git a/dist/module/WebSocket.js b/dist/module/WebSocket.js
+index f61fcf23da7529c1e2808159632054e1cadae8ec..d14a47643f5f8077dfbc99a552f98eb98f41cb50 100644
+--- a/dist/module/WebSocket.js
++++ b/dist/module/WebSocket.js
+@@ -3,7 +3,7 @@ let WebSocketImpl;
+ if (typeof window === 'undefined') {
+     // Node.js environment
+     // eslint-disable-next-line @typescript-eslint/no-var-requires
+-    WebSocketImpl = require('ws');
++    WebSocketImpl = null;
+ }
+ else {
+     // Browser environment
+diff --git a/package.json b/package.json
+index 126f9206002abfd5d2a9285d82303dc3a2b44b1f..1360894b469f4901871a858f982933a27f504b0e 100644
+--- a/package.json
++++ b/package.json
+@@ -17,6 +17,7 @@
+     "dist",
+     "src"
+   ],
++  "type": "module",
+   "main": "dist/main/index.js",
+   "module": "dist/module/index.js",
+   "types": "dist/module/index.d.ts",
+@@ -65,12 +66,10 @@
+   },
+   "exports": {
+     ".": {
+-      "node": "./dist/main/index.js",
+       "browser": "./dist/module/index.js",
+-      "default": "./dist/main/index.js"
++      "default": "./dist/module/index.js"
+     },
+     "./websocket": {
+-      "node": "./dist/WebSocket.js",
+       "browser": "./dist/WebSocket.native.js",
+       "types": "./dist/WebSocket.d.ts",
+       "default": "./dist/WebSocket.native.js"

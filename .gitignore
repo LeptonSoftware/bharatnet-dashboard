@@ -1,48 +1,59 @@
-# Dependencies
-node_modules/
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+stats.html
+.output
+.nitro
+.build
+.vinxi
+
+temp
+
+# dependencies
+node_modules
+.pnp
+.pnp.js
+
+dist
+
+# testing
+coverage
+
+# next.js
+.next/
+out/
+
+# production
+build
+
+# misc
+.DS_Store
+*.pem
+
+.turbo
+
+.next
+
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Production build
-dist/
-build/
+# local env files
+.env*.local
 
-# Environment variables
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+target
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
+*.pyc
+*.rio
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Logs
-logs
-*.log
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-
-# Temporary folders
-tmp/
-temp/ 
+tests/results
+.test
+.trigger

@@ -116,3 +116,36 @@ export interface ProjectProgress {
   totalBlocks: number;
   approvalRate: number;
 }
+
+export interface NationalRowData {
+  id: number;
+  sNo: number;
+  state: string;
+  abbreviation: string;
+  pia: string;
+  agreementSigningDate: string;
+  gPsTotal: number;
+  gPsNew: number;
+  gPsExisting: number;
+  hotoGPsTodo: number;
+  hotoGPsDone: number;
+  hotoKMsDone: string | number;
+  hotoKMsTodo: string | number;
+  physicalSurveyGPsTodo: number;
+  physicalSurveyGPsDone: number;
+  physicalSurveyKMsTodo: string | number;
+  physicalSurveyKMsDone: string | number;
+  desktopSurveyTarget: string | number;
+  desktopSurveyDone: number;
+  snocTargetDate: string;
+  snocStatus: string;
+  "gPs >98%Uptime": number;
+  activeFtthConnections: number;
+  noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone: number;
+  noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone: string | number;
+  ofcTotalKMs: number;
+  ofcExistingKMs: number;
+  ofcNewKms: number;
+
+  ofcLaidKMs: number;
+}
