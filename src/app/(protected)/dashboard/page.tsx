@@ -66,7 +66,7 @@ export default function HomePage() {
             title: "BharatNet",
             icon: <img src="/logo.png" className="h-4 w-4" />,
           },
-          { title: "Insights" },
+          { title: "Dashboard" },
         ]}
       />
       <NationalDashboard />
