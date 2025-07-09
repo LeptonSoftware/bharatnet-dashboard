@@ -1,9 +1,10 @@
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { GeoJSON2SVG } from "geojson2svg";
 import { useMemo } from "react";
+import { cn } from "@rio.js/ui/lib/utils";
 const converter = new GeoJSON2SVG({});
 
-export function CircleSVG({ circleId = "punjab" }) {
+export function CircleSVG({ circleId = "punjab", className = "" }) {
   const { data: geojson } = useSuspenseQuery({
     queryKey: ["circles", "geojson"],
     queryFn: async () => {
@@ -41,7 +42,7 @@ export function CircleSVG({ circleId = "punjab" }) {
     <svg
       width={32}
       height={32}
-      className="mx-auto"
+      className={cn("mx-auto", className)}
       viewBox="0 0 256 256"
       dangerouslySetInnerHTML={{ __html: svgString }}
     />

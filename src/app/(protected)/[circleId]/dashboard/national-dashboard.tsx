@@ -80,6 +80,8 @@ export function NationalDashboard() {
         setIsLoading(true);
         const nationalData = await fetchNationalData();
         const userCircleRoles = await fetchUserCircleRoles();
+        console.log(userCircleRoles);
+        console.log(nationalData);
         setCircleRoles(userCircleRoles);
 
         // Filter national data based on circle roles
