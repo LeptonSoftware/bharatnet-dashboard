@@ -17,6 +17,7 @@ import {
   CheckCircle,
   Wifi,
   Zap,
+  ChevronDownIcon,
 } from "lucide-react";
 import { CircleSVG } from "../circle-svg";
 import { Icon } from "@iconify/react";
@@ -140,7 +141,7 @@ export function AestheticCard<TData>({
 
   return (
     <Card
-      className="py-0!"
+      className="py-0! group/card is-card"
       // className={cn(
       //   "overflow-hidden border-0 bg-gradient-to-br from-white to-gray-50/80",
       //   "dark:from-gray-900/50 dark:to-gray-950/30",
@@ -149,7 +150,7 @@ export function AestheticCard<TData>({
       //   "rounded-2xl"
       // )}
     >
-      <div className="flex flex-col bg-muted py-6 relative">
+      <div className="flex flex-col bg-muted rounded-t-md py-6 relative">
         <Link to={`/${row.abbreviation}`} className="group">
           <div className="flex items-center justify-center">
             <CircleSVG circleId={row.state} size={96} />
@@ -160,7 +161,10 @@ export function AestheticCard<TData>({
         </Link>
 
         <Sheet>
-          <SheetTrigger asChild className="absolute top-0 right-2">
+          <SheetTrigger
+            asChild
+            className="absolute text-gray-500 top-0 right-2"
+          >
             <Button variant="ghost" size="icon">
               <Icon icon="mdi:pencil" />
             </Button>
@@ -217,6 +221,12 @@ import { useId, useState } from "react";
 
 import { Input } from "@rio.js/ui/components/input";
 import { Label } from "@rio.js/ui/components/label";
+import { Calendar } from "@rio.js/ui/components/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@rio.js/ui/components/popover";
 
 function InputWithAddon({
   label,
@@ -311,6 +321,8 @@ const DISPLAY_FIELDS = [
 
 function AestheticCardEdit({ row }: { row: NationalRowData }) {
   const [editedValues, setEditedValues] = useState<Record<string, any>>({});
+  const [date, setDate] = useState(new Date());
+  const [open, setOpen] = useState(false);
   return (
     <>
       <SheetHeader>
@@ -323,6 +335,43 @@ function AestheticCardEdit({ row }: { row: NationalRowData }) {
       </SheetHeader>
 
       <div className="space-y-6 flex flex-col px-4">
+        <div className="*:not-first:mt-2">
+          <Label htmlFor={"date"}>
+            <div className="flex items-center gap-2">
+              <Icon
+                icon="mdi:calendar"
+                className="h-4 w-4 text-muted-foreground/70"
+              />
+              Date
+            </div>
+          </Label>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                id="date"
+                className="w-full justify-between font-normal"
+              >
+                {date ? date.toLocaleDateString() : "Select date"}
+                <ChevronDownIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto overflow-hidden p-0"
+              align="start"
+            >
+              <Calendar
+                mode="single"
+                selected={date}
+                captionLayout="dropdown"
+                onSelect={(date) => {
+                  setDate(date);
+                  setOpen(false);
+                }}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
         {DISPLAY_FIELDS.map((field) => (
           <TextInput
             key={field.key}

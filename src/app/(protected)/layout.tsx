@@ -1,5 +1,9 @@
 import { rio } from "@/lib/rio";
-import { CopilotKit } from "@copilotkit/react-core";
+import {
+  CopilotKit,
+  useCopilotAction,
+  useCopilotReadable,
+} from "@copilotkit/react-core";
 import { CopilotPopup } from "@copilotkit/react-ui";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import "@copilotkit/react-ui/styles.css";
@@ -17,6 +21,8 @@ import { Authenticated } from "@rio.js/auth";
 import { SidebarInset, SidebarProvider } from "@rio.js/ui/components/sidebar";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { fetchNationalData } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 export function loader({ request }: LoaderFunctionArgs) {
   if (!rio.auth.isLoggedIn()) {
@@ -53,6 +59,7 @@ export default function ProtectedLayout() {
             <AppSidebar collapsible="icon" variant="inset" />
             <SidebarInset>
               <Outlet />
+              <CopilotActions />
               <CopilotPopup
                 labels={{
                   initial: "Hello! How can I help you today?",
@@ -68,4 +75,54 @@ export default function ProtectedLayout() {
       </Authenticated>
     </NuqsAdapter>
   );
+}
+
+function CopilotActions() {
+  const { data: nationalData, isLoading: isLoadingNational } = useQuery({
+    queryKey: ["nationalData", "punjab"],
+    queryFn: () => fetchNationalData(),
+  });
+
+  const navigate = useNavigate();
+
+  useCopilotReadable({
+    description: "The list of states and abbreviations",
+    value: nationalData?.map((row) => ({
+      state: row.state,
+      abbreviation: row.abbreviation,
+    })),
+  });
+
+  useCopilotAction({
+    description: "Navigate to or show the home page",
+    name: "home",
+    handler() {
+      navigate("/home");
+    },
+  });
+
+  useCopilotAction({
+    description: "Navigate to or show the dashboard page",
+    name: "dashboard",
+    handler() {
+      navigate("/dashboard");
+    },
+  });
+
+  useCopilotAction({
+    description:
+      "Show or navigate to the dashboard/page for a state. Use the abbreviation of the state to navigate to it",
+    name: "state-dashboard",
+    parameters: [
+      {
+        name: "abbreviation",
+        type: "string",
+        description: "abbreviation of the state",
+      },
+    ],
+    handler({ abbreviation }) {
+      navigate(`/${abbreviation}`);
+    },
+  });
+  return null;
 }

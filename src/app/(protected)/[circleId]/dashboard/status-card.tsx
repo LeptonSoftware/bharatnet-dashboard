@@ -17,6 +17,10 @@ interface StatusCardProps {
     value: number;
     direction: "up" | "down" | "neutral";
     period?: string;
+    currentTotal?: number;
+    previousTotal?: number;
+    currentDailyRate?: number;
+    previousDailyRate?: number;
   };
   valueFormatter?: (value: number) => string;
 }
@@ -38,28 +42,69 @@ export function StatusCard({
       </CardHeader>
       <CardContent>
         {trend && (
-          <div
-            className={cn(
-              "text-[0.9em] font-medium flex items-center gap-1 text-xl sm:text-2xl",
-              trend.direction === "up" && "text-emerald-500",
-              trend.direction === "down" && "text-red-500",
-              trend.direction === "neutral" && "text-gray-500"
-            )}
-          >
-            {trend.direction === "up" && (
-              <Icon icon="iconamoon:trend-up-bold" />
-            )}
-            {trend.direction === "down" && (
-              <Icon icon="iconamoon:trend-down-bold" />
-            )}
-            {trend.direction === "neutral" && (
-              <Icon icon="material-symbols:trending-flat-rounded" />
-            )}
-            {trend.value > 0 ? "+" : trend.value < 0 ? "" : ""}
-            {trend.value}
-            {trend.period && (
-              <span className="text-muted-foreground">in {trend.period}</span>
-            )}
+          <div className="space-y-2">
+            <div
+              className={cn(
+                "text-[0.9em] font-medium flex items-center gap-1 text-xl sm:text-2xl",
+                trend.direction === "up" && "text-emerald-500",
+                trend.direction === "down" && "text-red-500",
+                trend.direction === "neutral" && "text-gray-500"
+              )}
+            >
+              {trend.direction === "up" && (
+                <Icon icon="iconamoon:trend-up-bold" />
+              )}
+              {trend.direction === "down" && (
+                <Icon icon="iconamoon:trend-down-bold" />
+              )}
+              {trend.direction === "neutral" && (
+                <Icon icon="material-symbols:trending-flat-rounded" />
+              )}
+              {trend.value > 0 ? "+" : trend.value < 0 ? "" : ""}
+              {trend.value}
+              {trend.period && trend.period.includes("(%)") ? "%" : ""}
+              {trend.period && (
+                <span className="text-muted-foreground">
+                  vs {trend.period.replace(" (%)", "")}
+                </span>
+              )}
+            </div>
+
+            {trend.currentTotal !== undefined &&
+              trend.previousTotal !== undefined && (
+                <div className="text-xs text-muted-foreground space-y-0.5 border-t pt-1">
+                  <div className="flex justify-between">
+                    <span>Current total:</span>
+                    <span className="font-mono">
+                      {trend.currentTotal.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Previous total:</span>
+                    <span className="font-mono">
+                      {trend.previousTotal.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+            {trend.currentDailyRate !== undefined &&
+              trend.previousDailyRate !== undefined && (
+                <div className="text-xs text-muted-foreground border-b pb-1 space-y-0.5">
+                  <div className="flex justify-between">
+                    <span>Current daily rate:</span>
+                    <span className="font-mono">
+                      {trend.currentDailyRate.toFixed(1)}/day
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Previous daily rate:</span>
+                    <span className="font-mono">
+                      {trend.previousDailyRate.toFixed(1)}/day
+                    </span>
+                  </div>
+                </div>
+              )}
           </div>
         )}
         <div className="flex items-baseline gap-2">

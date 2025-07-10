@@ -66,54 +66,14 @@ import {
   TimePeriod,
   filterEventsByTimePeriod,
   calculateAggregateTrend,
+  calculateAggregateComparativeTrend,
+  calculateComparativeTrend,
   calculateTrend,
   getTrendIcon,
   getTrendColor,
   getPeriodBoundaries,
 } from "@/lib/trends";
 import { useEvents } from "@/hooks/use-events";
-
-const TrendIndicator = ({
-  trend,
-  size = "xs",
-}: {
-  trend: { direction: string; hasData: boolean; changeValue: number };
-  size?: "xs" | "sm";
-}) => {
-  if (!trend.hasData) return null;
-
-  const iconSize = size === "xs" ? "h-3 w-3" : "h-4 w-4";
-  const textSize = size === "xs" ? "text-xs" : "text-sm";
-
-  return (
-    <div
-      className={cn(
-        "flex items-center gap-1",
-        textSize,
-        trend.direction === "up" && "text-emerald-600",
-        trend.direction === "down" && "text-red-600",
-        trend.direction === "stable" && "text-gray-500"
-      )}
-    >
-      {trend.direction === "up" && (
-        <Icon icon="iconamoon:trend-up-bold" className={iconSize} />
-      )}
-      {trend.direction === "down" && (
-        <Icon icon="iconamoon:trend-down-bold" className={iconSize} />
-      )}
-      {trend.direction === "stable" && (
-        <Icon
-          icon="material-symbols:trending-flat-rounded"
-          className={iconSize}
-        />
-      )}
-      <span className="font-mono">
-        {trend.changeValue > 0 ? "+" : ""}
-        {Math.round(trend.changeValue)}
-      </span>
-    </div>
-  );
-};
 // Add CircleRole type
 interface CircleRole {
   id: number;
@@ -125,10 +85,12 @@ interface CircleRole {
 
 interface NationalDashboardProps {
   timePeriod?: TimePeriod;
+  compareMode?: boolean;
 }
 
 export function NationalDashboard({
   timePeriod = "today",
+  compareMode = false,
 }: NationalDashboardProps) {
   "use no memo";
   const [data, setData] = useState<NationalRowData[]>([]);
@@ -156,7 +118,7 @@ export function NationalDashboard({
         // Filter national data based on circle roles
         if (userCircleRoles && userCircleRoles.circles.length > 0) {
           const allowedCircles = userCircleRoles.circles.map((c) =>
-            c.toLowerCase()
+            c.circle.toLowerCase()
           );
           const filteredData = nationalData.filter((row) =>
             allowedCircles.includes(row.abbreviation.toLowerCase())
@@ -312,6 +274,45 @@ export function NationalDashboard({
       };
     }
 
+    const circles = data.map((row) => row.state);
+
+    // Use comparative trends when compare mode is enabled
+    if (compareMode && ["current-week", "current-month"].includes(timePeriod)) {
+      return {
+        hotoTrend: calculateAggregateComparativeTrend(
+          eventsData,
+          "hotoGPsDone",
+          circles,
+          timePeriod
+        ),
+        surveyTrend: calculateAggregateComparativeTrend(
+          eventsData,
+          "physicalSurveyGPsDone",
+          circles,
+          timePeriod
+        ),
+        desktopSurveyTrend: calculateAggregateComparativeTrend(
+          eventsData,
+          "desktopSurveyDone",
+          circles,
+          timePeriod
+        ),
+        uptimeTrend: calculateAggregateComparativeTrend(
+          eventsData,
+          "gPs >98%Uptime",
+          circles,
+          timePeriod
+        ),
+        ftthTrend: calculateAggregateComparativeTrend(
+          eventsData,
+          "activeFtthConnections",
+          circles,
+          timePeriod
+        ),
+      };
+    }
+
+    // Use regular trends for non-compare mode
     const boundaries = getPeriodBoundaries(timePeriod);
     if (!boundaries) {
       return {
@@ -359,7 +360,6 @@ export function NationalDashboard({
     }
 
     const { startDate, endDate } = boundaries;
-    const circles = data.map((row) => row.state);
 
     return {
       hotoTrend: calculateAggregateTrend(
@@ -402,6 +402,110 @@ export function NationalDashboard({
 
   const trends = getTrendData();
 
+  // TrendIndicator component
+  const TrendIndicator = ({
+    trend,
+    size = "xs",
+  }: {
+    trend: {
+      direction: string;
+      hasData: boolean;
+      changeValue: number;
+      changePercentage?: number;
+      currentTotal?: number;
+      previousTotal?: number;
+      currentDailyRate?: number;
+      previousDailyRate?: number;
+    };
+    size?: "xs" | "sm";
+  }) => {
+    if (!trend.hasData) return null;
+
+    const iconSize = size === "xs" ? "h-3 w-3" : "h-4 w-4";
+    const textSize = size === "xs" ? "text-base" : "text-sm";
+
+    // Show percentage for comparative trends, otherwise show absolute change
+    const displayValue =
+      compareMode &&
+      ["current-week", "current-month"].includes(timePeriod!) &&
+      "changePercentage" in trend
+        ? Math.round(trend.changePercentage!)
+        : Math.round(trend.changeValue);
+
+    const suffix =
+      compareMode &&
+      ["current-week", "current-month"].includes(timePeriod!) &&
+      "changePercentage" in trend
+        ? "%"
+        : "";
+
+    const showDetailed =
+      compareMode &&
+      ["current-week", "current-month"].includes(timePeriod!) &&
+      trend.currentTotal !== undefined;
+
+    return (
+      <div className="space-y-1">
+        <div
+          className={cn(
+            "flex items-center gap-1 justify-center group-[.is-card]/card:justify-end",
+            textSize,
+            trend.direction === "up" && "text-emerald-600",
+            trend.direction === "down" && "text-red-600",
+            trend.direction === "stable" && "text-gray-500"
+          )}
+        >
+          {trend.direction === "up" && (
+            <Icon icon="iconamoon:trend-up-bold" className={iconSize} />
+          )}
+          {trend.direction === "down" && (
+            <Icon icon="iconamoon:trend-down-bold" className={iconSize} />
+          )}
+          {trend.direction === "stable" && (
+            <Icon
+              icon="material-symbols:trending-flat-rounded"
+              className={iconSize}
+            />
+          )}
+          <span className="font-mono">
+            {displayValue > 0 ? "+" : ""}
+            {displayValue}
+            {suffix}
+          </span>
+        </div>
+
+        {showDetailed && (
+          <div className="text-[10px] text-muted-foreground space-y-0.5 text-center group-[.is-card]/card:text-right">
+            <div
+              title={`Current: ${trend.currentTotal?.toLocaleString()}, Previous: ${trend.previousTotal?.toLocaleString()}`}
+            >
+              <span className="font-mono">
+                {trend.previousTotal?.toLocaleString()}
+              </span>
+              <span className="mx-1">→</span>
+
+              <span className="font-mono">
+                {trend.currentTotal?.toLocaleString()}
+              </span>
+            </div>
+            <div
+              title={`Current: ${trend.currentDailyRate?.toFixed(1)}/day, Previous: ${trend.previousDailyRate?.toFixed(1)}/day`}
+            >
+              <span className="font-mono">
+                {trend.previousDailyRate?.toFixed(1)}
+              </span>
+              <span className="mx-1">→</span>
+              <span className="font-mono">
+                {trend.currentDailyRate?.toFixed(1)}
+              </span>
+              <span>/day</span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Helper function to get individual circle trend
   const getCircleTrend = (stateName: string, eventType: string) => {
     console.log(timePeriod, stateName, eventType, eventsData);
@@ -409,6 +513,17 @@ export function NationalDashboard({
       return { direction: "stable" as const, hasData: false, changeValue: 0 };
     }
 
+    // Use comparative trends when compare mode is enabled
+    if (compareMode && ["current-week", "current-month"].includes(timePeriod)) {
+      return calculateComparativeTrend(
+        eventsData,
+        eventType,
+        stateName,
+        timePeriod
+      );
+    }
+
+    // Use regular trends for non-compare mode
     const boundaries = getPeriodBoundaries(timePeriod);
     if (!boundaries) {
       return { direction: "stable" as const, hasData: false, changeValue: 0 };
@@ -516,22 +631,25 @@ export function NationalDashboard({
 
         return (
           <div className="flex flex-col items-center gap-1">
-            <Badge
-              variant={
-                percentage >= 100
-                  ? "default"
-                  : percentage >= 75
-                    ? "secondary"
-                    : "destructive"
-              }
-              className="font-mono"
-            >
-              {percentage.toFixed(0)}%
-            </Badge>
+            {trend ? (
+              <TrendIndicator trend={trend} size="xs" />
+            ) : (
+              <Badge
+                variant={
+                  percentage >= 100
+                    ? "default"
+                    : percentage >= 75
+                      ? "secondary"
+                      : "destructive"
+                }
+                className="font-mono"
+              >
+                {percentage.toFixed(0)}%
+              </Badge>
+            )}
             <div className="text-xs text-muted-foreground">
               {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
             </div>
-            <TrendIndicator trend={trend} size="xs" />
           </div>
         );
       },
@@ -566,22 +684,25 @@ export function NationalDashboard({
 
         return (
           <div className="flex flex-col items-center gap-1">
-            <Badge
-              variant={
-                percentage >= 100
-                  ? "default"
-                  : percentage >= 75
-                    ? "secondary"
-                    : "destructive"
-              }
-              className="font-mono"
-            >
-              {percentage.toFixed(0)}%
-            </Badge>
+            {trend ? (
+              <TrendIndicator trend={trend} size="xs" />
+            ) : (
+              <Badge
+                variant={
+                  percentage >= 100
+                    ? "default"
+                    : percentage >= 75
+                      ? "secondary"
+                      : "destructive"
+                }
+                className="font-mono"
+              >
+                {percentage.toFixed(0)}%
+              </Badge>
+            )}
             <div className="text-xs text-muted-foreground">
               {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
             </div>
-            <TrendIndicator trend={trend} size="xs" />
           </div>
         );
       },
@@ -612,22 +733,25 @@ export function NationalDashboard({
 
         return (
           <div className="flex flex-col items-center gap-1">
-            <Badge
-              variant={
-                percentage >= 100
-                  ? "default"
-                  : percentage >= 75
-                    ? "secondary"
-                    : "destructive"
-              }
-              className="font-mono"
-            >
-              {percentage.toFixed(0)}%
-            </Badge>
+            {trend ? (
+              <TrendIndicator trend={trend} size="xs" />
+            ) : (
+              <Badge
+                variant={
+                  percentage >= 100
+                    ? "default"
+                    : percentage >= 75
+                      ? "secondary"
+                      : "destructive"
+                }
+                className="font-mono"
+              >
+                {percentage.toFixed(0)}%
+              </Badge>
+            )}
             <div className="text-xs text-muted-foreground">
               {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
             </div>
-            <TrendIndicator trend={trend} size="xs" />
           </div>
         );
       },
@@ -676,8 +800,8 @@ export function NationalDashboard({
 
         return (
           <div className="flex flex-col items-center gap-1">
-            <div className="font-mono">{connections.toLocaleString()}</div>
             <TrendIndicator trend={trend} size="xs" />
+            <div className="font-mono">{connections.toLocaleString()}</div>
           </div>
         );
       },
@@ -768,14 +892,30 @@ export function NationalDashboard({
             trend={
               trends.hotoTrend.hasData && timePeriod
                 ? {
-                    value: Math.round(trends.hotoTrend.changeValue),
+                    value:
+                      compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod)
+                        ? Math.round(trends.hotoTrend.changePercentage)
+                        : Math.round(trends.hotoTrend.changeValue),
                     direction:
                       trends.hotoTrend.direction === "up"
                         ? "up"
                         : trends.hotoTrend.direction === "down"
                           ? "down"
                           : "neutral",
-                    period: timePeriod.replace("-", " "),
+                    period:
+                      compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod)
+                        ? `vs prev ${timePeriod.includes("week") ? "week" : "month"} (%)`
+                        : timePeriod.replace("-", " "),
+                    ...(compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod) &&
+                      "currentTotal" in trends.hotoTrend && {
+                        currentTotal: trends.hotoTrend.currentTotal,
+                        previousTotal: trends.hotoTrend.previousTotal,
+                        currentDailyRate: trends.hotoTrend.currentDailyRate,
+                        previousDailyRate: trends.hotoTrend.previousDailyRate,
+                      }),
                   }
                 : undefined
             }
@@ -803,16 +943,32 @@ export function NationalDashboard({
             className="bg-blue-50 dark:bg-blue-950/20"
             valueFormatter={(value) => `${value.toFixed(1)}%`}
             trend={
-              trends.surveyTrend.hasData
+              trends.surveyTrend.hasData && timePeriod
                 ? {
-                    value: Math.round(trends.surveyTrend.changeValue),
+                    value:
+                      compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod)
+                        ? Math.round(trends.surveyTrend.changePercentage)
+                        : Math.round(trends.surveyTrend.changeValue),
                     direction:
                       trends.surveyTrend.direction === "up"
                         ? "up"
                         : trends.surveyTrend.direction === "down"
                           ? "down"
                           : "neutral",
-                    period: timePeriod.replace("-", " "),
+                    period:
+                      compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod)
+                        ? `vs prev ${timePeriod.includes("week") ? "week" : "month"} (%)`
+                        : timePeriod.replace("-", " "),
+                    ...(compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod) &&
+                      "currentTotal" in trends.surveyTrend && {
+                        currentTotal: trends.surveyTrend.currentTotal,
+                        previousTotal: trends.surveyTrend.previousTotal,
+                        currentDailyRate: trends.surveyTrend.currentDailyRate,
+                        previousDailyRate: trends.surveyTrend.previousDailyRate,
+                      }),
                   }
                 : undefined
             }
@@ -842,14 +998,32 @@ export function NationalDashboard({
             trend={
               trends.desktopSurveyTrend.hasData && timePeriod
                 ? {
-                    value: Math.round(trends.desktopSurveyTrend.changeValue),
+                    value:
+                      compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod)
+                        ? Math.round(trends.desktopSurveyTrend.changePercentage)
+                        : Math.round(trends.desktopSurveyTrend.changeValue),
                     direction:
                       trends.desktopSurveyTrend.direction === "up"
                         ? "up"
                         : trends.desktopSurveyTrend.direction === "down"
                           ? "down"
                           : "neutral",
-                    period: timePeriod.replace("-", " "),
+                    period:
+                      compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod)
+                        ? `vs prev ${timePeriod.includes("week") ? "week" : "month"} (%)`
+                        : timePeriod.replace("-", " "),
+                    ...(compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod) &&
+                      "currentTotal" in trends.desktopSurveyTrend && {
+                        currentTotal: trends.desktopSurveyTrend.currentTotal,
+                        previousTotal: trends.desktopSurveyTrend.previousTotal,
+                        currentDailyRate:
+                          trends.desktopSurveyTrend.currentDailyRate,
+                        previousDailyRate:
+                          trends.desktopSurveyTrend.previousDailyRate,
+                      }),
                   }
                 : undefined
             }
@@ -879,14 +1053,22 @@ export function NationalDashboard({
             trend={
               trends.ftthTrend.hasData && timePeriod
                 ? {
-                    value: Math.round(trends.ftthTrend.changeValue),
+                    value:
+                      compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod)
+                        ? Math.round(trends.ftthTrend.changePercentage)
+                        : Math.round(trends.ftthTrend.changeValue),
                     direction:
                       trends.ftthTrend.direction === "up"
                         ? "up"
                         : trends.ftthTrend.direction === "down"
                           ? "down"
                           : "neutral",
-                    period: timePeriod.replace("-", " "),
+                    period:
+                      compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod)
+                        ? `vs prev ${timePeriod.includes("week") ? "week" : "month"} (%)`
+                        : timePeriod.replace("-", " "),
                   }
                 : undefined
             }
@@ -901,14 +1083,22 @@ export function NationalDashboard({
             trend={
               trends.uptimeTrend.hasData && timePeriod
                 ? {
-                    value: Math.round(trends.uptimeTrend.changeValue),
+                    value:
+                      compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod)
+                        ? Math.round(trends.uptimeTrend.changePercentage)
+                        : Math.round(trends.uptimeTrend.changeValue),
                     direction:
                       trends.uptimeTrend.direction === "up"
                         ? "up"
                         : trends.uptimeTrend.direction === "down"
                           ? "down"
                           : "neutral",
-                    period: timePeriod.replace("-", " "),
+                    period:
+                      compareMode &&
+                      ["current-week", "current-month"].includes(timePeriod)
+                        ? `vs prev ${timePeriod.includes("week") ? "week" : "month"} (%)`
+                        : timePeriod.replace("-", " "),
                   }
                 : undefined
             }
@@ -936,7 +1126,10 @@ export function NationalDashboard({
           Package-wise Progress
         </h2>
         <DataTableProvider columns={columns} data={data} defaultView="grid">
-          <DataTable cardComponent={AestheticCard} key={timePeriod}>
+          <DataTable
+            cardComponent={AestheticCard}
+            key={timePeriod + compareMode.toString()}
+          >
             <DataTableAdvancedToolbar>
               <DataTableFilterList />
               <DataTableSortList />

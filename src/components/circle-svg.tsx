@@ -4,21 +4,21 @@ import { useMemo } from "react";
 import { cn } from "@rio.js/ui/lib/utils";
 const converter = new GeoJSON2SVG({});
 const colors = [
-  { name: "Rich Black", hex: "#0B0C10" },
-  { name: "Ebony", hex: "#1C1F26" },
-  { name: "Charcoal Teal", hex: "#264653" },
-  { name: "Gunmetal", hex: "#2A3439" },
-  { name: "Midnight Green", hex: "#004643" },
-  { name: "Deep Teal", hex: "#005F73" },
-  { name: "Prussian Blue", hex: "#003049" },
-  { name: "Midnight Blue", hex: "#191970" },
-  { name: "Oxford Blue", hex: "#002147" },
-  { name: "Indigo Dye", hex: "#00416A" },
-  { name: "Dark Burgundy", hex: "#45001B" },
-  { name: "Maroon", hex: "#5B0001" },
-  { name: "Espresso", hex: "#3E2723" },
-  { name: "Slate Gray", hex: "#2E3A44" },
-  { name: "Jet", hex: "#343434" },
+  { name: "Flame Red", hex: "#FF3B30" },
+  { name: "Neon Orange", hex: "#FF9500" },
+  { name: "Bright Yellow", hex: "#FFD600" },
+  { name: "Lime Green", hex: "#A4F600" },
+  { name: "Spring Green", hex: "#00E676" },
+  { name: "Minty Teal", hex: "#1DE9B6" },
+  { name: "Electric Cyan", hex: "#00E5FF" },
+  { name: "Sky Blue", hex: "#00B0FF" },
+  { name: "Azure", hex: "#2979FF" },
+  { name: "Royal Blue", hex: "#304FFE" },
+  { name: "Vivid Indigo", hex: "#651FFF" },
+  { name: "Electric Violet", hex: "#AA00FF" },
+  { name: "Hot Pink", hex: "#FF2D95" },
+  { name: "Shocking Pink", hex: "#FF5ACD" },
+  { name: "Coral Pop", hex: "#FF6D6D" },
 ];
 
 function hash(str: string) {
@@ -38,7 +38,6 @@ export function CircleSVG({ circleId = "punjab", className = "", size = 32 }) {
       return data;
     },
   });
-
   const { data: nationalData } = useSuspenseQuery({
     queryKey: ["circles", "national"],
     queryFn: async () => {

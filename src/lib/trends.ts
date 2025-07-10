@@ -307,3 +307,261 @@ export function getTrendColor(direction: TrendDirection): string {
       return "text-gray-600";
   }
 }
+
+// Get the previous period boundaries for comparison
+export function getPreviousPeriodBoundaries(
+  timePeriod: TimePeriod
+): { startDate: Date; endDate: Date } | null {
+  if (!timePeriod) return null;
+
+  const now = new Date();
+
+  if (timePeriod === "current-week") {
+    // Previous week: 7 days before the start of current week
+    const startOfCurrentWeek = new Date(now);
+    startOfCurrentWeek.setDate(now.getDate() - now.getDay()); // Start of current week (Sunday)
+    startOfCurrentWeek.setHours(0, 0, 0, 0);
+
+    const startOfPreviousWeek = new Date(startOfCurrentWeek);
+    startOfPreviousWeek.setDate(startOfCurrentWeek.getDate() - 7);
+
+    const endOfPreviousWeek = new Date(startOfCurrentWeek);
+    endOfPreviousWeek.setMilliseconds(-1); // End of previous week
+
+    return {
+      startDate: startOfPreviousWeek,
+      endDate: endOfPreviousWeek,
+    };
+  }
+
+  if (timePeriod === "current-month") {
+    // Previous month
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfPreviousMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1
+    );
+    const endOfPreviousMonth = new Date(startOfCurrentMonth);
+    endOfPreviousMonth.setMilliseconds(-1);
+
+    return {
+      startDate: startOfPreviousMonth,
+      endDate: endOfPreviousMonth,
+    };
+  }
+
+  return null;
+}
+
+// Calculate daily rate for a period
+function calculateDailyRate(
+  eventsData: EventLogData[],
+  eventType: string,
+  circle: string,
+  startDate: Date,
+  endDate: Date
+): number {
+  const trend = calculateTrend(
+    eventsData,
+    eventType,
+    circle,
+    startDate,
+    endDate
+  );
+
+  // Filter events for this period and circle/eventType
+  const relevantEvents = eventsData.filter((event) => {
+    const eventDate = parseTimestamp(event.timestamp);
+    const matchesCircle = !circle || event.circle === circle;
+    const matchesType = event.event === eventType;
+    const inPeriod = eventDate >= startDate && eventDate <= endDate;
+
+    return matchesCircle && matchesType && inPeriod;
+  });
+
+  // Find the date of the last event, or use start date if no events
+  let effectiveEndDate = startDate;
+  if (relevantEvents.length > 0) {
+    const lastEventDate = relevantEvents.reduce((latest, event) => {
+      const eventDate = parseTimestamp(event.timestamp);
+      return eventDate > latest ? eventDate : latest;
+    }, parseTimestamp(relevantEvents[0].timestamp));
+    effectiveEndDate = lastEventDate;
+  }
+
+  const periodDays = Math.max(
+    1,
+    Math.ceil(
+      (effectiveEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    )
+  );
+
+  return trend.changeValue / periodDays;
+}
+
+// Calculate comparative trend between current and previous period
+export function calculateComparativeTrend(
+  eventsData: EventLogData[],
+  eventType: string,
+  circle: string,
+  currentPeriod: TimePeriod
+): {
+  direction: "up" | "down" | "stable";
+  hasData: boolean;
+  changePercentage: number;
+  changeValue: number;
+  currentDailyRate: number;
+  previousDailyRate: number;
+  currentTotal: number;
+  previousTotal: number;
+} {
+  if (
+    !currentPeriod ||
+    !["current-week", "current-month"].includes(currentPeriod)
+  ) {
+    return {
+      direction: "stable",
+      hasData: false,
+      changePercentage: 0,
+      changeValue: 0,
+      currentDailyRate: 0,
+      previousDailyRate: 0,
+      currentTotal: 0,
+      previousTotal: 0,
+    };
+  }
+
+  const currentBoundaries = getPeriodBoundaries(currentPeriod);
+  const previousBoundaries = getPreviousPeriodBoundaries(currentPeriod);
+
+  if (!currentBoundaries || !previousBoundaries) {
+    return {
+      direction: "stable",
+      hasData: false,
+      changePercentage: 0,
+      changeValue: 0,
+      currentDailyRate: 0,
+      previousDailyRate: 0,
+      currentTotal: 0,
+      previousTotal: 0,
+    };
+  }
+
+  const currentTrend = calculateTrend(
+    eventsData,
+    eventType,
+    circle,
+    currentBoundaries.startDate,
+    currentBoundaries.endDate
+  );
+
+  const previousTrend = calculateTrend(
+    eventsData,
+    eventType,
+    circle,
+    previousBoundaries.startDate,
+    previousBoundaries.endDate
+  );
+
+  const currentDailyRate = calculateDailyRate(
+    eventsData,
+    eventType,
+    circle,
+    currentBoundaries.startDate,
+    currentBoundaries.endDate
+  );
+
+  const previousDailyRate = calculateDailyRate(
+    eventsData,
+    eventType,
+    circle,
+    previousBoundaries.startDate,
+    previousBoundaries.endDate
+  );
+
+  const changeValue = currentDailyRate - previousDailyRate;
+  const changePercentage =
+    previousDailyRate > 0 ? (changeValue / previousDailyRate) * 100 : 0;
+
+  return {
+    direction: changeValue > 0 ? "up" : changeValue < 0 ? "down" : "stable",
+    hasData: true,
+    changePercentage,
+    changeValue,
+    currentDailyRate,
+    previousDailyRate,
+    currentTotal: currentTrend.changeValue,
+    previousTotal: previousTrend.changeValue,
+  };
+}
+
+// Calculate aggregate comparative trend across multiple circles
+export function calculateAggregateComparativeTrend(
+  eventsData: EventLogData[],
+  eventType: string,
+  circles: string[],
+  currentPeriod: TimePeriod
+): {
+  direction: "up" | "down" | "stable";
+  hasData: boolean;
+  changePercentage: number;
+  changeValue: number;
+  currentDailyRate: number;
+  previousDailyRate: number;
+  currentTotal: number;
+  previousTotal: number;
+} {
+  const trends = circles.map((circle) =>
+    calculateComparativeTrend(eventsData, eventType, circle, currentPeriod)
+  );
+
+  const validTrends = trends.filter((trend) => trend.hasData);
+
+  if (validTrends.length === 0) {
+    return {
+      direction: "stable",
+      hasData: false,
+      changePercentage: 0,
+      changeValue: 0,
+      currentDailyRate: 0,
+      previousDailyRate: 0,
+      currentTotal: 0,
+      previousTotal: 0,
+    };
+  }
+
+  const totalCurrentDailyRate = validTrends.reduce(
+    (sum, trend) => sum + trend.currentDailyRate,
+    0
+  );
+  const totalPreviousDailyRate = validTrends.reduce(
+    (sum, trend) => sum + trend.previousDailyRate,
+    0
+  );
+  const totalCurrentTotal = validTrends.reduce(
+    (sum, trend) => sum + trend.currentTotal,
+    0
+  );
+  const totalPreviousTotal = validTrends.reduce(
+    (sum, trend) => sum + trend.previousTotal,
+    0
+  );
+
+  const changeValue = totalCurrentDailyRate - totalPreviousDailyRate;
+  const changePercentage =
+    totalPreviousDailyRate > 0
+      ? (changeValue / totalPreviousDailyRate) * 100
+      : 0;
+
+  return {
+    direction: changeValue > 0 ? "up" : changeValue < 0 ? "down" : "stable",
+    hasData: true,
+    changePercentage,
+    changeValue,
+    currentDailyRate: totalCurrentDailyRate,
+    previousDailyRate: totalPreviousDailyRate,
+    currentTotal: totalCurrentTotal,
+    previousTotal: totalPreviousTotal,
+  };
+}
