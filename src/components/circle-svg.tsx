@@ -2,6 +2,32 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { GeoJSON2SVG } from "geojson2svg";
 import { useMemo } from "react";
 import { cn } from "@rio.js/ui/lib/utils";
+
+// Add type interfaces for better type safety
+interface GeoJSONFeature {
+  type: string;
+  properties: {
+    state_name?: string;
+    [key: string]: any;
+  };
+  geometry: {
+    type: string;
+    geometries?: any[];
+    [key: string]: any;
+  };
+}
+
+interface GeoJSONData {
+  type: string;
+  features: GeoJSONFeature[];
+}
+
+interface NationalData {
+  state: string;
+  abbreviation: string;
+  [key: string]: any;
+}
+
 const converter = new GeoJSON2SVG({});
 const colors = [
   { name: "Flame Red", hex: "#FF3B30" },
@@ -30,15 +56,39 @@ function hash(str: string) {
 }
 
 export function CircleSVG({ circleId = "punjab", className = "", size = 32 }) {
-  const { data: geojson } = useSuspenseQuery({
+  const { data: geojson } = useSuspenseQuery<GeoJSONData>({
     queryKey: ["circles", "geojson"],
     queryFn: async () => {
-      const response = await fetch(`/india-states.json`);
+      const response = await fetch(`/districts.geojson`);
       const data = await response.json();
+
+      // Handle GeometryCollection by expanding MultiPolygons into separate features
+      if (data && data.features) {
+        const expandedFeatures: GeoJSONFeature[] = [];
+        for (const feature of data.features) {
+          if (
+            feature.geometry &&
+            feature.geometry.type === "GeometryCollection" &&
+            Array.isArray(feature.geometry.geometries)
+          ) {
+            for (const geom of feature.geometry.geometries) {
+              if (geom.type === "MultiPolygon" || geom.type === "Polygon") {
+                expandedFeatures.push({
+                  ...feature,
+                  geometry: geom,
+                });
+              }
+            }
+          } else {
+            expandedFeatures.push(feature);
+          }
+        }
+        data.features = expandedFeatures;
+      }
       return data;
     },
   });
-  const { data: nationalData } = useSuspenseQuery({
+  const { data: nationalData } = useSuspenseQuery<NationalData[]>({
     queryKey: ["circles", "national"],
     queryFn: async () => {
       const response = await fetch(
@@ -53,13 +103,14 @@ export function CircleSVG({ circleId = "punjab", className = "", size = 32 }) {
     return {
       type: "FeatureCollection",
       features: geojson?.features.filter(
-        (feature) =>
-          feature.properties.name.toLowerCase() === circleId.toLowerCase() ||
+        (feature: GeoJSONFeature) =>
+          feature.properties.state_name?.toLowerCase() ===
+            circleId.toLowerCase() ||
           Boolean(
             nationalData.find(
-              (d) =>
+              (d: NationalData) =>
                 d.state.toLowerCase() ===
-                  feature.properties.name.toLowerCase() &&
+                  feature.properties.state_name?.toLowerCase() &&
                 d.abbreviation.toLowerCase() === circleId.toLowerCase()
             )
           )
@@ -75,8 +126,8 @@ export function CircleSVG({ circleId = "punjab", className = "", size = 32 }) {
     return converter.convert(features, {
       attributes: {
         fill: color,
-        stroke: "black",
-        strokeWidth: "1",
+        stroke: "white",
+        strokeWidth: "2",
       },
     });
   }, [features, circleId]);

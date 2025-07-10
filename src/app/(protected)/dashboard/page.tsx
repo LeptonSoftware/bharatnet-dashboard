@@ -111,21 +111,6 @@ export default function HomePage() {
         ]}
       >
         <div className="flex items-center gap-4 ml-auto">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="compare-mode"
-              checked={compareMode}
-              onCheckedChange={setCompareMode}
-              disabled={
-                !timePeriod ||
-                !["current-week", "current-month"].includes(timePeriod)
-              }
-            />
-            <Label htmlFor="compare-mode" className="text-sm">
-              Compare
-            </Label>
-          </div>
-
           <Tabs
             value={timePeriod || ""}
             onValueChange={(value) => setTimePeriod(value as TimePeriod)}
@@ -134,9 +119,13 @@ export default function HomePage() {
             <TabsList>
               <TabsTrigger value="today">Today</TabsTrigger>
               <TabsTrigger value="current-week">Current Week</TabsTrigger>
-              <TabsTrigger value="last-week">Last Week</TabsTrigger>
+              {compareMode ? null : (
+                <TabsTrigger value="last-week">Last Week</TabsTrigger>
+              )}
               <TabsTrigger value="current-month">Current Month</TabsTrigger>
-              <TabsTrigger value="last-month">Last Month</TabsTrigger>
+              {compareMode ? null : (
+                <TabsTrigger value="last-month">Last Month</TabsTrigger>
+              )}
             </TabsList>
           </Tabs>
 
@@ -155,6 +144,30 @@ export default function HomePage() {
               <SelectItem value="last-month">Last Month</SelectItem>
             </SelectContent>
           </Select>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="compare-mode"
+              checked={compareMode}
+              onCheckedChange={() => {
+                setCompareMode(!compareMode);
+                if (!compareMode) {
+                  if (timePeriod === "last-week") {
+                    setTimePeriod("current-week");
+                  }
+                  if (timePeriod === "last-month") {
+                    setTimePeriod("current-month");
+                  }
+                }
+              }}
+              disabled={
+                !timePeriod ||
+                !["current-week", "current-month"].includes(timePeriod)
+              }
+            />
+            <Label htmlFor="compare-mode" className="text-sm">
+              Compare
+            </Label>
+          </div>
         </div>
       </PageHeader>
       <NationalDashboard timePeriod={timePeriod} compareMode={compareMode} />

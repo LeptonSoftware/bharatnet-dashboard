@@ -6,13 +6,24 @@ import {
   TabsList,
   TabsTrigger,
 } from "@rio.js/ui/components/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rio.js/ui/components/select";
+import { Button } from "@rio.js/ui/components/button";
 import { DtpDashboard } from "./dashboard/dtp-dashboard";
 import { FeasibilityDashboard } from "./dashboard/feasibility-dashboard";
 import { HotoDashboard } from "./dashboard/hoto-dashboard";
+import { OverviewDashboard } from "./dashboard/overview-dashboard";
 import { NationalDashboardSkeleton } from "./dashboard/loading-skeleton";
-import { FileText, Search, Cable } from "lucide-react";
+import { FileText, Search, Cable, BarChart3, TrendingUp } from "lucide-react";
 import { getCircleName } from "@/lib/utils";
 import { Icon } from "@iconify/react/dist/iconify.js";
+import { TimePeriod } from "@/lib/trends";
+import { cn } from "@rio.js/ui/lib/utils";
 
 export function Dashboard() {
   const { circleId: circle = "upe" } = useParams();
@@ -21,12 +32,16 @@ export function Dashboard() {
 
   useEffect(() => {
     // Update document title with circle name
-    const circleName = getCircleName(circle);
+    const circleName = getCircleName(circle || "");
     document.title = `${circleName} | BharatNet Dashboard | Lepton`;
 
     // Initial data load can be handled by individual dashboard components
     setIsLoading(false);
   }, [circle]);
+
+  const handleTimePeriodChange = (value: string) => {
+    setTimePeriod(value as TimePeriod);
+  };
 
   if (isLoading) {
     return (
@@ -58,74 +73,89 @@ export function Dashboard() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 w-full mx-auto overflow-y-auto @container">
-      <Tabs defaultValue="dtp" className="space-y-8">
-        <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-6 gap-2">
-          <TabsTrigger
-            value="dtp"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
-          >
-            <FileText className="h-5 w-5" />
-            <div className="flex flex-col items-start">
-              <span className="font-semibold">Desktop Planning</span>
-            </div>
-          </TabsTrigger>
-          <TabsTrigger
-            value="feasibility"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
-          >
-            <Search className="h-5 w-5" />
-            <div className="flex flex-col items-start">
-              <span className="font-semibold">Feasibility Survey</span>
-            </div>
-          </TabsTrigger>
-          <TabsTrigger
-            value="hoto"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
-          >
-            <Icon icon="lineicons:handshake" className="h-5 w-5" />
-            <div className="flex flex-col items-start">
-              <span className="font-semibold">HOTO Survey</span>
-            </div>
-          </TabsTrigger>
-          <TabsTrigger
-            value="trenching"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
-          >
-            <Icon icon="fa6-solid:person-digging" className="h-5 w-5" />
-            <div className="flex flex-col items-start">
-              <span className="font-semibold">Trenching</span>
-            </div>
-          </TabsTrigger>
-          <TabsTrigger
-            value="ducting"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
-          >
-            <Icon icon="ph:pipe-duotone" className="h-5 w-5" />
-            <div className="flex flex-col items-start">
-              <span className="font-semibold">Ducting</span>
-            </div>
-          </TabsTrigger>
-          <TabsTrigger
-            value="fiber-laying"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
-          >
-            <Cable className="h-5 w-5" />
-            <div className="flex flex-col items-start">
-              <span className="font-semibold">Fiber Laying</span>
-            </div>
-          </TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="overview" className="space-y-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+          <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-7 gap-2">
+            <TabsTrigger
+              value="overview"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+            >
+              <BarChart3 className="h-5 w-5" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Overview</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger
+              value="dtp"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+            >
+              <FileText className="h-5 w-5" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Desktop Planning</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger
+              value="feasibility"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+            >
+              <Search className="h-5 w-5" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Feasibility Survey</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger
+              value="hoto"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+            >
+              <Icon icon="lineicons:handshake" className="h-5 w-5" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">HOTO Survey</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger
+              value="trenching"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+            >
+              <Icon icon="fa6-solid:person-digging" className="h-5 w-5" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Trenching</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger
+              value="ducting"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+            >
+              <Icon icon="ph:pipe-duotone" className="h-5 w-5" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Ducting</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger
+              value="fiber-laying"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+            >
+              <Cable className="h-5 w-5" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Fiber Laying</span>
+              </div>
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="overview">
+          <OverviewDashboard circle={circle || ""} />
+        </TabsContent>
 
         <TabsContent value="dtp">
-          <DtpDashboard circle={circle} />
+          <DtpDashboard circle={circle || ""} />
         </TabsContent>
 
         <TabsContent value="feasibility">
-          <FeasibilityDashboard circle={circle} />
+          <FeasibilityDashboard circle={circle || ""} />
         </TabsContent>
 
         <TabsContent value="hoto">
-          <HotoDashboard circle={circle} />
+          <HotoDashboard circle={circle || ""} />
         </TabsContent>
       </Tabs>
     </div>
