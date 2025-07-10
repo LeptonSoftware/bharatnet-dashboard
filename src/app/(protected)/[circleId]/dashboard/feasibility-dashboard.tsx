@@ -11,6 +11,7 @@ import { StatusCard } from "./status-card";
 import { SurveyOverviewChart } from "./survey-overview-chart";
 import { SurveyDistrictProgress } from "./survey-district-progress";
 import { SurveyBlocksTable } from "./survey-blocks-table";
+import { SurveyDashboardSkeleton } from "./loading-skeleton";
 import {
   CheckCircle,
   Clock,
@@ -55,8 +56,10 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
     loadData();
   }, [circle]);
 
-  if (isLoading || !data.length) return null;
+  if (isLoading) return <SurveyDashboardSkeleton />;
   if (error) return <div className="text-destructive">{error}</div>;
+  if (!data.length)
+    return <div className="text-center p-8">No data available</div>;
 
   const stats = calculateSurveySummaryStats(data, "feasibility", circle);
   const districts = getSurveyDistrictSummaries(data, "feasibility", circle);

@@ -52,14 +52,14 @@ const data = {
   ],
   navMain: [
     {
+      title: "Home",
+      url: "/",
+      icon: "tabler:home",
+    },
+    {
       title: "Dashboard",
       url: "/dashboard",
       icon: "tabler:dashboard",
-    },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: "tabler:list-details",
     },
     {
       title: "Analytics",

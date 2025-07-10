@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/page-header";
 import { Dashboard } from "./dashboard";
 import { useParams } from "react-router";
 import { getCircleName } from "@/lib/utils";
+import { CircleSVG } from "@/components/circle-svg";
 
 export default function DashboardPage() {
   const { circleId } = useParams();
@@ -13,7 +14,10 @@ export default function DashboardPage() {
             title: "BharatNet",
             icon: <img src="/logo.png" className="w-4 h-4" />,
           },
-          { title: getCircleName(circleId!) },
+          {
+            title: getCircleName(circleId!),
+            icon: <CircleSVG circleId={circleId!} size={16} />,
+          },
         ]}
       />
       <Dashboard />

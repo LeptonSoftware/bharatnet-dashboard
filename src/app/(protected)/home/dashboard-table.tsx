@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@rio.js/ui/components/select";
 import { Table } from "lucide-react";
+import { AestheticCard } from "@/components/ui/aesthetic-card";
 
 function TableSkeleton() {
   return (
@@ -275,7 +276,7 @@ export function DashboardTable() {
 
         return (
           <div className="flex flex-col items-center gap-1">
-            <div className="font-medium">{amount}</div>
+            <div className="font-medium">₹ {amount}</div>
             {date && (
               <div className="text-xs text-muted-foreground">{date}</div>
             )}
@@ -302,32 +303,17 @@ export function DashboardTable() {
 
   return (
     <div className="space-y-4 flex flex-col ">
-      <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
-        <Table className="h-5 w-5" />
-        State-wise Progress
-      </h2>
-      <DataTableProvider<NationalRowData> columns={columns} data={data}>
-        <div className="flex-1 flex flex-col min-h-0">
+      <DataTableProvider<NationalRowData>
+        columns={columns}
+        data={data}
+        defaultView="grid"
+      >
+        <DataTable cardComponent={AestheticCard}>
           <DataTableAdvancedToolbar>
             <DataTableFilterList />
             <DataTableSortList />
-            <Select>
-              <SelectTrigger className="md:hidden">
-                <SelectValue placeholder="Select a date" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="current-week">Current Week</SelectItem>
-                <SelectItem value="last-week">Last Week</SelectItem>
-                <SelectItem value="current-month">Current Month</SelectItem>
-                <SelectItem value="last-month">Last Month</SelectItem>
-              </SelectContent>
-            </Select>
           </DataTableAdvancedToolbar>
-          <div className="flex-1 min-h-0 overflow-auto">
-            <DataTable />
-          </div>
-        </div>
+        </DataTable>
       </DataTableProvider>
     </div>
   );

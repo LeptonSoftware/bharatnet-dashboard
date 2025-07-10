@@ -11,7 +11,26 @@ import {
   Router,
   MapPin,
   MapPinned,
+  Cable,
+  LayoutDashboard,
+  FileText,
+  CheckCircle,
+  Wifi,
+  Zap,
 } from "lucide-react";
+import { CircleSVG } from "../circle-svg";
+import { Icon } from "@iconify/react";
+import { Button } from "@rio.js/ui/components/button";
+import { Link } from "react-router";
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@rio.js/ui/components/sheet";
+import { NationalRowData } from "@/types";
 
 interface AestheticCardProps<TData> {
   row: TData;
@@ -121,36 +140,41 @@ export function AestheticCard<TData>({
 
   return (
     <Card
-      className={cn(
-        "overflow-hidden border-0 bg-gradient-to-br from-white to-gray-50/80",
-        "dark:from-gray-900/50 dark:to-gray-950/30",
-        "shadow-md hover:shadow-lg transition-all duration-300",
-        "backdrop-blur-sm backdrop-filter",
-        "rounded-2xl"
-      )}
+      className="py-0!"
+      // className={cn(
+      //   "overflow-hidden border-0 bg-gradient-to-br from-white to-gray-50/80",
+      //   "dark:from-gray-900/50 dark:to-gray-950/30",
+      //   "shadow-md hover:shadow-lg transition-all duration-300",
+      //   "backdrop-blur-sm backdrop-filter",
+      //   "rounded-2xl"
+      // )}
     >
-      {/* Header Section */}
-      {stateCell && (
-        <div className="p-4 flex items-center space-x-3 bg-gradient-to-r from-blue-50/50 to-blue-100/30 dark:from-blue-950/20 dark:to-blue-900/10">
-          <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shadow-sm">
-            <MapPinned className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+      <div className="flex flex-col bg-muted py-6 relative">
+        <Link to={`/${row.abbreviation}`} className="group">
+          <div className="flex items-center justify-center">
+            <CircleSVG circleId={row.state} size={96} />
           </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-lg">
-              {flexRender(
-                stateCell.column.columnDef.cell,
-                stateCell.getContext()
-              )}
-            </h3>
-            <p className="text-xs text-muted-foreground/70">State/UT Details</p>
+          <div className="text-2xl font-bold text-center group-hover:underline">
+            {row.state}
           </div>
-        </div>
-      )}
+        </Link>
+
+        <Sheet>
+          <SheetTrigger asChild className="absolute top-0 right-2">
+            <Button variant="ghost" size="icon">
+              <Icon icon="mdi:pencil" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent>
+            <AestheticCardEdit row={row} />
+          </SheetContent>
+        </Sheet>
+      </div>
 
       {/* Content Section */}
-      <div className="p-5 space-y-5">
+      <div className="p-2 space-y-2">
         {cellPairs.map((pair, pairIndex) => (
-          <div key={pairIndex} className="grid grid-cols-2 gap-6">
+          <div key={pairIndex} className="grid grid-cols-1 gap-0">
             {pair.map((cell) => {
               const column = cell.column;
               const content = flexRender(
@@ -162,7 +186,7 @@ export function AestheticCard<TData>({
               return (
                 <div
                   key={column.id}
-                  className="group p-3 rounded-xl hover:bg-gray-100/50 dark:hover:bg-gray-800/30 transition-colors duration-200"
+                  className="group p-1 px-2 rounded-xl hover:bg-gray-100/50 dark:hover:bg-gray-800/30 transition-colors duration-200 border-b border-gray-200 dark:border-gray-700"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -173,7 +197,7 @@ export function AestheticCard<TData>({
                         {title}
                       </span>
                     </div>
-                    <div className="font-medium">
+                    <div className="font-medium [&>*]:items-end [&>*]:text-right [&>*]:text-sm!">
                       {typeof content === "string"
                         ? formatCellContent(content)
                         : content}
@@ -186,5 +210,147 @@ export function AestheticCard<TData>({
         ))}
       </div>
     </Card>
+  );
+}
+
+import { useId, useState } from "react";
+
+import { Input } from "@rio.js/ui/components/input";
+import { Label } from "@rio.js/ui/components/label";
+
+function InputWithAddon({
+  label,
+  placeholder,
+  addon,
+}: {
+  label: string;
+  placeholder: string;
+  addon?: string;
+}) {
+  const id = useId();
+  return (
+    <div className="*:not-first:mt-2">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="flex rounded-md shadow-xs">
+        <Input
+          id={id}
+          className="-me-px rounded-e-none shadow-none"
+          placeholder={placeholder}
+          type="text"
+        />
+        <span className="border-input bg-background text-muted-foreground -z-10 inline-flex items-center rounded-e-md border px-3 text-sm">
+          {addon}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function TextInput({
+  label,
+  placeholder,
+  addon,
+  value,
+  icon: Icon,
+  ...props
+}: {
+  label: string;
+  placeholder: string;
+  addon?: string;
+  value: string;
+  icon: React.ElementType;
+}) {
+  const id = useId();
+  return (
+    <div className="*:not-first:mt-2">
+      <Label htmlFor={id}>
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground/70" />
+          {label}
+        </div>
+      </Label>
+      <div className="flex rounded-md shadow-xs">
+        <Input
+          id={id}
+          value={value}
+          className="-me-px shadow-none"
+          placeholder={placeholder}
+          type="text"
+          {...props}
+        />
+      </div>
+    </div>
+  );
+}
+
+const DISPLAY_FIELDS = [
+  { key: "hotoGPsDone", label: "HOTO GPs Done", icon: CheckCircle },
+  {
+    key: "physicalSurveyGPsDone",
+    label: "Physical Survey GPs Done",
+    icon: FileText,
+  },
+  {
+    key: "desktopSurveyDone",
+    label: "Desktop Survey Done",
+    icon: LayoutDashboard,
+  },
+  { key: "gPs >98%Uptime", label: "GPs >98% Uptime", icon: Wifi },
+  {
+    key: "activeFtthConnections",
+    label: "Active FTTH Connections",
+    icon: Building2,
+  },
+  {
+    key: "noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone",
+    label: "GPs Commissioned in Ring",
+    icon: Zap,
+  },
+  { key: "ofcLaidKMs", label: "OFC Laid (KMs)", icon: Cable },
+];
+
+function AestheticCardEdit({ row }: { row: NationalRowData }) {
+  const [editedValues, setEditedValues] = useState<Record<string, any>>({});
+  return (
+    <>
+      <SheetHeader>
+        <SheetTitle>
+          <div className="flex items-center gap-2 justify-start">
+            <CircleSVG circleId={row.state} className="m-0" size={32} />
+            <span>{row.state}</span>
+          </div>
+        </SheetTitle>
+      </SheetHeader>
+
+      <div className="space-y-6 flex flex-col px-4">
+        {DISPLAY_FIELDS.map((field) => (
+          <TextInput
+            key={field.key}
+            label={field.label}
+            icon={field.icon}
+            placeholder={field.label}
+            onChange={(e) => {
+              setEditedValues({
+                ...editedValues,
+                [field.key]: e.target.value,
+              });
+            }}
+            type="number"
+            value={editedValues[field.key] ?? row[field.key]}
+          />
+        ))}
+      </div>
+      <SheetFooter>
+        <Button variant="outline" onClick={() => setOpen(false)}>
+          Cancel
+        </Button>
+        <Button
+          className="bg-teal-600"
+          disabled={Object.keys(editedValues).length === 0}
+        >
+          Save
+        </Button>
+      </SheetFooter>
+    </>
   );
 }

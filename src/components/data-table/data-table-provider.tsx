@@ -34,6 +34,7 @@ export function DataTableProvider<TData extends { id: string }>({
   columns,
   isLoading,
   skeletonRow,
+  defaultView = "list",
 }: {
   children: React.ReactNode;
 } & {
@@ -41,6 +42,7 @@ export function DataTableProvider<TData extends { id: string }>({
   columns: ColumnDef<TData, any>[];
   isLoading?: boolean;
   skeletonRow: TData;
+  defaultView?: "grid" | "list";
 }) {
   "use no memo";
   const skeletonRows = useMemo(
@@ -52,7 +54,7 @@ export function DataTableProvider<TData extends { id: string }>({
     []
   );
 
-  const [view, setView] = useState<"grid" | "list">("list");
+  const [view, setView] = useState<"grid" | "list">(defaultView);
 
   const table = useDataTable({
     data: isLoading ? skeletonRows : (data as TData[]),

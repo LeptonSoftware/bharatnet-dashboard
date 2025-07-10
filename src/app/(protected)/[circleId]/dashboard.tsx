@@ -12,6 +12,7 @@ import { HotoDashboard } from "./dashboard/hoto-dashboard";
 import { NationalDashboardSkeleton } from "./dashboard/loading-skeleton";
 import { FileText, Search, Cable } from "lucide-react";
 import { getCircleName } from "@/lib/utils";
+import { Icon } from "@iconify/react/dist/iconify.js";
 
 export function Dashboard() {
   const { circleId: circle = "upe" } = useParams();
@@ -58,41 +59,59 @@ export function Dashboard() {
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 w-full mx-auto overflow-y-auto @container">
       <Tabs defaultValue="dtp" className="space-y-8">
-        <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-6 gap-2">
           <TabsTrigger
             value="dtp"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-16 text-lg"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
           >
             <FileText className="h-5 w-5" />
             <div className="flex flex-col items-start">
               <span className="font-semibold">Desktop Planning</span>
-              <span className="text-sm font-normal opacity-80">
-                Network Design
-              </span>
             </div>
           </TabsTrigger>
           <TabsTrigger
             value="feasibility"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-16 text-lg"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
           >
             <Search className="h-5 w-5" />
             <div className="flex flex-col items-start">
               <span className="font-semibold">Feasibility Survey</span>
-              <span className="text-sm font-normal opacity-80">
-                Field Assessment
-              </span>
             </div>
           </TabsTrigger>
           <TabsTrigger
             value="hoto"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-16 text-lg"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+          >
+            <Icon icon="lineicons:handshake" className="h-5 w-5" />
+            <div className="flex flex-col items-start">
+              <span className="font-semibold">HOTO Survey</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger
+            value="trenching"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+          >
+            <Icon icon="fa6-solid:person-digging" className="h-5 w-5" />
+            <div className="flex flex-col items-start">
+              <span className="font-semibold">Trenching</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger
+            value="ducting"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+          >
+            <Icon icon="ph:pipe-duotone" className="h-5 w-5" />
+            <div className="flex flex-col items-start">
+              <span className="font-semibold">Ducting</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger
+            value="fiber-laying"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
           >
             <Cable className="h-5 w-5" />
             <div className="flex flex-col items-start">
-              <span className="font-semibold">HOTO Survey</span>
-              <span className="text-sm font-normal opacity-80">
-                Network Handover
-              </span>
+              <span className="font-semibold">Fiber Laying</span>
             </div>
           </TabsTrigger>
         </TabsList>

@@ -29,6 +29,8 @@ import { useState, useEffect, Suspense } from "react";
 import { cn } from "@rio.js/ui/lib/utils";
 import { PageHeader } from "@/components/page-header";
 import { CircleSVG } from "@/components/circle-svg";
+import { getCircleName } from "@/lib/utils";
+import { useParams } from "react-router";
 
 // Add CircleRole type
 interface CircleRole {
@@ -66,7 +68,8 @@ const DISPLAY_FIELDS = [
 ];
 
 export default function FormPage() {
-  const [selectedCircle, setSelectedCircle] = useState<string>("");
+  const { circleId } = useParams();
+  const [selectedCircle, setSelectedCircle] = useState<string>(circleId!);
   const [editedValues, setEditedValues] = useState<Record<string, any>>({});
   const [isEditing, setIsEditing] = useState<Record<string, boolean>>({});
 
@@ -119,7 +122,18 @@ export default function FormPage() {
 
   return (
     <>
-      <PageHeader />
+      <PageHeader
+        breadcrumbs={[
+          {
+            title: "BharatNet",
+            icon: <img src="/logo.png" className="w-4 h-4" />,
+          },
+          {
+            title: getCircleName(circleId!),
+            icon: <CircleSVG circleId={circleId!} size={16} />,
+          },
+        ]}
+      />
       <div className="flex-1 space-y-8 p-8 pt-6 overflow-y-auto">
         <div className="flex flex-row gap-4">
           <div>

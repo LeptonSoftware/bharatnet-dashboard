@@ -1,3 +1,5 @@
+"use no memo";
+
 import { Suspense, useEffect, useState } from "react";
 import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api";
 import { NationalRowData } from "@/types";
@@ -59,21 +61,87 @@ import {
 } from "@rio.js/ui/components/select";
 import { cn } from "@rio.js/ui/lib/utils";
 import { NationalDashboardSkeleton } from "./loading-skeleton";
+import { Icon } from "@iconify/react";
+import {
+  TimePeriod,
+  filterEventsByTimePeriod,
+  calculateAggregateTrend,
+  calculateTrend,
+  getTrendIcon,
+  getTrendColor,
+  getPeriodBoundaries,
+} from "@/lib/trends";
+import { useEvents } from "@/hooks/use-events";
 
+const TrendIndicator = ({
+  trend,
+  size = "xs",
+}: {
+  trend: { direction: string; hasData: boolean; changeValue: number };
+  size?: "xs" | "sm";
+}) => {
+  if (!trend.hasData) return null;
+
+  const iconSize = size === "xs" ? "h-3 w-3" : "h-4 w-4";
+  const textSize = size === "xs" ? "text-xs" : "text-sm";
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-1",
+        textSize,
+        trend.direction === "up" && "text-emerald-600",
+        trend.direction === "down" && "text-red-600",
+        trend.direction === "stable" && "text-gray-500"
+      )}
+    >
+      {trend.direction === "up" && (
+        <Icon icon="iconamoon:trend-up-bold" className={iconSize} />
+      )}
+      {trend.direction === "down" && (
+        <Icon icon="iconamoon:trend-down-bold" className={iconSize} />
+      )}
+      {trend.direction === "stable" && (
+        <Icon
+          icon="material-symbols:trending-flat-rounded"
+          className={iconSize}
+        />
+      )}
+      <span className="font-mono">
+        {trend.changeValue > 0 ? "+" : ""}
+        {Math.round(trend.changeValue)}
+      </span>
+    </div>
+  );
+};
 // Add CircleRole type
 interface CircleRole {
   id: number;
   created_at: string;
   user_id: string;
-  circles: Array<{ circle: string }>;
+  circles: string[];
   role: string;
 }
 
-export function NationalDashboard() {
+interface NationalDashboardProps {
+  timePeriod?: TimePeriod;
+}
+
+export function NationalDashboard({
+  timePeriod = "today",
+}: NationalDashboardProps) {
+  "use no memo";
   const [data, setData] = useState<NationalRowData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [circleRoles, setCircleRoles] = useState<CircleRole | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Load events data
+  const {
+    data: eventsData,
+    isLoading: eventsLoading,
+    error: eventsError,
+  } = useEvents();
 
   useEffect(() => {
     async function loadData() {
@@ -88,7 +156,7 @@ export function NationalDashboard() {
         // Filter national data based on circle roles
         if (userCircleRoles && userCircleRoles.circles.length > 0) {
           const allowedCircles = userCircleRoles.circles.map((c) =>
-            c.circle.toLowerCase()
+            c.toLowerCase()
           );
           const filteredData = nationalData.filter((row) =>
             allowedCircles.includes(row.abbreviation.toLowerCase())
@@ -197,6 +265,161 @@ export function NationalDashboard() {
 
   const COLORS = ["#22c55e", "#ef4444", "#3b82f6", "#f59e0b"];
 
+  // Calculate trends for key metrics
+  const getTrendData = () => {
+    if (!eventsData || eventsData.length === 0 || timePeriod === null) {
+      return {
+        hotoTrend: {
+          direction: "stable" as const,
+          hasData: false,
+          changePercentage: 0,
+          changeValue: 0,
+          previousValue: 0,
+          currentValue: 0,
+        },
+        surveyTrend: {
+          direction: "stable" as const,
+          hasData: false,
+          changePercentage: 0,
+          changeValue: 0,
+          previousValue: 0,
+          currentValue: 0,
+        },
+        desktopSurveyTrend: {
+          direction: "stable" as const,
+          hasData: false,
+          changePercentage: 0,
+          changeValue: 0,
+          previousValue: 0,
+          currentValue: 0,
+        },
+        uptimeTrend: {
+          direction: "stable" as const,
+          hasData: false,
+          changePercentage: 0,
+          changeValue: 0,
+          previousValue: 0,
+          currentValue: 0,
+        },
+        ftthTrend: {
+          direction: "stable" as const,
+          hasData: false,
+          changePercentage: 0,
+          changeValue: 0,
+          previousValue: 0,
+          currentValue: 0,
+        },
+      };
+    }
+
+    const boundaries = getPeriodBoundaries(timePeriod);
+    if (!boundaries) {
+      return {
+        hotoTrend: {
+          direction: "stable" as const,
+          hasData: false,
+          changePercentage: 0,
+          changeValue: 0,
+          previousValue: 0,
+          currentValue: 0,
+        },
+        surveyTrend: {
+          direction: "stable" as const,
+          hasData: false,
+          changePercentage: 0,
+          changeValue: 0,
+          previousValue: 0,
+          currentValue: 0,
+        },
+        desktopSurveyTrend: {
+          direction: "stable" as const,
+          hasData: false,
+          changePercentage: 0,
+          changeValue: 0,
+          previousValue: 0,
+          currentValue: 0,
+        },
+        uptimeTrend: {
+          direction: "stable" as const,
+          hasData: false,
+          changePercentage: 0,
+          changeValue: 0,
+          previousValue: 0,
+          currentValue: 0,
+        },
+        ftthTrend: {
+          direction: "stable" as const,
+          hasData: false,
+          changePercentage: 0,
+          changeValue: 0,
+          previousValue: 0,
+          currentValue: 0,
+        },
+      };
+    }
+
+    const { startDate, endDate } = boundaries;
+    const circles = data.map((row) => row.state);
+
+    return {
+      hotoTrend: calculateAggregateTrend(
+        eventsData,
+        "hotoGPsDone",
+        circles,
+        startDate,
+        endDate
+      ),
+      surveyTrend: calculateAggregateTrend(
+        eventsData,
+        "physicalSurveyGPsDone",
+        circles,
+        startDate,
+        endDate
+      ),
+      desktopSurveyTrend: calculateAggregateTrend(
+        eventsData,
+        "desktopSurveyDone",
+        circles,
+        startDate,
+        endDate
+      ),
+      uptimeTrend: calculateAggregateTrend(
+        eventsData,
+        "gPs >98%Uptime",
+        circles,
+        startDate,
+        endDate
+      ),
+      ftthTrend: calculateAggregateTrend(
+        eventsData,
+        "activeFtthConnections",
+        circles,
+        startDate,
+        endDate
+      ),
+    };
+  };
+
+  const trends = getTrendData();
+
+  // Helper function to get individual circle trend
+  const getCircleTrend = (stateName: string, eventType: string) => {
+    console.log(timePeriod, stateName, eventType, eventsData);
+    if (!eventsData || eventsData.length === 0 || timePeriod === null) {
+      return { direction: "stable" as const, hasData: false, changeValue: 0 };
+    }
+
+    const boundaries = getPeriodBoundaries(timePeriod);
+    if (!boundaries) {
+      return { direction: "stable" as const, hasData: false, changeValue: 0 };
+    }
+
+    const { startDate, endDate } = boundaries;
+    return calculateTrend(eventsData, eventType, stateName, startDate, endDate);
+  };
+
+  // Helper component for compact trend indicator
+
   // Define columns for the states table
   const columns: ColumnDef<NationalRowData>[] = [
     {
@@ -282,10 +505,14 @@ export function NationalDashboard() {
         const percentage = todo > 0 ? (done / todo) * 100 : 0;
         return percentage;
       },
+
       cell: ({ row }) => {
+        "use no memo";
         const done = row.original.hotoGPsDone;
         const todo = row.original.hotoGPsTodo;
         const percentage = todo > 0 ? (done / todo) * 100 : 0;
+        const trend = getCircleTrend(row.original.state, "hotoGPsDone");
+        console.log(trend);
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -304,6 +531,7 @@ export function NationalDashboard() {
             <div className="text-xs text-muted-foreground">
               {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
             </div>
+            <TrendIndicator trend={trend} size="xs" />
           </div>
         );
       },
@@ -314,6 +542,49 @@ export function NationalDashboard() {
           title="HOTO"
         />
       ),
+    },
+    {
+      accessorKey: "desktopSurveyDone",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          className="mx-auto"
+          column={column}
+          title="Desktop Survey"
+        />
+      ),
+      accessorFn: (row) => {
+        const done = Number(row.desktopSurveyDone);
+        const todo = Number(row.desktopSurveyTarget);
+        const percentage = todo > 0 ? (done / todo) * 100 : 0;
+        return percentage;
+      },
+      cell: ({ row }) => {
+        const done = Number(row.original.desktopSurveyDone);
+        const todo = Number(row.original.desktopSurveyTarget);
+        const percentage = todo > 0 ? (done / todo) * 100 : 0;
+        const trend = getCircleTrend(row.original.state, "desktopSurveyDone");
+
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <Badge
+              variant={
+                percentage >= 100
+                  ? "default"
+                  : percentage >= 75
+                    ? "secondary"
+                    : "destructive"
+              }
+              className="font-mono"
+            >
+              {percentage.toFixed(0)}%
+            </Badge>
+            <div className="text-xs text-muted-foreground">
+              {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
+            </div>
+            <TrendIndicator trend={trend} size="xs" />
+          </div>
+        );
+      },
     },
     {
       accessorKey: "physicalSurveyGPsDone",
@@ -334,6 +605,10 @@ export function NationalDashboard() {
         const done = row.original.physicalSurveyGPsDone;
         const todo = row.original.physicalSurveyGPsTodo;
         const percentage = todo > 0 ? (done / todo) * 100 : 0;
+        const trend = getCircleTrend(
+          row.original.state,
+          "physicalSurveyGPsDone"
+        );
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -352,6 +627,7 @@ export function NationalDashboard() {
             <div className="text-xs text-muted-foreground">
               {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
             </div>
+            <TrendIndicator trend={trend} size="xs" />
           </div>
         );
       },
@@ -369,6 +645,7 @@ export function NationalDashboard() {
         const uptime = row.original["gPs >98%Uptime"];
         const total = row.original.gPsTotal;
         const percentage = total > 0 ? (uptime / total) * 100 : 0;
+        const trend = getCircleTrend(row.original.state, "gPs >98%Uptime");
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -376,6 +653,7 @@ export function NationalDashboard() {
             <div className="text-xs text-muted-foreground">
               {percentage.toFixed(1)}%
             </div>
+            <TrendIndicator trend={trend} size="xs" />
           </div>
         );
       },
@@ -391,10 +669,15 @@ export function NationalDashboard() {
       ),
       cell: ({ row }) => {
         const connections = row.original.activeFtthConnections;
+        const trend = getCircleTrend(
+          row.original.state,
+          "activeFtthConnections"
+        );
 
         return (
           <div className="flex flex-col items-center gap-1">
             <div className="font-mono">{connections.toLocaleString()}</div>
+            <TrendIndicator trend={trend} size="xs" />
           </div>
         );
       },
@@ -417,11 +700,6 @@ export function NationalDashboard() {
 
         return (
           <div className="flex flex-col items-center gap-1">
-            <div className="font-mono">{(total ?? 0).toLocaleString()}</div>
-            <div className="text-xs text-muted-foreground">
-              {existing.toLocaleString()} existing, {newKms.toLocaleString()}{" "}
-              new
-            </div>
             <Badge
               variant={
                 percentage >= 80
@@ -433,7 +711,17 @@ export function NationalDashboard() {
               className="text-xs"
             >
               {percentage.toFixed(0)}% laid
-            </Badge>
+            </Badge>{" "}
+            <div className="font-mono">{(total ?? 0).toLocaleString()}</div>
+            <div className="text-xs text-muted-foreground">
+              <span className="text-green-700">
+                {existing.toLocaleString()} existing{" "}
+              </span>
+              ,{" "}
+              <span className="text-blue-700">
+                {newKms.toLocaleString()} new
+              </span>
+            </div>
           </div>
         );
       },
@@ -442,7 +730,12 @@ export function NationalDashboard() {
 
   return (
     <div className="space-y-6 p-6 overflow-y-auto">
+      {/* <div className="flex items-center justify-end"></div> */}
       <div>
+        <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
+          <Map className="h-5 w-5" />
+          National Progress
+        </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           <StatusCard
             title="Total GPs in Scope"
@@ -453,37 +746,113 @@ export function NationalDashboard() {
           <StatusCard
             title="HOTO Progress"
             value={
-              nationalSummary.totalHotoTarget > 0
-                ? (nationalSummary.totalHotoCompleted /
-                    nationalSummary.totalHotoTarget) *
-                  100
-                : 0
+              <>
+                <span>
+                  {nationalSummary.totalHotoCompleted.toLocaleString()}
+                </span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  / {nationalSummary.totalHotoTarget.toLocaleString()}
+                </span>
+              </>
             }
-            icon={<CheckCircle />}
-            description={`${nationalSummary.totalHotoCompleted.toLocaleString()}/${nationalSummary.totalHotoTarget.toLocaleString()} completed`}
+            icon={<Icon icon="lineicons:handshake" className="size-6" />}
+            description={`${(nationalSummary.totalHotoTarget > 0
+              ? (nationalSummary.totalHotoCompleted /
+                  nationalSummary.totalHotoTarget) *
+                100
+              : 0
+            ).toFixed(1)}% completed`}
             className="bg-emerald-50 dark:bg-emerald-950/20"
             valueFormatter={(value) => `${value.toFixed(1)}%`}
+            trend={
+              trends.hotoTrend.hasData && timePeriod
+                ? {
+                    value: Math.round(trends.hotoTrend.changeValue),
+                    direction:
+                      trends.hotoTrend.direction === "up"
+                        ? "up"
+                        : trends.hotoTrend.direction === "down"
+                          ? "down"
+                          : "neutral",
+                    period: timePeriod.replace("-", " "),
+                  }
+                : undefined
+            }
           />
           <StatusCard
             title="Physical Survey Progress"
             value={
-              nationalSummary.totalSurveyTarget > 0
-                ? (nationalSummary.totalSurveyCompleted /
-                    nationalSummary.totalSurveyTarget) *
-                  100
-                : 0
+              <>
+                <span>
+                  {nationalSummary.totalSurveyCompleted.toLocaleString()}
+                </span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  / {nationalSummary.totalSurveyTarget.toLocaleString()}
+                </span>
+              </>
             }
             icon={<FileText />}
-            description={`${nationalSummary.totalSurveyCompleted.toLocaleString()}/${nationalSummary.totalSurveyTarget.toLocaleString()} completed`}
+            description={`${(nationalSummary.totalSurveyTarget > 0
+              ? (nationalSummary.totalSurveyCompleted /
+                  nationalSummary.totalSurveyTarget) *
+                100
+              : 0
+            ).toFixed(1)}% completed`}
             className="bg-blue-50 dark:bg-blue-950/20"
             valueFormatter={(value) => `${value.toFixed(1)}%`}
+            trend={
+              trends.surveyTrend.hasData
+                ? {
+                    value: Math.round(trends.surveyTrend.changeValue),
+                    direction:
+                      trends.surveyTrend.direction === "up"
+                        ? "up"
+                        : trends.surveyTrend.direction === "down"
+                          ? "down"
+                          : "neutral",
+                    period: timePeriod.replace("-", " "),
+                  }
+                : undefined
+            }
           />
           <StatusCard
-            title="GPS Uptime"
-            value={nationalSummary.totalGpsUptime}
-            icon={<Wifi />}
-            description="Total GPs with >98% uptime"
-            className="bg-purple-50 dark:bg-purple-950/20"
+            title="Desktop Survey Progress"
+            value={
+              <>
+                <span>
+                  {nationalSummary.totalDesktopSurveyDone.toLocaleString()}
+                </span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  / {nationalSummary.totalDesktopSurveyTarget.toLocaleString()}
+                </span>
+              </>
+            }
+            icon={<Icon icon="mdi:desktop-mac" className="size-6" />}
+            description={`${(nationalSummary.totalDesktopSurveyTarget > 0
+              ? (nationalSummary.totalDesktopSurveyDone /
+                  nationalSummary.totalDesktopSurveyTarget) *
+                100
+              : 0
+            ).toFixed(1)}% completed`}
+            className="bg-blue-50 dark:bg-blue-950/20"
+            valueFormatter={(value) => `${value.toFixed(1)}%`}
+            trend={
+              trends.desktopSurveyTrend.hasData && timePeriod
+                ? {
+                    value: Math.round(trends.desktopSurveyTrend.changeValue),
+                    direction:
+                      trends.desktopSurveyTrend.direction === "up"
+                        ? "up"
+                        : trends.desktopSurveyTrend.direction === "down"
+                          ? "down"
+                          : "neutral",
+                    period: timePeriod.replace("-", " "),
+                  }
+                : undefined
+            }
           />
         </div>
       </div>
@@ -495,13 +864,6 @@ export function NationalDashboard() {
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           <StatusCard
-            title="FTTH Connections"
-            value={nationalSummary.totalFtthConnections}
-            icon={<Building2 />}
-            description="Active FTTH connections nationwide"
-            className="bg-indigo-50 dark:bg-indigo-950/20"
-          />
-          <StatusCard
             title="OFC Length"
             value={nationalSummary.totalOfcLength}
             icon={<Cable />}
@@ -509,12 +871,47 @@ export function NationalDashboard() {
             valueFormatter={(value) => `${value.toLocaleString()} km`}
           />
           <StatusCard
-            title="OFC Existing"
-            value={nationalSummary.totalOfcExisting}
-            icon={<Cable />}
-            description="Existing OFC (KMs)"
-            className="bg-green-50 dark:bg-green-950/20"
-            valueFormatter={(value) => `${value.toLocaleString()} km`}
+            title="FTTH Connections"
+            value={nationalSummary.totalFtthConnections}
+            icon={<Building2 />}
+            description="Active FTTH connections nationwide"
+            className="bg-indigo-50 dark:bg-indigo-950/20"
+            trend={
+              trends.ftthTrend.hasData && timePeriod
+                ? {
+                    value: Math.round(trends.ftthTrend.changeValue),
+                    direction:
+                      trends.ftthTrend.direction === "up"
+                        ? "up"
+                        : trends.ftthTrend.direction === "down"
+                          ? "down"
+                          : "neutral",
+                    period: timePeriod.replace("-", " "),
+                  }
+                : undefined
+            }
+          />
+
+          <StatusCard
+            title="GPs with >98% Uptime"
+            value={nationalSummary.totalGpsUptime}
+            icon={<Wifi />}
+            description="Total GPs with >98% uptime"
+            className="bg-purple-50 dark:bg-purple-950/20"
+            trend={
+              trends.uptimeTrend.hasData && timePeriod
+                ? {
+                    value: Math.round(trends.uptimeTrend.changeValue),
+                    direction:
+                      trends.uptimeTrend.direction === "up"
+                        ? "up"
+                        : trends.uptimeTrend.direction === "down"
+                          ? "down"
+                          : "neutral",
+                    period: timePeriod.replace("-", " "),
+                  }
+                : undefined
+            }
           />
           <StatusCard
             title="GPS Commissioned"
@@ -536,34 +933,13 @@ export function NationalDashboard() {
       <div>
         <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
           <Table className="h-5 w-5" />
-          State-wise Progress
+          Package-wise Progress
         </h2>
-        <DataTableProvider columns={columns} data={data}>
-          <DataTable cardComponent={AestheticCard}>
+        <DataTableProvider columns={columns} data={data} defaultView="grid">
+          <DataTable cardComponent={AestheticCard} key={timePeriod}>
             <DataTableAdvancedToolbar>
               <DataTableFilterList />
               <DataTableSortList />
-              <Tabs className="hidden md:block">
-                <TabsList>
-                  <TabsTrigger value="today">Today</TabsTrigger>
-                  <TabsTrigger value="current-week">Current Week</TabsTrigger>
-                  <TabsTrigger value="last-week">Last Week</TabsTrigger>
-                  <TabsTrigger value="current-month">Current Month</TabsTrigger>
-                  <TabsTrigger value="last-month">Last Month</TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <Select>
-                <SelectTrigger className="md:hidden">
-                  <SelectValue placeholder="Select a date" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="current-week">Current Week</SelectItem>
-                  <SelectItem value="last-week">Last Week</SelectItem>
-                  <SelectItem value="current-month">Current Month</SelectItem>
-                  <SelectItem value="last-month">Last Month</SelectItem>
-                </SelectContent>
-              </Select>
             </DataTableAdvancedToolbar>
           </DataTable>
         </DataTableProvider>
@@ -574,7 +950,7 @@ export function NationalDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5" />
-              State-wise Progress Comparison
+              Package-wise Progress Comparison
             </CardTitle>
           </CardHeader>
           <CardContent>

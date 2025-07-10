@@ -12,6 +12,7 @@ import { StatusCard } from "./status-card";
 import { OverviewChart } from "./overview-chart";
 import { DistrictProgress } from "./district-progress";
 import { BlocksTable } from "./blocks-table";
+import { DtpDashboardSkeleton } from "./loading-skeleton";
 import {
   CheckCircle,
   FileText,
@@ -53,8 +54,10 @@ export function DtpDashboard({ circle }: DtpDashboardProps) {
     loadData();
   }, [circle]);
 
-  if (isLoading || !data.length) return null;
+  if (isLoading) return <DtpDashboardSkeleton />;
   if (error) return <div className="text-destructive">{error}</div>;
+  if (!data.length)
+    return <div className="text-center p-8">No data available</div>;
 
   const stats = calculateSummaryStats(data);
   const districts = getDistrictSummaries(data);
@@ -62,8 +65,8 @@ export function DtpDashboard({ circle }: DtpDashboardProps) {
   const approvalTimeData = getApprovalTimeData(data);
   const statusDistribution = getDtpStatusDistribution(data);
 
-  // Calculate total submitted (including approved)
-  const totalSubmitted = stats.submitted + stats.approved;
+  // Calculate total submitted (including approved) with default values
+  const totalSubmitted = (stats.submitted || 0) + (stats.approved || 0);
 
   return (
     <div className="space-y-6">
@@ -83,7 +86,7 @@ export function DtpDashboard({ circle }: DtpDashboardProps) {
             title="Submitted"
             value={totalSubmitted}
             icon={<FileText />}
-            description={`${stats.approved} approved, ${stats.submitted} pending approval`}
+            description={`${stats.approved || 0} approved, ${stats.submitted || 0} pending approval`}
             className="bg-blue-50 dark:bg-blue-950/20"
             trend={
               stats.weeklySubmitted
@@ -97,7 +100,7 @@ export function DtpDashboard({ circle }: DtpDashboardProps) {
           />
           <StatusCard
             title="Approved"
-            value={stats.approved}
+            value={stats.approved || 0}
             icon={<CheckCircle />}
             description="Blocks with approved Desktop Planning"
             className="bg-emerald-50 dark:bg-emerald-950/20"

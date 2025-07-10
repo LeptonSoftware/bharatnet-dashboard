@@ -22,8 +22,11 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">{children}</div>
         </div>
-        <div className="text-center text-sm text-muted-foreground ml-auto">
-          &copy; {new Date().getFullYear()} Lepton Software
+        <div className="flex items-center gap-2">
+          <img src="/lepton-logo.png" className="h-6" />
+          <div className="text-center text-sm text-muted-foreground ml-auto">
+            &copy; {new Date().getFullYear()} Lepton Software
+          </div>
         </div>
       </div>
       <div className="bg-muted relative hidden lg:block">

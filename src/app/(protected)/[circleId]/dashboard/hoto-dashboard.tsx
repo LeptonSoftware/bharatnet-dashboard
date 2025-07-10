@@ -12,6 +12,7 @@ import { SurveyOverviewChart } from "./survey-overview-chart";
 import { SurveyDistrictProgress } from "./survey-district-progress";
 import { SurveyBlocksTable } from "./survey-blocks-table";
 import { SurveyProgress } from "./survey-progress";
+import { SurveyDashboardSkeleton } from "./loading-skeleton";
 import {
   CheckCircle,
   Clock,
@@ -55,8 +56,10 @@ export function HotoDashboard({ circle }: HotoDashboardProps) {
     loadData();
   }, [circle]);
 
-  if (isLoading || !data.length) return null;
+  if (isLoading) return <SurveyDashboardSkeleton />;
   if (error) return <div className="text-destructive">{error}</div>;
+  if (!data.length)
+    return <div className="text-center p-8">No data available</div>;
 
   const stats = calculateSurveySummaryStats(data, "hoto");
   const districts = getSurveyDistrictSummaries(data, "hoto");
