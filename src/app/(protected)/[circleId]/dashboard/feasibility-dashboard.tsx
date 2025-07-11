@@ -30,6 +30,10 @@ interface FeasibilityDashboardProps {
   circle: string;
 }
 
+const parseDate = (date: string) => {
+  const [day, month, year] = date.split(".");
+  return new Date(Number(year), Number(month) - 1, Number(day));
+};
 export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
   const [data, setData] = useState<SurveyData[]>([]);
   const [nationalData, setNationalData] = useState<NationalRowData[]>([]);
@@ -100,9 +104,27 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
 
   const currentProgress = getGpProgress();
 
+  // Get circle national data for timeline
+  const getCircleNationalData = () => {
+    const circleName = getCircleName(circle);
+    return nationalData.find((item) => item.state === circleName);
+  };
+
+  const circleNationalData = getCircleNationalData();
+
   return (
     <div className="space-y-6">
-      <SurveyTimeline currentProgress={currentProgress} />
+      <SurveyTimeline
+        currentProgress={currentProgress}
+        totalGpsInScope={circleNationalData?.physicalSurveyGPsTodo || 0}
+        agreementDate={
+          circleNationalData?.agreementSigningDate
+            ? parseDate(circleNationalData.agreementSigningDate)
+            : undefined
+        }
+        milestoneType="feasibility"
+        title="Physical Survey Timeline & Milestones"
+      />
       <div>
         <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
           <LayoutDashboard className="h-5 w-5" />

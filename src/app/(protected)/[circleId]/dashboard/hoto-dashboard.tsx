@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { SurveyData } from "@/types";
-import { fetchData } from "@/lib/api";
+import { SurveyData, NationalRowData } from "@/types";
+import { fetchData, fetchNationalData } from "@/lib/api";
+import { getCircleName } from "@/lib/utils";
 import {
   calculateSurveySummaryStats,
   getSurveyDistrictSummaries,
@@ -13,6 +14,7 @@ import { SurveyDistrictProgress } from "./survey-district-progress";
 import { SurveyBlocksTable } from "./survey-blocks-table";
 import { SurveyProgress } from "./survey-progress";
 import { SurveyDashboardSkeleton } from "./loading-skeleton";
+import { SurveyTimeline } from "./survey-timeline";
 import {
   CheckCircle,
   Clock,
@@ -29,8 +31,14 @@ interface HotoDashboardProps {
   circle: string;
 }
 
+const parseDate = (date: string) => {
+  const [day, month, year] = date.split(".");
+  return new Date(Number(year), Number(month) - 1, Number(day));
+};
+
 export function HotoDashboard({ circle }: HotoDashboardProps) {
   const [data, setData] = useState<SurveyData[]>([]);
+  const [nationalData, setNationalData] = useState<NationalRowData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,13 +46,21 @@ export function HotoDashboard({ circle }: HotoDashboardProps) {
     async function loadData() {
       try {
         setIsLoading(true);
-        const response = await fetchData(circle, "survey");
-        const circleData = response[`${circle}Survey`] as SurveyData[];
+
+        // Fetch both survey data and national data in parallel
+        const [surveyResponse, nationalResponse] = await Promise.all([
+          fetchData(circle, "survey"),
+          fetchNationalData(),
+        ]);
+
+        const circleData = surveyResponse[`${circle}Survey`] as SurveyData[];
         setData(
           circleData?.filter(
             (item) => Boolean(item.sNo) && item.block != "B-1"
           ) || []
         );
+
+        setNationalData(nationalResponse);
       } catch (err) {
         setError("Failed to load data");
         console.error(err);
@@ -69,8 +85,46 @@ export function HotoDashboard({ circle }: HotoDashboardProps) {
     data: [stats.completedKm || 0, stats.pendingKm || 0],
   };
 
+  // Calculate current progress percentage for timeline using HOTO GP data from national dashboard
+  const getHotoGpProgress = () => {
+    const circleName = getCircleName(circle);
+    const circleNationalData = nationalData.find(
+      (item) => item.state === circleName
+    );
+
+    if (circleNationalData && circleNationalData.hotoGPsTodo > 0) {
+      return (
+        (circleNationalData.hotoGPsDone / circleNationalData.hotoGPsTodo) * 100
+      );
+    }
+
+    // Fallback to KM-based calculation if GP data is not available
+    return ((stats.completedKm || 0) / (stats.totalExistingKm || 1)) * 100;
+  };
+
+  const currentProgress = getHotoGpProgress();
+
+  // Get circle national data for timeline
+  const getCircleNationalData = () => {
+    const circleName = getCircleName(circle);
+    return nationalData.find((item) => item.state === circleName);
+  };
+
+  const circleNationalData = getCircleNationalData();
+
   return (
     <div className="space-y-6">
+      <SurveyTimeline
+        currentProgress={currentProgress}
+        totalGpsInScope={circleNationalData?.hotoGPsTodo || 0}
+        agreementDate={
+          circleNationalData?.agreementSigningDate
+            ? parseDate(circleNationalData.agreementSigningDate)
+            : undefined
+        }
+        milestoneType="hoto"
+        title="HOTO Timeline & Milestones"
+      />
       <div>
         <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
           <LayoutDashboard className="h-5 w-5" />
@@ -106,6 +160,54 @@ export function HotoDashboard({ circle }: HotoDashboardProps) {
           />
         </div>
       </div>
+
+      {/* GP Progress Section */}
+      {(() => {
+        if (circleNationalData) {
+          return (
+            <div>
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                GP HOTO Progress (Timeline Basis)
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+                <StatusCard
+                  title="Total GPs for HOTO"
+                  value={circleNationalData.hotoGPsTodo}
+                  icon={<Map />}
+                  description="Total Gram Panchayats for handover"
+                />
+                <StatusCard
+                  title="GPs Handed Over"
+                  value={circleNationalData.hotoGPsDone}
+                  icon={<CheckCircle />}
+                  description="Gram Panchayats with completed handover"
+                  className="bg-emerald-50 dark:bg-emerald-950/20"
+                />
+                <StatusCard
+                  title="GPs Remaining"
+                  value={
+                    circleNationalData.hotoGPsTodo -
+                    circleNationalData.hotoGPsDone
+                  }
+                  icon={<Clock />}
+                  description="Gram Panchayats pending handover"
+                  className="bg-blue-50 dark:bg-blue-950/20"
+                />
+                <StatusCard
+                  title="HOTO Progress"
+                  value={currentProgress}
+                  icon={<FileQuestion />}
+                  description="GP handover completion percentage"
+                  className="bg-purple-50 dark:bg-purple-950/20"
+                  valueFormatter={(value) => `${value.toFixed(1)}%`}
+                />
+              </div>
+            </div>
+          );
+        }
+        return null;
+      })()}
 
       <div>
         <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
