@@ -164,7 +164,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           icon={({ ...props }) => <img src="/logo.png" {...props} />}
           name={env.PUBLIC_APP_NAME}
         />
-        <TeamSwitcher teams={data.teams} />
+        {/* <TeamSwitc/>her teams={data.teams} /> */}
       </SidebarHeader>
       <SidebarContent>
         <NavSection title="Main" items={data.navMain} />
