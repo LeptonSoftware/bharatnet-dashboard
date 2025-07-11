@@ -22,6 +22,7 @@ import {
   Building2,
   Table,
 } from "lucide-react";
+import { useNationalDashboard } from "@/hooks/use-national-dashboard";
 
 interface DtpDashboardProps {
   circle: string;
@@ -31,6 +32,11 @@ export function DtpDashboard({ circle }: DtpDashboardProps) {
   const [data, setData] = useState<BlockData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const {
+    data: nationalData,
+    isLoading: nationalLoading,
+    error: nationalError,
+  } = useNationalDashboard();
 
   useEffect(() => {
     async function loadData() {
@@ -54,8 +60,13 @@ export function DtpDashboard({ circle }: DtpDashboardProps) {
     loadData();
   }, [circle]);
 
-  if (isLoading) return <DtpDashboardSkeleton />;
-  if (error) return <div className="text-destructive">{error}</div>;
+  if (isLoading || nationalLoading) return <DtpDashboardSkeleton />;
+  if (error || nationalError)
+    return (
+      <div className="text-destructive">
+        {error || nationalError?.message || "Failed to load data"}
+      </div>
+    );
   if (!data.length)
     return <div className="text-center p-8">No data available</div>;
 

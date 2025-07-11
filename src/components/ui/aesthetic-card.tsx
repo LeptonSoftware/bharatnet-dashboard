@@ -271,6 +271,58 @@ import {
 } from "lucide-react";
 import { toast } from "@rio.js/ui/components/toast";
 
+// API functions for updating dashboard and creating events
+async function updateDashboard(
+  row: NationalRowData,
+  updates: Record<string, any>
+) {
+  const url = `https://api.sheety.co/632604ca09353483222880568eb0ebe2/bharatnetMonitoringDashboard/dashboard/${row.id}`;
+  const body = {
+    dashboard: { ...row, ...updates },
+  };
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to update dashboard: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+async function createEvent(event: {
+  circle: string;
+  event: string;
+  data: number;
+  timestamp: string;
+}) {
+  const url =
+    "https://api.sheety.co/632604ca09353483222880568eb0ebe2/bharatnetMonitoringDashboard/events";
+  const body = {
+    event: event,
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to create event: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
 function AestheticCardHistory({ row }: { row: NationalRowData }) {
   const queryClient = useQueryClient();
   const { data: events, isLoading, error } = useCircleEvents(row.state);
@@ -532,6 +584,8 @@ function TextInput({
   addon,
   value,
   icon: Icon,
+  onChange,
+  type = "text",
   ...props
 }: {
   label: string;
@@ -539,6 +593,8 @@ function TextInput({
   addon?: string;
   value: string;
   icon: React.ElementType;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
 }) {
   const id = useId();
   return (
@@ -555,7 +611,8 @@ function TextInput({
           value={value}
           className="-me-px shadow-none"
           placeholder={placeholder}
-          type="text"
+          type={type}
+          onChange={onChange}
           {...props}
         />
       </div>
@@ -564,29 +621,43 @@ function TextInput({
 }
 
 const DISPLAY_FIELDS = [
-  { key: "hotoGPsDone", label: "HOTO GPs Done", icon: CheckCircle },
+  {
+    key: "hotoGPsDone",
+    label: "HOTO GPs Done",
+    icon: CheckCircle,
+    type: "number",
+  },
   {
     key: "physicalSurveyGPsDone",
     label: "Physical Survey GPs Done",
     icon: FileText,
+    type: "number",
   },
   {
     key: "desktopSurveyDone",
     label: "Desktop Survey Done",
     icon: LayoutDashboard,
+    type: "number",
   },
-  { key: "gPs >98%Uptime", label: "GPs >98% Uptime", icon: Wifi },
+  {
+    key: "gPs >98%Uptime",
+    label: "GPs >98% Uptime",
+    icon: Wifi,
+    type: "number",
+  },
   {
     key: "activeFtthConnections",
     label: "Active FTTH Connections",
     icon: Building2,
+    type: "number",
   },
   {
     key: "noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone",
     label: "GPs Commissioned in Ring",
     icon: Zap,
+    type: "number",
   },
-  { key: "ofcLaidKMs", label: "OFC Laid (KMs)", icon: Cable },
+  { key: "ofcLaidKMs", label: "OFC Laid (KMs)", icon: Cable, type: "number" },
   {
     key: "snocStatus",
     label: "SNOC Status",
@@ -599,6 +670,57 @@ function AestheticCardEdit({ row }: { row: NationalRowData }) {
   const [editedValues, setEditedValues] = useState<Record<string, any>>({});
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ updates }: { updates: Record<string, any> }) => {
+      // Update dashboard
+      await updateDashboard(row, updates);
+
+      // Create events for each changed field
+      const timestamp = format(date, "dd.MM.yy");
+      const eventPromises = Object.entries(updates).map(([key, value]) => {
+        // Only create events for numeric fields that have changed
+        if (key !== "id" && key !== "sNo") {
+          return createEvent({
+            circle: row.state,
+            event: key,
+            data: value,
+            timestamp: timestamp,
+          });
+        }
+        return Promise.resolve();
+      });
+
+      await Promise.all(eventPromises);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["national-data"] });
+      queryClient.invalidateQueries({ queryKey: ["national-dashboard"] });
+      toast.success("Dashboard updated successfully");
+      setSheetOpen(false);
+      setEditedValues({});
+    },
+    onError: (error) => {
+      toast.error(`Failed to update dashboard: ${error.message}`);
+    },
+  });
+
+  const handleSave = () => {
+    if (Object.keys(editedValues).length === 0) {
+      toast.error("No changes to save");
+      return;
+    }
+
+    updateMutation.mutate({ updates: editedValues });
+  };
+
+  const getValue = (key: string) => {
+    return editedValues[key] ?? (row as any)[key] ?? "";
+  };
+
   return (
     <>
       <SheetHeader>
@@ -657,25 +779,31 @@ function AestheticCardEdit({ row }: { row: NationalRowData }) {
             icon={field.icon}
             placeholder={field.label}
             onChange={(e) => {
+              const fieldType = field.type || "number";
+              const value =
+                fieldType === "text" ? e.target.value : Number(e.target.value);
               setEditedValues({
                 ...editedValues,
-                [field.key]: e.target.value,
+                [field.key]: value,
               });
             }}
-            type={field.type ?? "number"}
-            value={editedValues[field.key] ?? row[field.key]}
+            type={field.type || "number"}
+            value={getValue(field.key).toString()}
           />
         ))}
       </div>
       <SheetFooter>
-        <Button variant="outline" onClick={() => setOpen(false)}>
+        <Button variant="outline" onClick={() => setSheetOpen(false)}>
           Cancel
         </Button>
         <Button
           className="bg-teal-600"
-          disabled={Object.keys(editedValues).length === 0}
+          disabled={
+            Object.keys(editedValues).length === 0 || updateMutation.isPending
+          }
+          onClick={handleSave}
         >
-          Save
+          {updateMutation.isPending ? "Saving..." : "Save"}
         </Button>
       </SheetFooter>
     </>

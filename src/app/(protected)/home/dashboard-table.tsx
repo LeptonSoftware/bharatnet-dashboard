@@ -22,6 +22,7 @@ import {
 } from "@rio.js/ui/components/select";
 import { Table } from "lucide-react";
 import { AestheticCard } from "@/components/ui/aesthetic-card";
+import { useNationalDashboard } from "@/hooks/use-national-dashboard";
 
 function TableSkeleton() {
   return (
@@ -69,45 +70,16 @@ function TableSkeleton() {
 }
 
 export function DashboardTable() {
-  const [data, setData] = useState<NationalRowData[]>([]);
-  const [circleRoles, setCircleRoles] = useState<CircleRole | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        setIsLoading(true);
-        const nationalData = await fetchNationalData();
-        const userCircleRoles = await fetchUserCircleRoles();
-        setCircleRoles(userCircleRoles);
-
-        // Filter national data based on circle roles
-        if (userCircleRoles && userCircleRoles.circles.length > 0) {
-          const allowedCircles = userCircleRoles.circles.map((c) =>
-            c.circle.toLowerCase()
-          );
-          const filteredData = nationalData.filter((row) =>
-            allowedCircles.includes(row.abbreviation.toLowerCase())
-          );
-          setData(filteredData);
-        } else {
-          setData(nationalData);
-        }
-      } catch (err) {
-        setError("Failed to load national data");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadData();
-  }, []);
+  // Use the national dashboard hook
+  const { data, circleRoles, isLoading, error } = useNationalDashboard();
 
   if (isLoading) return <TableSkeleton />;
   if (error)
-    return <div className="text-destructive text-center p-8">{error}</div>;
+    return (
+      <div className="text-destructive text-center p-8">
+        {error.message || "Failed to load national data"}
+      </div>
+    );
   if (!data.length)
     return <div className="text-center p-8">No data available</div>;
 
@@ -303,10 +275,41 @@ export function DashboardTable() {
 
   return (
     <div className="space-y-4 flex flex-col ">
-      <DataTableProvider<NationalRowData>
-        columns={columns}
-        data={data}
+      <DataTableProvider
+        columns={columns as any}
+        data={data.map((item) => ({ ...item, id: item.id.toString() }))}
         defaultView="grid"
+        skeletonRow={{
+          id: "skeleton",
+          sNo: 0,
+          state: "",
+          abbreviation: "",
+          pia: "",
+          agreementSigningDate: "",
+          gPsTotal: 0,
+          gPsNew: 0,
+          gPsExisting: 0,
+          hotoGPsTodo: 0,
+          hotoGPsDone: 0,
+          hotoKMsDone: 0,
+          hotoKMsTodo: 0,
+          physicalSurveyGPsTodo: 0,
+          physicalSurveyGPsDone: 0,
+          physicalSurveyKMsTodo: 0,
+          physicalSurveyKMsDone: 0,
+          desktopSurveyTarget: 0,
+          desktopSurveyDone: 0,
+          snocTargetDate: "",
+          snocStatus: "",
+          "gPs >98%Uptime": 0,
+          activeFtthConnections: 0,
+          noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone: 0,
+          noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone: 0,
+          ofcTotalKMs: 0,
+          ofcExistingKMs: 0,
+          ofcNewKms: 0,
+          ofcLaidKMs: 0,
+        }}
       >
         <DataTable cardComponent={AestheticCard}>
           <DataTableAdvancedToolbar>

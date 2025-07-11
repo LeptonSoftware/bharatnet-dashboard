@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { SurveyData, NationalRowData } from "@/types";
-import { fetchData, fetchNationalData } from "@/lib/api";
+import { fetchData } from "@/lib/api";
 import { getCircleName } from "@/lib/utils";
 import {
   calculateSurveySummaryStats,
@@ -15,6 +15,7 @@ import { SurveyBlocksTable } from "./survey-blocks-table";
 import { SurveyProgress } from "./survey-progress";
 import { SurveyDashboardSkeleton } from "./loading-skeleton";
 import { SurveyTimeline } from "./survey-timeline";
+import { useNationalDashboard } from "@/hooks/use-national-dashboard";
 import {
   CheckCircle,
   Clock,
@@ -38,29 +39,29 @@ const parseDate = (date: string) => {
 
 export function HotoDashboard({ circle }: HotoDashboardProps) {
   const [data, setData] = useState<SurveyData[]>([]);
-  const [nationalData, setNationalData] = useState<NationalRowData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Use the national dashboard hook
+  const {
+    data: nationalData,
+    isLoading: nationalLoading,
+    error: nationalError,
+  } = useNationalDashboard();
 
   useEffect(() => {
     async function loadData() {
       try {
         setIsLoading(true);
 
-        // Fetch both survey data and national data in parallel
-        const [surveyResponse, nationalResponse] = await Promise.all([
-          fetchData(circle, "survey"),
-          fetchNationalData(),
-        ]);
-
+        // Only fetch survey data
+        const surveyResponse = await fetchData(circle, "survey");
         const circleData = surveyResponse[`${circle}Survey`] as SurveyData[];
         setData(
           circleData?.filter(
             (item) => Boolean(item.sNo) && item.block != "B-1"
           ) || []
         );
-
-        setNationalData(nationalResponse);
       } catch (err) {
         setError("Failed to load data");
         console.error(err);
@@ -72,8 +73,18 @@ export function HotoDashboard({ circle }: HotoDashboardProps) {
     loadData();
   }, [circle]);
 
-  if (isLoading) return <SurveyDashboardSkeleton />;
+  // Show loading if either survey data or national data is loading
+  if (isLoading || nationalLoading) return <SurveyDashboardSkeleton />;
+
+  // Show error if either failed
   if (error) return <div className="text-destructive">{error}</div>;
+  if (nationalError)
+    return (
+      <div className="text-destructive">
+        {nationalError.message || "Failed to load national data"}
+      </div>
+    );
+
   if (!data.length)
     return <div className="text-center p-8">No data available</div>;
 

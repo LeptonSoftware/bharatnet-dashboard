@@ -74,14 +74,7 @@ import {
   getPeriodBoundaries,
 } from "@/lib/trends";
 import { useEvents } from "@/hooks/use-events";
-// Add CircleRole type
-interface CircleRole {
-  id: number;
-  created_at: string;
-  user_id: string;
-  circles: string[];
-  role: string;
-}
+import { useNationalDashboard } from "@/hooks/use-national-dashboard";
 
 interface NationalDashboardProps {
   timePeriod?: TimePeriod;
@@ -93,10 +86,9 @@ export function NationalDashboard({
   compareMode = false,
 }: NationalDashboardProps) {
   "use no memo";
-  const [data, setData] = useState<NationalRowData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [circleRoles, setCircleRoles] = useState<CircleRole | null>(null);
-  const [error, setError] = useState<string | null>(null);
+
+  // Use the national dashboard hook
+  const { data, circleRoles, isLoading, error } = useNationalDashboard();
 
   // Load events data
   const {
@@ -105,42 +97,13 @@ export function NationalDashboard({
     error: eventsError,
   } = useEvents();
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        setIsLoading(true);
-        const nationalData = await fetchNationalData();
-        const userCircleRoles = await fetchUserCircleRoles();
-        console.log(userCircleRoles);
-        console.log(nationalData);
-        setCircleRoles(userCircleRoles);
-
-        // Filter national data based on circle roles
-        if (userCircleRoles && userCircleRoles.circles.length > 0) {
-          const allowedCircles = userCircleRoles.circles.map((c) =>
-            c.circle.toLowerCase()
-          );
-          const filteredData = nationalData.filter((row) =>
-            allowedCircles.includes(row.abbreviation.toLowerCase())
-          );
-          setData(filteredData);
-        } else {
-          setData(nationalData);
-        }
-      } catch (err) {
-        setError("Failed to load national data");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadData();
-  }, []);
-
   if (isLoading) return <NationalDashboardSkeleton />;
   if (error)
-    return <div className="text-destructive text-center p-8">{error}</div>;
+    return (
+      <div className="text-destructive text-center p-8">
+        {error.message || "Failed to load national data"}
+      </div>
+    );
   if (!data.length)
     return <div className="text-center p-8">No data available</div>;
 
@@ -631,7 +594,7 @@ export function NationalDashboard({
 
         return (
           <div className="flex flex-col items-center gap-1">
-            {trend ? (
+            {trend.hasData ? (
               <TrendIndicator trend={trend} size="xs" />
             ) : (
               <Badge
@@ -684,7 +647,7 @@ export function NationalDashboard({
 
         return (
           <div className="flex flex-col items-center gap-1">
-            {trend ? (
+            {trend.hasData ? (
               <TrendIndicator trend={trend} size="xs" />
             ) : (
               <Badge
@@ -733,7 +696,7 @@ export function NationalDashboard({
 
         return (
           <div className="flex flex-col items-center gap-1">
-            {trend ? (
+            {trend.hasData ? (
               <TrendIndicator trend={trend} size="xs" />
             ) : (
               <Badge
@@ -922,17 +885,7 @@ export function NationalDashboard({
           />
           <StatusCard
             title="Physical Survey Progress"
-            value={
-              <>
-                <span>
-                  {nationalSummary.totalSurveyCompleted.toLocaleString()}
-                </span>
-                <span className="text-muted-foreground">
-                  {" "}
-                  / {nationalSummary.totalSurveyTarget.toLocaleString()}
-                </span>
-              </>
-            }
+            value={nationalSummary.totalSurveyCompleted}
             icon={<FileText />}
             description={`${(nationalSummary.totalSurveyTarget > 0
               ? (nationalSummary.totalSurveyCompleted /
@@ -1125,7 +1078,11 @@ export function NationalDashboard({
           <Table className="h-5 w-5" />
           Package-wise Progress
         </h2>
-        <DataTableProvider columns={columns} data={data} defaultView="grid">
+        <DataTableProvider
+          columns={columns as any}
+          data={data.map((item) => ({ ...item, id: item.id.toString() }))}
+          defaultView="grid"
+        >
           <DataTable
             cardComponent={AestheticCard}
             key={timePeriod + compareMode.toString()}

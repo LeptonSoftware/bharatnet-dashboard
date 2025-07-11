@@ -49,7 +49,7 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
     error: eventsError,
   } = useEvents();
 
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>("");
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>(null);
   const [compareMode, setCompareMode] = useState(false);
   useEffect(() => {
     async function loadData() {
