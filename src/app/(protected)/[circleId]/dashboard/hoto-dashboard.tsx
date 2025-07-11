@@ -100,7 +100,7 @@ export function HotoDashboard({ circle }: HotoDashboardProps) {
   const getHotoGpProgress = () => {
     const circleName = getCircleName(circle);
     const circleNationalData = nationalData.find(
-      (item) => item.state === circleName
+      (item) => item.state === circleName || item.abbreviation === circle
     );
 
     if (circleNationalData && circleNationalData.hotoGPsTodo > 0) {
@@ -118,7 +118,9 @@ export function HotoDashboard({ circle }: HotoDashboardProps) {
   // Get circle national data for timeline
   const getCircleNationalData = () => {
     const circleName = getCircleName(circle);
-    return nationalData.find((item) => item.state === circleName);
+    return nationalData.find(
+      (item) => item.state === circleName || item.abbreviation === circle
+    );
   };
 
   const circleNationalData = getCircleNationalData();

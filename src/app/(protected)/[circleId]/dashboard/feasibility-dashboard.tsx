@@ -32,7 +32,7 @@ interface FeasibilityDashboardProps {
 }
 
 const parseDate = (date: string) => {
-  const [day, month, year] = date.split(".");
+  const [day, month, year] = date.trim().split(".");
   return new Date(Number(year), Number(month) - 1, Number(day));
 };
 
@@ -99,7 +99,7 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
   const getGpProgress = () => {
     const circleName = getCircleName(circle);
     const circleNationalData = nationalData.find(
-      (item) => item.state === circleName
+      (item) => item.state === circleName || item.abbreviation === circle
     );
 
     if (circleNationalData && circleNationalData.physicalSurveyGPsTodo > 0) {
@@ -119,7 +119,9 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
   // Get circle national data for timeline
   const getCircleNationalData = () => {
     const circleName = getCircleName(circle);
-    return nationalData.find((item) => item.state === circleName);
+    return nationalData.find(
+      (item) => item.state === circleName || item.abbreviation === circle
+    );
   };
 
   const circleNationalData = getCircleNationalData();
