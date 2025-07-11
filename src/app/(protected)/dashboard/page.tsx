@@ -105,7 +105,7 @@ export default function HomePage() {
         breadcrumbs={[
           {
             title: "BharatNet",
-            icon: <img src="/logo.png" className="h-4 w-4" />,
+            icon: <img src="/bharatnet-logo.png" className="h-4" />,
           },
           { title: "Dashboard", icon: <Icon icon="tabler:dashboard" /> },
         ]}
@@ -129,22 +129,7 @@ export default function HomePage() {
             </TabsList>
           </Tabs>
 
-          <Select
-            value={timePeriod || ""}
-            onValueChange={(value) => setTimePeriod(value as TimePeriod)}
-          >
-            <SelectTrigger className="md:hidden">
-              <SelectValue placeholder="Select time period" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="today">Today</SelectItem>
-              <SelectItem value="current-week">Current Week</SelectItem>
-              <SelectItem value="last-week">Last Week</SelectItem>
-              <SelectItem value="current-month">Current Month</SelectItem>
-              <SelectItem value="last-month">Last Month</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="flex items-center space-x-2">
+          <div className="items-center space-x-2 hidden md:flex">
             <Switch
               id="compare-mode"
               checked={compareMode}
@@ -170,6 +155,47 @@ export default function HomePage() {
           </div>
         </div>
       </PageHeader>
+      <div className="flex flex-row items-center justify-center gap-4 px-4 py-2 border-b md:hidden">
+        <Select
+          value={timePeriod || ""}
+          onValueChange={(value) => setTimePeriod(value as TimePeriod)}
+        >
+          <SelectTrigger className="md:hidden">
+            <SelectValue placeholder="Select time period" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="current-week">Current Week</SelectItem>
+            <SelectItem value="last-week">Last Week</SelectItem>
+            <SelectItem value="current-month">Current Month</SelectItem>
+            <SelectItem value="last-month">Last Month</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="compare-mode"
+            checked={compareMode}
+            onCheckedChange={() => {
+              setCompareMode(!compareMode);
+              if (!compareMode) {
+                if (timePeriod === "last-week") {
+                  setTimePeriod("current-week");
+                }
+                if (timePeriod === "last-month") {
+                  setTimePeriod("current-month");
+                }
+              }
+            }}
+            disabled={
+              !timePeriod ||
+              !["current-week", "current-month"].includes(timePeriod)
+            }
+          />
+          <Label htmlFor="compare-mode" className="text-sm">
+            Compare
+          </Label>
+        </div>
+      </div>
       <NationalDashboard timePeriod={timePeriod} compareMode={compareMode} />
     </>
   );

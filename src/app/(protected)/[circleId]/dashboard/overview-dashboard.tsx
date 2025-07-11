@@ -147,12 +147,12 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-row justify-between">
-        <div className="flex flex-row items-center gap-4">
+      <div className="flex sm:flex-row flex-col justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
           <CircleSVG circleId={circle} size={96} />
           <h1 className="text-6xl font-bold">{getCircleName(circle)}</h1>
         </div>
-        <div className="flex items-center gap-4 ml-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-4 sm:ml-auto">
           <Tabs
             value={timePeriod || ""}
             onValueChange={(value) => setTimePeriod(value as TimePeriod)}

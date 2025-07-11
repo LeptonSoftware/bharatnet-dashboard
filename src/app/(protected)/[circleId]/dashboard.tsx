@@ -78,7 +78,7 @@ export function Dashboard() {
           <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-7 gap-2">
             <TabsTrigger
               value="overview"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-base"
             >
               <BarChart3 className="h-5 w-5" />
               <div className="flex flex-col items-start">
@@ -87,25 +87,28 @@ export function Dashboard() {
             </TabsTrigger>
             <TabsTrigger
               value="dtp"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-base"
             >
-              <FileText className="h-5 w-5" />
+              <Icon icon="mdi:desktop-mac" className="h-5 w-5" />
               <div className="flex flex-col items-start">
                 <span className="font-semibold">Desktop Planning</span>
               </div>
             </TabsTrigger>
             <TabsTrigger
               value="feasibility"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-base"
             >
-              <Search className="h-5 w-5" />
+              <Icon
+                icon="icon-park-outline:land-surveying"
+                className="h-5 w-5"
+              />
               <div className="flex flex-col items-start">
-                <span className="font-semibold">Feasibility Survey</span>
+                <span className="font-semibold">Physical Survey</span>
               </div>
             </TabsTrigger>
             <TabsTrigger
               value="hoto"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-base"
             >
               <Icon icon="lineicons:handshake" className="h-5 w-5" />
               <div className="flex flex-col items-start">
@@ -114,7 +117,7 @@ export function Dashboard() {
             </TabsTrigger>
             <TabsTrigger
               value="trenching"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-base"
             >
               <Icon icon="fa6-solid:person-digging" className="h-5 w-5" />
               <div className="flex flex-col items-start">
@@ -123,7 +126,7 @@ export function Dashboard() {
             </TabsTrigger>
             <TabsTrigger
               value="ducting"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-base"
             >
               <Icon icon="ph:pipe-duotone" className="h-5 w-5" />
               <div className="flex flex-col items-start">
@@ -132,7 +135,7 @@ export function Dashboard() {
             </TabsTrigger>
             <TabsTrigger
               value="fiber-laying"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-lg"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2 h-12 text-base"
             >
               <Cable className="h-5 w-5" />
               <div className="flex flex-col items-start">

@@ -74,7 +74,7 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
       <div>
         <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
           <LayoutDashboard className="h-5 w-5" />
-          Feasibility Survey Overview
+          Physical Survey Overview
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           <StatusCard
@@ -160,7 +160,7 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
       <div>
         <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
           <Table className="h-5 w-5" />
-          Feasibility Survey Block-wise Details
+          Physical Survey Block-wise Details
         </h2>
         <SurveyBlocksTable data={data} type="feasibility" />
       </div>

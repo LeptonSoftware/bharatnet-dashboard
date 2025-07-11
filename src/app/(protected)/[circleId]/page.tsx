@@ -12,7 +12,7 @@ export default function DashboardPage() {
         breadcrumbs={[
           {
             title: "BharatNet",
-            icon: <img src="/logo.png" className="w-4 h-4" />,
+            icon: <img src="/bharatnet-logo.png" className="h-4" />,
           },
           {
             title: getCircleName(circleId!),

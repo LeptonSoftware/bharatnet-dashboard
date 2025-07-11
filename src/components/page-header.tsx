@@ -43,23 +43,23 @@ export function PageHeader({
           ))}
         </h1>
         {children}
-        <div className="ml-auto text-sm text-muted-foreground">
+        <div className="ml-auto hidden sm:block sm:text-sm text-muted-foreground">
           {format(new Date(), "MMMM d, yyyy")}
         </div>
         <Button
           variant="ghost"
           size="icon"
-          className="ml-2"
+          className="ml-2 text-xs sm:text-base"
           onClick={() => window.location.reload()}
         >
           <RefreshCw className="h-4 w-4" />
           <span className="sr-only">Reload page</span>
         </Button>
-        <Separator
+        {/* <Separator
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
-        />
-        <img src="/lepton-logo.png" alt="Lepton Logo" className="h-6 w-auto" />
+        /> */}
+        {/* <img src="/lepton-logo.png" alt="Lepton Logo" className="h-6 w-auto" /> */}
       </div>
     </header>
   );

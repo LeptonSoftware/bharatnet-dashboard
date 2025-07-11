@@ -18,6 +18,7 @@ import {
   Wifi,
   Zap,
   ChevronDownIcon,
+  LayoutDashboardIcon,
 } from "lucide-react";
 import { CircleSVG } from "../circle-svg";
 import { Icon } from "@iconify/react";
@@ -33,13 +34,13 @@ import {
 } from "@rio.js/ui/components/sheet";
 import { NationalRowData } from "@/types";
 
-interface AestheticCardProps<TData> {
+interface AestheticCardProps<TData extends NationalRowData> {
   row: TData;
   index: number;
   table: Table<TData>;
 }
 
-export function AestheticCard<TData>({
+export function AestheticCard<TData extends NationalRowData>({
   row,
   table,
 }: AestheticCardProps<TData>) {
@@ -151,12 +152,15 @@ export function AestheticCard<TData>({
       // )}
     >
       <div className="flex flex-col bg-muted rounded-t-md py-6 relative">
-        <Link to={`/${row.abbreviation}`} className="group">
+        <Link
+          to={`/${(row as NationalRowData).abbreviation}`}
+          className="group"
+        >
           <div className="flex items-center justify-center">
-            <CircleSVG circleId={row.state} size={96} />
+            <CircleSVG circleId={(row as NationalRowData).state} size={96} />
           </div>
           <div className="text-2xl font-bold text-center group-hover:underline">
-            {row.state}
+            {(row as NationalRowData).state}
           </div>
         </Link>
 
@@ -169,8 +173,21 @@ export function AestheticCard<TData>({
               <Icon icon="mdi:pencil" />
             </Button>
           </SheetTrigger>
-          <SheetContent>
+          <SheetContent className="sm:max-w-md">
             <AestheticCardEdit row={row} />
+          </SheetContent>
+        </Sheet>
+        <Sheet>
+          <SheetTrigger
+            asChild
+            className="absolute text-gray-500 top-8 right-2"
+          >
+            <Button variant="ghost" size="icon">
+              <Icon icon="iconamoon:history-duotone" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="sm:max-w-md">
+            <AestheticCardHistory row={row} />
           </SheetContent>
         </Sheet>
       </div>
@@ -218,6 +235,7 @@ export function AestheticCard<TData>({
 }
 
 import { useId, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Input } from "@rio.js/ui/components/input";
 import { Label } from "@rio.js/ui/components/label";
@@ -227,6 +245,258 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@rio.js/ui/components/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@rio.js/ui/components/alert-dialog";
+import { ScrollArea } from "@rio.js/ui/components/scroll-area";
+import { Badge } from "@rio.js/ui/components/badge";
+import { Separator } from "@rio.js/ui/components/separator";
+import { useCircleEvents, deleteEvent, EventLogData } from "@/hooks/use-events";
+import { formatDistanceToNow, format } from "date-fns";
+import {
+  Trash2,
+  Calendar as CalendarIcon,
+  Activity,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+} from "lucide-react";
+import { toast } from "@rio.js/ui/components/toast";
+
+function AestheticCardHistory({ row }: { row: NationalRowData }) {
+  const queryClient = useQueryClient();
+  const { data: events, isLoading, error } = useCircleEvents(row.state);
+
+  console.log(events);
+  const deleteMutation = useMutation({
+    mutationFn: deleteEvent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      toast.success("Event deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to delete event: ${error.message}`);
+    },
+  });
+
+  const handleDeleteEvent = (eventId: number) => {
+    deleteMutation.mutate(eventId);
+  };
+
+  const getEventIcon = (eventType: string) => {
+    const iconProps = { className: "h-4 w-4" };
+    switch (eventType.toLowerCase()) {
+      case "hotoGPsDone".toLowerCase():
+        return (
+          <CheckCircle {...iconProps} className="h-4 w-4 text-green-600" />
+        );
+      case "physicalSurveyGPsDone".toLowerCase():
+        return <FileText {...iconProps} className="h-4 w-4 text-blue-600" />;
+      case "desktopSurveyDone".toLowerCase():
+        return (
+          <LayoutDashboard {...iconProps} className="h-4 w-4 text-purple-600" />
+        );
+      case "gPs >98%Uptime".toLowerCase():
+        return <Wifi {...iconProps} className="h-4 w-4 text-emerald-600" />;
+      case "activeFtthConnections".toLowerCase():
+        return <Network {...iconProps} className="h-4 w-4 text-orange-600" />;
+      case "ofcLaidKMs".toLowerCase():
+        return <Cable {...iconProps} className="h-4 w-4 text-cyan-600" />;
+      default:
+        return <Activity {...iconProps} className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
+  const getEventDisplayName = (eventType: string) => {
+    const eventMap: Record<string, string> = {
+      hotoGPsDone: "HOTO GPs Done",
+      physicalSurveyGPsDone: "Physical Survey GPs Done",
+      desktopSurveyDone: "Desktop Survey Done",
+      "gPs >98%Uptime": "GPs >98% Uptime",
+      activeFtthConnections: "Active FTTH Connections",
+      noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone:
+        "GPs Commissioned in Ring",
+      ofcLaidKMs: "OFC Laid (KMs)",
+    };
+    return eventMap[eventType] || eventType;
+  };
+
+  const getTrendDirection = (events: EventLogData[], index: number) => {
+    if (index === events.length - 1) return null; // No previous event
+    const currentValue = events[index].data;
+    const previousValue = events[index + 1].data;
+
+    if (currentValue > previousValue) return "up";
+    if (currentValue < previousValue) return "down";
+    return "stable";
+  };
+
+  const getTrendIcon = (direction: string | null) => {
+    const iconProps = { className: "h-3 w-3" };
+    switch (direction) {
+      case "up":
+        return <TrendingUp {...iconProps} className="h-3 w-3 text-green-500" />;
+      case "down":
+        return <TrendingDown {...iconProps} className="h-3 w-3 text-red-500" />;
+      case "stable":
+        return <Minus {...iconProps} className="h-3 w-3 text-gray-500" />;
+      default:
+        return null;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-destructive">Failed to load events history</div>
+      </div>
+    );
+  }
+
+  if (!events || events.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+        <h3 className="text-lg font-medium">No Events Yet</h3>
+        <p className="text-muted-foreground">
+          No events have been recorded for this circle.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <SheetHeader>
+        <SheetTitle>
+          <div className="flex gap-2 items-start flex-col">
+            <div className="flex items-center gap-2">
+              <CircleSVG circleId={row.state} className="m-0" size={32} />
+              <span>{row.state} Events History</span>
+            </div>
+            <Badge variant="secondary">{events.length} events</Badge>
+          </div>
+        </SheetTitle>
+      </SheetHeader>
+
+      <ScrollArea className="h-[calc(100vh-8rem)]">
+        <div className="space-y-3 p-4">
+          {events.map((event, index) => {
+            const trendDirection = getTrendDirection(events, index);
+            return (
+              <div
+                key={event.id}
+                className="group relative p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3 flex-1">
+                    <div className="p-2 rounded-lg bg-background border">
+                      {getEventIcon(event.event)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2">
+                        <h4 className="font-medium text-sm">
+                          {getEventDisplayName(event.event)}
+                        </h4>
+                        {getTrendIcon(trendDirection)}
+                      </div>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className="text-lg font-bold text-primary">
+                          {event.data.toLocaleString()}
+                        </span>
+                        {trendDirection && trendDirection !== "stable" && (
+                          <Badge
+                            variant={
+                              trendDirection === "up"
+                                ? "default"
+                                : "destructive"
+                            }
+                            className="text-xs"
+                          >
+                            {trendDirection === "up" ? "+" : "-"}
+                            {Math.abs(
+                              event.data - events[index + 1]?.data || 0
+                            )}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2 mt-2 text-xs text-muted-foreground">
+                        <CalendarIcon className="h-3 w-3" />
+                        <span>{format(event.date, "MMM d, yyyy")}</span>
+                        <span>•</span>
+                        <span>
+                          {formatDistanceToNow(event.date, {
+                            addSuffix: true,
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this event? This
+                          action cannot be undone.
+                          <div className="mt-2 p-3 rounded-lg bg-muted">
+                            <div className="font-medium">
+                              {getEventDisplayName(event.event)}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Value: {event.data} •{" "}
+                              {format(event.date, "MMM d, yyyy 'at' h:mm a")}
+                            </div>
+                          </div>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="bg-destructive text-white hover:bg-destructive/90"
+                          disabled={deleteMutation.isPending}
+                        >
+                          {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </ScrollArea>
+    </>
+  );
+}
 
 function InputWithAddon({
   label,
@@ -317,6 +587,12 @@ const DISPLAY_FIELDS = [
     icon: Zap,
   },
   { key: "ofcLaidKMs", label: "OFC Laid (KMs)", icon: Cable },
+  {
+    key: "snocStatus",
+    label: "SNOC Status",
+    icon: LayoutDashboardIcon,
+    type: "text",
+  },
 ];
 
 function AestheticCardEdit({ row }: { row: NationalRowData }) {
@@ -365,8 +641,10 @@ function AestheticCardEdit({ row }: { row: NationalRowData }) {
                 selected={date}
                 captionLayout="dropdown"
                 onSelect={(date) => {
-                  setDate(date);
-                  setOpen(false);
+                  if (date) {
+                    setDate(date);
+                    setOpen(false);
+                  }
                 }}
               />
             </PopoverContent>
@@ -384,7 +662,7 @@ function AestheticCardEdit({ row }: { row: NationalRowData }) {
                 [field.key]: e.target.value,
               });
             }}
-            type="number"
+            type={field.type ?? "number"}
             value={editedValues[field.key] ?? row[field.key]}
           />
         ))}
