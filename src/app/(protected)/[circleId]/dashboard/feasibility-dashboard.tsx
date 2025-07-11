@@ -147,7 +147,7 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           <StatusCard
             title="Total Blocks"
-            value={stats.total}
+            value={circleNationalData?.blocks}
             icon={<Map />}
             description="Total number of blocks in the project"
           />

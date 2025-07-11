@@ -23,6 +23,7 @@ import {
   Table,
 } from "lucide-react";
 import { useNationalDashboard } from "@/hooks/use-national-dashboard";
+import { getCircleName } from "@/lib/utils";
 
 interface DtpDashboardProps {
   circle: string;
@@ -79,6 +80,11 @@ export function DtpDashboard({ circle }: DtpDashboardProps) {
   // Calculate total submitted (including approved) with default values
   const totalSubmitted = (stats.submitted || 0) + (stats.approved || 0);
 
+  const circleNationalData = nationalData.find(
+    (item) =>
+      item.state === getCircleName(circle) || item.abbreviation === circle
+  );
+
   return (
     <div className="space-y-6">
       <div>
@@ -89,7 +95,7 @@ export function DtpDashboard({ circle }: DtpDashboardProps) {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           <StatusCard
             title="Total Blocks"
-            value={stats.total}
+            value={circleNationalData?.blocks}
             icon={<Map />}
             description="Total number of blocks in the project"
           />
