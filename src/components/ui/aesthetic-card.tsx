@@ -50,6 +50,8 @@ export function AestheticCard<TData extends NationalRowData>({
       .rows.find((r) => r.original === row)
       ?.getVisibleCells() || [];
 
+  const { circleRoles } = useNationalDashboard();
+
   // Helper function to get icon for a field
   const getFieldIcon = (title: string) => {
     const iconProps = { className: "h-4 w-4 text-muted-foreground/70" };
@@ -170,19 +172,6 @@ export function AestheticCard<TData extends NationalRowData>({
             className="absolute text-gray-500 top-0 right-2"
           >
             <Button variant="ghost" size="icon">
-              <Icon icon="mdi:pencil" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent className="sm:max-w-md">
-            <AestheticCardEdit row={row} />
-          </SheetContent>
-        </Sheet>
-        <Sheet>
-          <SheetTrigger
-            asChild
-            className="absolute text-gray-500 top-8 right-2"
-          >
-            <Button variant="ghost" size="icon">
               <Icon icon="iconamoon:history-duotone" />
             </Button>
           </SheetTrigger>
@@ -190,6 +179,21 @@ export function AestheticCard<TData extends NationalRowData>({
             <AestheticCardHistory row={row} />
           </SheetContent>
         </Sheet>
+        {circleRoles?.role === "viewer" ? null : (
+          <Sheet>
+            <SheetTrigger
+              asChild
+              className="absolute text-gray-500 top-8 right-2"
+            >
+              <Button variant="ghost" size="icon">
+                <Icon icon="mdi:pencil" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="sm:max-w-md">
+              <AestheticCardEdit row={row} />
+            </SheetContent>
+          </Sheet>
+        )}
       </div>
 
       {/* Content Section */}
@@ -270,6 +274,7 @@ import {
   Minus,
 } from "lucide-react";
 import { toast } from "@rio.js/ui/components/toast";
+import { useNationalDashboard } from "@/hooks/use-national-dashboard";
 
 // API functions for updating dashboard and creating events
 async function updateDashboard(
@@ -326,6 +331,7 @@ async function createEvent(event: {
 function AestheticCardHistory({ row }: { row: NationalRowData }) {
   const queryClient = useQueryClient();
   const { data: events, isLoading, error } = useCircleEvents(row.state);
+  const { circleRoles } = useNationalDashboard();
 
   console.log(events);
   const deleteMutation = useMutation({
@@ -501,45 +507,49 @@ function AestheticCardHistory({ row }: { row: NationalRowData }) {
                     </div>
                   </div>
 
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Event</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this event? This
-                          action cannot be undone.
-                          <div className="mt-2 p-3 rounded-lg bg-muted">
-                            <div className="font-medium">
-                              {getEventDisplayName(event.event)}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              Value: {event.data} •{" "}
-                              {format(event.date, "MMM d, yyyy 'at' h:mm a")}
-                            </div>
-                          </div>
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDeleteEvent(event.id)}
-                          className="bg-destructive text-white hover:bg-destructive/90"
-                          disabled={deleteMutation.isPending}
+                  {circleRoles?.role === "viewer" ? null : (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
                         >
-                          {deleteMutation.isPending ? "Deleting..." : "Delete"}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete this event? This
+                            action cannot be undone.
+                            <div className="mt-2 p-3 rounded-lg bg-muted">
+                              <div className="font-medium">
+                                {getEventDisplayName(event.event)}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Value: {event.data} •{" "}
+                                {format(event.date, "MMM d, yyyy 'at' h:mm a")}
+                              </div>
+                            </div>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteEvent(event.id)}
+                            className="bg-destructive text-white hover:bg-destructive/90"
+                            disabled={deleteMutation.isPending}
+                          >
+                            {deleteMutation.isPending
+                              ? "Deleting..."
+                              : "Delete"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
                 </div>
               </div>
             );

@@ -58,6 +58,11 @@ const settingsSchema = z.object({
     SUPABASE: z.object({
       URL: z.string().default(SUPABASE_URL),
       ANON_KEY: z.string().default(SUPABASE_ANON_KEY),
+      SERVICE_ROLE_KEY: z
+        .string()
+        .default(
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Z3l0cWl0Y2NzYWZmcnZ2ZGZmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczOTk4NzgwNiwiZXhwIjoyMDU1NTYzODA2fQ.sM7pcgzgljN9dB-25taj6fLROBGZRjNbH374A3liHqM"
+        ),
       AUTH: z.object({
         URL: z.string().default(`${SUPABASE_URL}auth/v1`),
         ANON_KEY: z.string().default(SUPABASE_ANON_KEY),

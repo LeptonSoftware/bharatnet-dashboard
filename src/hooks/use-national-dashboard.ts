@@ -29,7 +29,7 @@ export function useNationalDashboard() {
       ? (() => {
           if (circleRoles && circleRoles.circles.length > 0) {
             const allowedCircles = circleRoles.circles.map((c: string) =>
-              c.toLowerCase()
+              c.circle.toLowerCase()
             );
             return nationalData.filter((row) =>
               allowedCircles.includes(row.abbreviation.toLowerCase())

@@ -32,5 +32,5 @@
       "@rio.js/ui/*": ["./node_modules/@rio.js/ui/src/*"]
     }
   },
-  "include": ["src", "env.d.ts", "env.schema.ts"]
+  "include": ["src", "env.d.ts", "env.schema.ts", "scripts"]
 }
