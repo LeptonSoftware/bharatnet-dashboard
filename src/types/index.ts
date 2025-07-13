@@ -135,6 +135,10 @@ export interface NationalRowData {
   physicalSurveyGPsDone: number;
   physicalSurveyKMsTodo: string | number;
   physicalSurveyKMsDone: string | number;
+  physicalSurveyBlocksDone: number;
+  physicalSurveyBlocksPending: number;
+  hotoBlocksDone: number;
+  hotoBlocksPending: number;
   desktopSurveyTarget: string | number;
   desktopSurveyDone: number;
   snocTargetDate: string;

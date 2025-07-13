@@ -153,7 +153,10 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
           />
           <StatusCard
             title="Completed"
-            value={stats.completed || 0}
+            value={
+              circleNationalData?.physicalSurveyBlocksDone ??
+              (stats.completed || 0)
+            }
             icon={<CheckCircle />}
             description="Blocks with completed survey"
             className="bg-emerald-50 dark:bg-emerald-950/20"
@@ -167,7 +170,10 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
           />
           <StatusCard
             title="Pending"
-            value={stats.pending || 0}
+            value={
+              circleNationalData?.physicalSurveyBlocksPending ??
+              (stats.pending || 0)
+            }
             icon={<FileQuestion />}
             description="Blocks pending survey"
             className="bg-amber-50 dark:bg-amber-950/20"
