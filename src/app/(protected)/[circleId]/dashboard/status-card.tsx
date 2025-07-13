@@ -65,7 +65,7 @@ export function StatusCard({
               {trend.period && trend.period.includes("(%)") ? "%" : ""}
               {trend.period && (
                 <span className="text-muted-foreground">
-                  vs {trend.period.replace(" (%)", "")}
+                  in {trend.period.replace(" (%)", "")}
                 </span>
               )}
             </div>
