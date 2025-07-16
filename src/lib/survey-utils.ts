@@ -66,6 +66,7 @@ export function getSurveyDistrictSummaries(
         .join(" ");
 
       districts.set(districtName, {
+        id: item.districtCode,
         name: displayName,
         total: 0,
         completed: 0,

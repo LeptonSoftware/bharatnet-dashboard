@@ -27,6 +27,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@rio.js/ui/components/sheet";
+import { useParams } from "react-router";
+import { DistrictMap } from "./district-map";
 
 interface SurveyDistrictProgressProps {
   districts: SurveyDistrictSummary[];
@@ -38,6 +40,7 @@ export function SurveyDistrictProgress({
   data,
 }: SurveyDistrictProgressProps) {
   const [search, setSearch] = useState("");
+  const { circleId } = useParams();
 
   const filteredDistricts = districts.filter((district) =>
     district.name.toLowerCase().includes(search.toLowerCase())
@@ -101,8 +104,12 @@ export function SurveyDistrictProgress({
                                 All blocks in {district.name}
                               </SheetDescription>
                             </SheetHeader>
-                            <div className="mt-6">
-                              <BlockMap blocks={districtBlocks} />
+                            <div className="mt-6 flex-1">
+                              {/* <BlockMap blocks={districtBlocks} /> */}
+                              <DistrictMap
+                                district={district}
+                                circle={circleId}
+                              />
                             </div>
                           </SheetContent>
                         </Sheet>

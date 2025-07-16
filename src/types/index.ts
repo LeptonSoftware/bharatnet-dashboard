@@ -99,6 +99,7 @@ export interface DistrictSummary {
 }
 
 export interface SurveyDistrictSummary {
+  id: number;
   name: string;
   total: number;
   completed: number;

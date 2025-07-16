@@ -1,12 +1,12 @@
-import { Icon } from "@iconify/react"
-import { useNavigate } from "react-router"
+import { Icon } from "@iconify/react";
+import { useNavigate } from "react-router";
 
-import { useObserver, useRio } from "@rio.js/client"
+import { useObserver, useRio } from "@rio.js/client";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@rio.js/ui/components/avatar"
+} from "@rio.js/ui/components/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,33 +15,34 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@rio.js/ui/components/dropdown-menu"
+} from "@rio.js/ui/components/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@rio.js/ui/components/sidebar"
-import { useTheme } from "@rio.js/ui/components/theme-provider"
+} from "@rio.js/ui/components/sidebar";
+import { useTheme } from "@rio.js/ui/components/theme-provider";
 
 export function NavUser() {
-  using _ = useObserver()
-  const { isMobile } = useSidebar()
-  const { setTheme, theme } = useTheme()
-  const navigate = useNavigate()
-  const rio = useRio()
-  const user = rio.auth.me
+  using _ = useObserver();
+  const { isMobile } = useSidebar();
+  const { setTheme, theme } = useTheme();
+  const navigate = useNavigate();
+  const rio = useRio();
+  const user = rio.auth.me;
 
   if (!user) {
-    throw new Error("User not found")
+    throw new Error("User not found");
   }
 
-  const name: string = user.user_metadata.full_name ?? user.email?.split("@")[0]
+  const name: string =
+    user.user_metadata.full_name ?? user.email?.split("@")[0];
   const initials = name
     .split(/[ -\.]/)
     .map((n) => n[0])
     .join("")
-    .toUpperCase()
+    .toUpperCase();
 
   return (
     <SidebarMenu>
@@ -85,7 +86,9 @@ export function NavUser() {
                     src={user.user_metadata.avatar_url}
                     alt={user.user_metadata.full_name}
                   />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
@@ -116,7 +119,7 @@ export function NavUser() {
             <DropdownMenuGroup>
               <DropdownMenuItem
                 onClick={() => {
-                  setTheme(theme === "light" ? "dark" : "light")
+                  setTheme(theme === "light" ? "dark" : "light");
                 }}
               >
                 <Icon icon="tabler:palette" />
@@ -130,9 +133,9 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={async () => {
-                const response = await rio.auth.logout()
+                const response = await rio.auth.logout();
                 if (response.success && response.redirectTo) {
-                  navigate(response.redirectTo)
+                  navigate(response.redirectTo);
                 }
               }}
             >
@@ -143,5 +146,5 @@ export function NavUser() {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }
