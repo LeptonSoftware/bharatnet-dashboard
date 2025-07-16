@@ -1,5 +1,12 @@
 import { HTTPEvent, toWebRequest } from "vinxi/http";
 
+const circleURLs = {
+  upe: "http://networkaccess.bnet.leptonsoftware.com/RVNL/Smartinventory_services/api/VectorLayer/GetVectorData",
+  upw: "http://networkaccess.bnet.leptonsoftware.com/RVNL_UPW/Smartinventory_services/api/VectorLayer/GetVectorData",
+  punjab:
+    "http://networkaccess.bnet.leptonsoftware.com/HFCL_Punjab/Smartinventory_services/api/VectorLayer/GetVectorData",
+};
+
 export async function GET(event: HTTPEvent) {
   const request = toWebRequest(event);
   const { searchParams } = new URL(request.url);
@@ -11,8 +18,12 @@ export async function GET(event: HTTPEvent) {
     return new Response("Missing required parameters", { status: 400 });
   }
 
-  const url =
-    "http://networkaccess.bnet.leptonsoftware.com/RVNL/Smartinventory_services/api/VectorLayer/GetVectorData";
+  const url = circleURLs[circleId.toLowerCase() as keyof typeof circleURLs];
+
+  if (!url) {
+    return new Response("Invalid circle ID", { status: 400 });
+  }
+
   const options = {
     method: "POST",
     headers: {
