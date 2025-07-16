@@ -108,7 +108,7 @@ export function SurveyDistrictProgress({
                               {/* <BlockMap blocks={districtBlocks} /> */}
                               <DistrictMap
                                 district={district}
-                                circle={circleId}
+                                circleId={circleId}
                               />
                             </div>
                           </SheetContent>

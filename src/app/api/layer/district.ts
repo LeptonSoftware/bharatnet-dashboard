@@ -3,9 +3,13 @@ import { HTTPEvent, toWebRequest } from "vinxi/http";
 export async function GET(event: HTTPEvent) {
   const request = toWebRequest(event);
   const { searchParams } = new URL(request.url);
-  const circleId = searchParams.get("circleId");
-  const districtId = searchParams.get("districtId");
+  const circleId = searchParams.get("circle")!;
+  const district = searchParams.get("district")!;
   const entityType = searchParams.get("entityType");
+
+  if (!circleId || !district || !entityType) {
+    return new Response("Missing required parameters", { status: 400 });
+  }
 
   const url =
     "http://networkaccess.bnet.leptonsoftware.com/RVNL/Smartinventory_services/api/VectorLayer/GetVectorData";
@@ -18,7 +22,7 @@ export async function GET(event: HTTPEvent) {
     },
     body: JSON.stringify({
       data: JSON.stringify({
-        PrvinceIds: districtId,
+        PrvinceIds: district,
         connectionString: null,
         entityType: entityType,
         lat: null,

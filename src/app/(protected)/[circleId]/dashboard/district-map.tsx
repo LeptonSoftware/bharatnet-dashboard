@@ -42,12 +42,16 @@ function useLayerStyles() {
   });
 }
 
-function useLayerData(districtId: string, entityType: string) {
+function useLayerData(
+  districtId: string,
+  circleId: string,
+  entityType: string
+) {
   return useSuspenseQuery({
-    queryKey: ["layer-data", districtId, entityType],
+    queryKey: ["layer-data", districtId, circleId, entityType],
     queryFn: async () => {
       const response = await fetch(
-        `/api/layer/district?districtId=945&entityType=${entityType}`
+        `/api/layer/district?district=${districtId}&circle=${circleId}&entityType=${entityType}`
       );
       const data = await response.json();
       return data;
@@ -66,7 +70,13 @@ const hexToColorArray = (hex: string) => {
   return [r, g, b, 255];
 };
 
-function MapLayers({ district }: { district: any }) {
+function MapLayers({
+  district,
+  circleId,
+}: {
+  district: any;
+  circleId: string;
+}) {
   const { data: layerStyles } = useLayerStyles();
   return (
     <>
@@ -81,7 +91,7 @@ function MapLayers({ district }: { district: any }) {
             order={index}
             id={`district-${district.id}-${entityType}`}
             type={MapLayer.GeoJsonLayer}
-            data={`/api/layer/district?districtId=945&entityType=${entityType}`}
+            data={`/api/layer/district?district=${district}&circle=${circleId}&entityType=${entityType}`}
             pointType={"icon"}
             getPointRadius={100}
             pickable
@@ -107,26 +117,56 @@ function MapLayers({ district }: { district: any }) {
   );
 }
 
-function Map({ viewState, district }: { viewState: any; district: any }) {
+function Map({
+  viewState,
+  district,
+  circleId,
+}: {
+  viewState: any;
+  district: any;
+  circleId: string;
+}) {
   return (
     <MapProvider initialViewState={viewState}>
       <MapCanvas></MapCanvas>
       <Suspense fallback={null}>
-        <MapLayers district={district} />
+        <MapLayers district={district} circleId={circleId} />
       </Suspense>
     </MapProvider>
   );
 }
 
+function useDistrictInfo(district: string, circleId: string) {
+  return useSuspenseQuery({
+    queryKey: ["district-info", district, circleId],
+    queryFn: async () => {
+      const response = await fetch(
+        `https://api.sheety.co/632604ca09353483222880568eb0ebe2/bharatnetMonitoringDashboard/districts`
+      );
+      const data = await response.json();
+      const districtInfo = data.districts.find(
+        (d: any) =>
+          d.circle.toLowerCase() === circleId?.toLowerCase() &&
+          d.provinceName.toLowerCase() === district.toLowerCase()
+      );
+      return districtInfo;
+    },
+  });
+}
+
 export function DistrictMap({
   district,
-  circle,
+  circleId,
 }: {
   district: any;
-  circle: string;
+  circleId: string;
 }) {
-  console.log(district);
-  const { data: layerData } = useLayerData(district.id, "POD");
+  const { data: districtInfo } = useDistrictInfo(district.name, circleId);
+  const { data: layerData } = useLayerData(
+    districtInfo.provinceId,
+    circleId,
+    "POD"
+  );
 
   const viewState = useMemo(() => {
     const bbox = envelope(layerData);
@@ -149,7 +189,11 @@ export function DistrictMap({
   return (
     <div className="h-full w-full">
       <Suspense fallback={null}>
-        <Map viewState={viewState} district={district} />
+        <Map
+          viewState={viewState}
+          district={districtInfo.provinceId}
+          circleId={circleId}
+        />
       </Suspense>
     </div>
   );
