@@ -120,23 +120,24 @@ export function NationalDashboard({
     (acc, state) => {
       if (state.agreementSigningDate) {
         acc.totalGpsInScope += state.gPsTotal;
+        acc.totalHotoCompleted += state.hotoGPsDone;
+        acc.totalHotoTarget += state.hotoGPsTodo;
+        acc.totalSurveyCompleted += state.physicalSurveyGPsDone;
+        acc.totalSurveyTarget += state.physicalSurveyGPsTodo;
+        acc.totalGpsUptime += state["gPs >98%Uptime"];
+        acc.totalFtthConnections += state.activeFtthConnections;
+        acc.totalOfcLength += state.ofcTotalKMs;
+        acc.totalOfcExisting += state.ofcExistingKMs;
+        acc.totalOfcNew += state.ofcNewKms;
+        acc.totalGpsCommissioned +=
+          state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone;
+        acc.totalGpsCommissionedDone += toNumber(
+          state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone
+        );
+        acc.totalDesktopSurveyDone += state.desktopSurveyDone;
+        acc.totalDesktopSurveyTarget += toNumber(state.desktopSurveyTarget);
       }
-      acc.totalHotoCompleted += state.hotoGPsDone;
-      acc.totalHotoTarget += state.hotoGPsTodo;
-      acc.totalSurveyCompleted += state.physicalSurveyGPsDone;
-      acc.totalSurveyTarget += state.physicalSurveyGPsTodo;
-      acc.totalGpsUptime += state["gPs >98%Uptime"];
-      acc.totalFtthConnections += state.activeFtthConnections;
-      acc.totalOfcLength += state.ofcTotalKMs;
-      acc.totalOfcExisting += state.ofcExistingKMs;
-      acc.totalOfcNew += state.ofcNewKms;
-      acc.totalGpsCommissioned +=
-        state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone;
-      acc.totalGpsCommissionedDone += toNumber(
-        state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone
-      );
-      acc.totalDesktopSurveyDone += state.desktopSurveyDone;
-      acc.totalDesktopSurveyTarget += toNumber(state.desktopSurveyTarget);
+
       return acc;
     },
     {
