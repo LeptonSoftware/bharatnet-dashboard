@@ -333,7 +333,6 @@ function AestheticCardHistory({ row }: { row: NationalRowData }) {
   const { data: events, isLoading, error } = useCircleEvents(row.state);
   const { circleRoles } = useNationalDashboard();
 
-  console.log(events);
   const deleteMutation = useMutation({
     mutationFn: deleteEvent,
     onSuccess: () => {

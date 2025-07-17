@@ -474,7 +474,6 @@ export function NationalDashboard({
 
   // Helper function to get individual circle trend
   const getCircleTrend = (stateName: string, eventType: string) => {
-    console.log(timePeriod, stateName, eventType, eventsData);
     if (!eventsData || eventsData.length === 0 || timePeriod === null) {
       return { direction: "stable" as const, hasData: false, changeValue: 0 };
     }
@@ -593,7 +592,6 @@ export function NationalDashboard({
         const todo = row.original.hotoGPsTodo;
         const percentage = todo > 0 ? (done / todo) * 100 : 0;
         const trend = getCircleTrend(row.original.state, "hotoGPsDone");
-        console.log(trend);
 
         return (
           <div className="flex flex-col items-center gap-1">

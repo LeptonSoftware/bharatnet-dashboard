@@ -119,7 +119,6 @@ export function CircleSVG({ circleId = "punjab", className = "", size = 32 }) {
   }, [geojson, circleId, nationalData]);
 
   const svgString = useMemo(() => {
-    console.log(features);
     if (!features.features.length) return "";
 
     const color = colors[Math.abs(hash(circleId)) % colors.length].hex;
@@ -132,7 +131,6 @@ export function CircleSVG({ circleId = "punjab", className = "", size = 32 }) {
     });
   }, [features, circleId]);
 
-  console.log(svgString);
 
   return (
     <svg

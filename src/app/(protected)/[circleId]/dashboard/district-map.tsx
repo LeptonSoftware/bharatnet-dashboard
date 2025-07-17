@@ -92,8 +92,6 @@ function MapLayers({
         const style = layerStyles.find(
           (style: any) => style.layer_name === entityType
         );
-
-        console.log(style);
         const isIconLayer =
           style &&
           style.LayerStyle &&

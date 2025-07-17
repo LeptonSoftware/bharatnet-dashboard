@@ -136,7 +136,6 @@ export async function fetchUserCircleRoles(): Promise<CircleRole | null> {
       error: userError,
     } = await supabase.auth.getUser();
     if (userError) throw userError;
-    console.log(user);
     if (!user) return null;
 
     // Fetch circle roles for the user

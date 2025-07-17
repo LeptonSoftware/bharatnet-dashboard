@@ -117,7 +117,6 @@ export default function FormPage() {
 
   const handleUpdate = () => {
     // This would be where you handle the update
-    console.log("Updated values:", editedValues);
   };
 
   return (

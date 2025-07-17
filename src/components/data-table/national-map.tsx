@@ -402,7 +402,7 @@ export function NationalMap({ data }: NationalMapProps) {
       {/* Tooltip for hovered state */}
       {hoveredState && (
         <div
-          className="pointer-events-none fixed z-50 px-3 py-2 rounded-md bg-white border border-gray-300 shadow text-xs text-gray-900"
+          className="pointer-events-none z-50 absolute px-3 py-2 rounded-md bg-white border border-gray-300 shadow text-xs text-gray-900"
           style={{ left: hoveredState.x + 16, top: hoveredState.y + 16 }}
         >
           <div className="font-semibold">{hoveredState.name}</div>

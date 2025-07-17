@@ -1,50 +1,50 @@
-import { Table, flexRender } from "@tanstack/react-table"
-import type * as React from "react"
+import { Table, flexRender } from "@tanstack/react-table";
+import type * as React from "react";
 
-import { cn } from "@rio.js/ui/lib/utils"
+import { cn } from "@rio.js/ui/lib/utils";
 
-import { DataTablePagination } from "./data-table-pagination"
-import { useDataTableContext } from "./data-table-provider"
+import { DataTablePagination } from "./data-table-pagination";
+import { useDataTableContext } from "./data-table-provider";
 
 export interface DataTableGridProps<TData> extends React.ComponentProps<"div"> {
   /**
    * Component or render function to display each row as a card
    */
   cardComponent?: React.ComponentType<{
-    row: TData
-    index: number
-    table: Table<TData>
-  }>
+    row: TData;
+    index: number;
+    table: Table<TData>;
+  }>;
   /**
    * Render function for custom card layout
    */
-  renderCard?: (row: TData, index: number) => React.ReactNode
+  renderCard?: (row: TData, index: number) => React.ReactNode;
   /**
    * CSS class for the grid container
    */
-  gridClassName?: string
+  gridClassName?: string;
   /**
    * CSS class for individual cards
    */
-  cardClassName?: string
+  cardClassName?: string;
   /**
    * Number of columns for different breakpoints
    */
   columns?: {
-    sm?: number
-    md?: number
-    lg?: number
-    xl?: number
-    "2xl"?: number
-  }
+    sm?: number;
+    md?: number;
+    lg?: number;
+    xl?: number;
+    "2xl"?: number;
+  };
   /**
    * Gap between cards
    */
-  gap?: "sm" | "md" | "lg" | "xl"
+  gap?: "sm" | "md" | "lg" | "xl";
   /**
    * Content to display when no data is available
    */
-  emptyState?: React.ReactNode
+  emptyState?: React.ReactNode;
 }
 
 const gapClasses = {
@@ -52,26 +52,26 @@ const gapClasses = {
   md: "gap-4",
   lg: "gap-6",
   xl: "gap-8",
-}
+};
 
 function getGridColsClass(columns?: DataTableGridProps<any>["columns"]) {
-  const classes = ["grid"]
+  const classes = ["grid"];
 
-  if (columns?.sm) classes.push(`grid-cols-${columns.sm}`)
-  else classes.push("grid-cols-1")
+  if (columns?.sm) classes.push(`grid-cols-${columns.sm}`);
+  else classes.push("grid-cols-1");
 
-  if (columns?.md) classes.push(`sm:grid-cols-${columns.md}`)
-  else classes.push("sm:grid-cols-2")
+  if (columns?.md) classes.push(`sm:grid-cols-${columns.md}`);
+  else classes.push("sm:grid-cols-2");
 
-  if (columns?.lg) classes.push(`md:grid-cols-${columns.lg}`)
-  else classes.push("md:grid-cols-3")
+  if (columns?.lg) classes.push(`md:grid-cols-${columns.lg}`);
+  else classes.push("md:grid-cols-3");
 
-  if (columns?.xl) classes.push(`lg:grid-cols-${columns.xl}`)
-  else classes.push("lg:grid-cols-4")
+  if (columns?.xl) classes.push(`lg:grid-cols-${columns.xl}`);
+  else classes.push("lg:grid-cols-4");
 
-  if (columns?.["2xl"]) classes.push(`xl:grid-cols-${columns["2xl"]}`)
+  if (columns?.["2xl"]) classes.push(`xl:grid-cols-${columns["2xl"]}`);
 
-  return classes.join(" ")
+  return classes.join(" ");
 }
 
 function DefaultCard<TData>({
@@ -80,35 +80,37 @@ function DefaultCard<TData>({
   index,
   cardClassName,
 }: {
-  row: any
-  index: number
-  table: Table<TData>
-  cardClassName?: string
+  row: any;
+  index: number;
+  table: Table<TData>;
+  cardClassName?: string;
 }) {
-  "use no memo"
-  const visibleColumns = table.getVisibleLeafColumns()
+  "use no memo";
+  const visibleColumns = table.getVisibleLeafColumns();
 
   // Filter out the select and actions columns and handle them separately
-  const selectColumn = visibleColumns.find((column) => column.id === "select")
-  const actionsColumn = visibleColumns.find((column) => column.id === "actions")
+  const selectColumn = visibleColumns.find((column) => column.id === "select");
+  const actionsColumn = visibleColumns.find(
+    (column) => column.id === "actions"
+  );
   const dataColumns = visibleColumns.filter(
-    (column) => column.id !== "select" && column.id !== "actions",
-  )
+    (column) => column.id !== "select" && column.id !== "actions"
+  );
 
   // Get the select and actions cells if they exist
   const selectCell = selectColumn
     ? row.getVisibleCells().find((cell: any) => cell.column.id === "select")
-    : null
+    : null;
 
   const actionsCell = actionsColumn
     ? row.getVisibleCells().find((cell: any) => cell.column.id === "actions")
-    : null
+    : null;
 
   return (
     <div
       className={cn(
         "rounded-md border p-4 shadow-sm transition-shadow hover:shadow-md relative",
-        cardClassName,
+        cardClassName
       )}
     >
       {/* Select checkbox in top right corner */}
@@ -116,7 +118,7 @@ function DefaultCard<TData>({
         <div className="absolute top-3 right-3">
           {flexRender(
             selectCell.column.columnDef.cell,
-            selectCell.getContext(),
+            selectCell.getContext()
           )}
         </div>
       )}
@@ -126,7 +128,7 @@ function DefaultCard<TData>({
         <div className="absolute bottom-3 right-3">
           {flexRender(
             actionsCell.column.columnDef.cell,
-            actionsCell.getContext(),
+            actionsCell.getContext()
           )}
         </div>
       )}
@@ -135,8 +137,8 @@ function DefaultCard<TData>({
         {dataColumns.map((column) => {
           const cell = row
             .getVisibleCells()
-            .find((cell: any) => cell.column.id === column.id)
-          if (!cell) return null
+            .find((cell: any) => cell.column.id === column.id);
+          if (!cell) return null;
 
           // Get the column header
           const header =
@@ -145,12 +147,12 @@ function DefaultCard<TData>({
                   table
                     .getHeaderGroups()[0]
                     .headers.find((h) => h.column.id === column.id)
-                    ?.getContext() || ({} as any),
+                    ?.getContext() || ({} as any)
                 )
-              : column.columnDef.header
+              : column.columnDef.header;
 
           // Skip if header is null/undefined
-          if (!header) return null
+          if (!header) return null;
 
           return (
             <div key={column.id} className="flex flex-col space-y-1">
@@ -161,11 +163,11 @@ function DefaultCard<TData>({
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </div>
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
 
 export function DataTableGrid<TData>({
@@ -180,19 +182,17 @@ export function DataTableGrid<TData>({
   className,
   ...props
 }: DataTableGridProps<TData>) {
-  "use no memo"
-  const { table } = useDataTableContext<TData>()
+  "use no memo";
+  const { table } = useDataTableContext<TData>();
 
-  const rows = table.getRowModel().rows
-
-  console.log("rows", rows)
+  const rows = table.getRowModel().rows;
 
   // Default empty state
   const defaultEmptyState = (
     <div className="flex h-32 w-full items-center justify-center rounded-md border border-dashed">
       <p className="text-sm text-muted-foreground">No results found.</p>
     </div>
-  )
+  );
 
   // Default card component that uses column definitions
 
@@ -206,7 +206,7 @@ export function DataTableGrid<TData>({
             getGridColsClass(columns),
             gapClasses[gap],
             "w-full",
-            gridClassName,
+            gridClassName
           )}
         >
           {rows.map((row, index) => {
@@ -216,7 +216,7 @@ export function DataTableGrid<TData>({
                 <div key={row.id} className={cardClassName}>
                   {renderCard(row.original as TData, index)}
                 </div>
-              )
+              );
             }
 
             // If CardComponent is provided, use it
@@ -228,7 +228,7 @@ export function DataTableGrid<TData>({
                   index={index}
                   table={table}
                 />
-              )
+              );
             }
 
             // Use default card component
@@ -240,7 +240,7 @@ export function DataTableGrid<TData>({
                 table={table}
                 cardClassName={cardClassName}
               />
-            )
+            );
           })}
         </div>
       ) : (
@@ -254,5 +254,5 @@ export function DataTableGrid<TData>({
           actionBar} */}
       </div>
     </div>
-  )
+  );
 }
