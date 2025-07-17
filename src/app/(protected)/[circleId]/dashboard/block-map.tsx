@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, Maximize2, Minimize2 } from "lucide-react";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import { BlockData } from "@/types";
 import { useParams } from "react-router";
@@ -55,6 +55,7 @@ async function fetchGeoJson(circle: string) {
 
 export function BlockMap({ blocks }: BlockMapProps) {
   const { circle = "upe" } = useParams();
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
 
   const {
     data: geojson,
@@ -107,38 +108,58 @@ export function BlockMap({ blocks }: BlockMapProps) {
       </div>
     );
   }
-
-  return (
-    <MapContainer
-      style={{ height: "500px", width: "100%" }}
-      center={[0, 0]}
-      zoom={13}
-      scrollWheelZoom={true}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {blockFeatures.map((feature, index) => (
-        <GeoJSON
-          key={feature.properties.Code}
-          data={feature}
-          style={{
-            fillColor:
-              blocks.length > 1
-                ? `hsl(${(index * 137) % 360}, 70%, 50%)`
-                : "#3B82F6",
-            weight: 2,
-            opacity: 1,
-            color:
-              blocks.length > 1
-                ? `hsl(${(index * 137) % 360}, 70%, 40%)`
-                : "#2563EB",
-            fillOpacity: 0.3,
-          }}
+  const map = (
+    <div className="relative w-full h-full">
+      {/* Fullscreen button, styled like map controls */}
+      <button
+        className="absolute top-3.5 Hola right-5 rounded-[2px] border-[2px] border-[#ccc] z-2000 bg-white shadow p-2 hover:bg-gray-100 focus:outline-none"
+        style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
+        onClick={() => setIsFullscreen((f) => !f)}
+        aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+      >
+        {isFullscreen ? (
+          <Minimize2 className="h-5 w-5" />
+        ) : (
+          <Maximize2 className="h-5 w-5" />
+        )}
+      </button>
+      <MapContainer
+        style={{ height: isFullscreen ? "100vh" : "500px", width: "100%" }}
+        center={[0, 0]}
+        zoom={13}
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-      ))}
-      <MapController blocks={blocks} geojson={geojson} />
-    </MapContainer>
+        {blockFeatures.map((feature, index) => (
+          <GeoJSON
+            key={feature.properties.Code}
+            data={feature}
+            style={{
+              fillColor:
+                blocks.length > 1
+                  ? `hsl(${(index * 137) % 360}, 70%, 50%)`
+                  : "#3B82F6",
+              weight: 2,
+              opacity: 1,
+              color:
+                blocks.length > 1
+                  ? `hsl(${(index * 137) % 360}, 70%, 40%)`
+                  : "#2563EB",
+              fillOpacity: 0.3,
+            }}
+          />
+        ))}
+        <MapController blocks={blocks} geojson={geojson} />
+      </MapContainer>
+    </div>
   );
+
+  if (isFullscreen) {
+    return <div className="fixed inset-0 z-50 bg-white">{map}</div>;
+  }
+
+  return map;
 }

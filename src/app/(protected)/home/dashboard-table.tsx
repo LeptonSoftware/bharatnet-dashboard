@@ -266,7 +266,7 @@ export function DashboardTable() {
         />
       ),
       cell: ({ row }) => (
-        <div className="text-center text-wrap min-w-[200px]">
+        <div className="text-center text-wrap min-w-[0px]">
           {row.getValue("snocStatus") || "N/A"}
         </div>
       ),
@@ -278,7 +278,7 @@ export function DashboardTable() {
       <DataTableProvider
         columns={columns as any}
         data={data.map((item) => ({ ...item, id: item.id.toString() }))}
-        defaultView="grid"
+        defaultView="map"
         skeletonRow={{
           id: "skeleton",
           sNo: 0,

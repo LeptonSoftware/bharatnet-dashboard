@@ -7,8 +7,8 @@ export const DataTableContext = createContext<{
   shallow: boolean;
   debounceMs: number;
   throttleMs: number;
-  view: "grid" | "list";
-  setView: (view: "grid" | "list") => void;
+  view: "grid" | "list" | "map";
+  setView: (view: "grid" | "list" | "map") => void;
 } | null>(null);
 
 export function useDataTableContext<TData>() {
@@ -23,7 +23,7 @@ export function useDataTableContext<TData>() {
     shallow: boolean;
     debounceMs: number;
     throttleMs: number;
-    view: "grid" | "list";
+    view: "grid" | "list" | "map";
     setView: (view: string) => void;
   };
 }
@@ -42,7 +42,7 @@ export function DataTableProvider<TData extends { id: string }>({
   columns: ColumnDef<TData, any>[];
   isLoading?: boolean;
   skeletonRow: TData;
-  defaultView?: "grid" | "list";
+  defaultView?: "map" | "grid" | "list";
 }) {
   "use no memo";
   const skeletonRows = useMemo(
@@ -54,7 +54,7 @@ export function DataTableProvider<TData extends { id: string }>({
     []
   );
 
-  const [view, setView] = useState<"grid" | "list">(defaultView);
+  const [view, setView] = useState<"grid" | "list" | "map">(defaultView);
 
   const table = useDataTable({
     data: isLoading ? skeletonRows : (data as TData[]),

@@ -118,23 +118,26 @@ export function NationalDashboard({
   // Calculate national summaries
   const nationalSummary = data.reduce(
     (acc, state) => {
-      acc.totalGpsInScope += state.gPsTotal;
-      acc.totalHotoCompleted += state.hotoGPsDone;
-      acc.totalHotoTarget += state.hotoGPsTodo;
-      acc.totalSurveyCompleted += state.physicalSurveyGPsDone;
-      acc.totalSurveyTarget += state.physicalSurveyGPsTodo;
-      acc.totalGpsUptime += state["gPs >98%Uptime"];
-      acc.totalFtthConnections += state.activeFtthConnections;
-      acc.totalOfcLength += state.ofcTotalKMs;
-      acc.totalOfcExisting += state.ofcExistingKMs;
-      acc.totalOfcNew += state.ofcNewKms;
-      acc.totalGpsCommissioned +=
-        state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone;
-      acc.totalGpsCommissionedDone += toNumber(
-        state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone
-      );
-      acc.totalDesktopSurveyDone += state.desktopSurveyDone;
-      acc.totalDesktopSurveyTarget += toNumber(state.desktopSurveyTarget);
+      if (state.agreementSigningDate) {
+        acc.totalGpsInScope += state.gPsTotal;
+        acc.totalHotoCompleted += state.hotoGPsDone;
+        acc.totalHotoTarget += state.hotoGPsTodo;
+        acc.totalSurveyCompleted += state.physicalSurveyGPsDone;
+        acc.totalSurveyTarget += state.physicalSurveyGPsTodo;
+        acc.totalGpsUptime += state["gPs >98%Uptime"];
+        acc.totalFtthConnections += state.activeFtthConnections;
+        acc.totalOfcLength += state.ofcTotalKMs;
+        acc.totalOfcExisting += state.ofcExistingKMs;
+        acc.totalOfcNew += state.ofcNewKms;
+        acc.totalGpsCommissioned +=
+          state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone;
+        acc.totalGpsCommissionedDone += toNumber(
+          state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone
+        );
+        acc.totalDesktopSurveyDone += state.desktopSurveyDone;
+        acc.totalDesktopSurveyTarget += toNumber(state.desktopSurveyTarget);
+      }
+
       return acc;
     },
     {
@@ -1081,7 +1084,42 @@ export function NationalDashboard({
         <DataTableProvider
           columns={columns as any}
           data={data.map((item) => ({ ...item, id: item.id.toString() }))}
-          defaultView="grid"
+          defaultView="map"
+          skeletonRow={{
+            id: "skeleton",
+            sNo: 0,
+            state: "",
+            abbreviation: "",
+            pia: "",
+            agreementSigningDate: "",
+            gPsTotal: 0,
+            gPsNew: 0,
+            gPsExisting: 0,
+            hotoGPsTodo: 0,
+            hotoGPsDone: 0,
+            hotoKMsDone: "",
+            hotoKMsTodo: "",
+            physicalSurveyGPsTodo: 0,
+            physicalSurveyGPsDone: 0,
+            physicalSurveyKMsTodo: "",
+            physicalSurveyKMsDone: "",
+            physicalSurveyBlocksDone: 0,
+            physicalSurveyBlocksPending: 0,
+            hotoBlocksDone: 0,
+            hotoBlocksPending: 0,
+            desktopSurveyTarget: "",
+            desktopSurveyDone: 0,
+            snocTargetDate: "",
+            snocStatus: "",
+            "gPs >98%Uptime": 0,
+            activeFtthConnections: 0,
+            noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone: 0,
+            noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone: "",
+            ofcTotalKMs: 0,
+            ofcExistingKMs: 0,
+            ofcNewKms: 0,
+            ofcLaidKMs: 0,
+          }}
         >
           <DataTable
             cardComponent={AestheticCard}
