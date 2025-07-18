@@ -544,20 +544,61 @@ export function NationalDashboard({
       accessorKey: "pia",
       header: ({ column }) => (
         <DataTableColumnHeader
-          className="mx-auto"
           column={column}
           title="PIA"
+          className="mx-auto"
         />
       ),
       cell: ({ row }) => {
         const pia = row.original.pia;
-
         const isNotPia =
           pia.toLowerCase().includes("tender") ||
           pia.toLowerCase().includes("bids");
         return (
-          <div className={cn("text-center", isNotPia && "text-destructive")}>
+          <div
+            className={cn(
+              "font-medium text-center",
+              isNotPia && "text-destructive"
+            )}
+          >
             {pia}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "agreementSigningDate",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Agreement Signing Date"
+          className="mx-auto"
+        />
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.getValue("agreementSigningDate") || "N/A"}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "ie",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="IE" className="mx-auto" />
+      ),
+      cell: ({ row }) => {
+        const ie = row.original.ie;
+        const isNotIE =
+          ie.toLowerCase().includes("tender") ||
+          ie.toLowerCase().includes("bids");
+        return (
+          <div
+            className={cn(
+              "font-medium text-center",
+              isNotIE && "text-destructive"
+            )}
+          >
+            {ie}
           </div>
         );
       },
@@ -800,7 +841,7 @@ export function NationalDashboard({
               }
               className="text-xs"
             >
-              {percentage.toFixed(0)}% laid
+              {laid}km ({percentage.toFixed(0)}%) laid
             </Badge>{" "}
             <div className="font-mono">{(total ?? 0).toLocaleString()}</div>
             <div className="text-xs text-muted-foreground">
