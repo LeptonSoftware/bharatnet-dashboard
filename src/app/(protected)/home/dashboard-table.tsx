@@ -170,6 +170,28 @@ export function DashboardTable() {
       ),
     },
     {
+      accessorKey: "ie",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="IE" className="mx-auto" />
+      ),
+      cell: ({ row }) => {
+        const ie = row.original.ie;
+        const isNotIE =
+          ie.toLowerCase().includes("tender") ||
+          ie.toLowerCase().includes("bids");
+        return (
+          <div
+            className={cn(
+              "font-medium text-center",
+              isNotIE && "text-destructive"
+            )}
+          >
+            {ie}
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: "gPsTotal",
       header: ({ column }) => (
         <DataTableColumnHeader
