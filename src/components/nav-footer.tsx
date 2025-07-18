@@ -1,7 +1,5 @@
-"use client"
-
-import { Icon } from "@iconify/react"
-import * as React from "react"
+import { Icon } from "@iconify/react";
+import * as React from "react";
 
 import {
   SidebarGroup,
@@ -9,17 +7,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@rio.js/ui/components/sidebar"
+} from "@rio.js/ui/components/sidebar";
 
 export function NavFooter({
   items,
   ...props
 }: {
   items: {
-    title: string
-    url: string
-    icon: string
-  }[]
+    title: string;
+    url: string;
+    icon: string;
+  }[];
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
@@ -38,5 +36,5 @@ export function NavFooter({
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  )
+  );
 }

@@ -97,10 +97,15 @@ export function DashboardTable() {
       ),
     },
     {
+      id: "state",
       accessorKey: "state",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="State/UT" />
       ),
+      meta: {
+        label: "State/UT",
+      },
+      enableColumnFilter: true,
       cell: ({ row }) => {
         if (
           Object.keys(circleMap).includes(

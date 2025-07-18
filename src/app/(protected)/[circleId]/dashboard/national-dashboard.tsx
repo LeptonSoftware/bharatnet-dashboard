@@ -1125,10 +1125,10 @@ export function NationalDashboard({
             cardComponent={AestheticCard}
             key={timePeriod + compareMode.toString()}
           >
-            <DataTableAdvancedToolbar>
+            {/* <DataTableAdvancedToolbar>
               <DataTableFilterList />
               <DataTableSortList />
-            </DataTableAdvancedToolbar>
+            </DataTableAdvancedToolbar> */}
           </DataTable>
         </DataTableProvider>
       </div>

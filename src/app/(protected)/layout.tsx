@@ -41,39 +41,39 @@ export default function ProtectedLayout() {
     });
   }, [navigate, location.pathname]);
   return (
-    <NuqsAdapter>
-      <Authenticated onUnauthenticated={onUnauthenticated}>
-        <CopilotKit
-          runtimeUrl="/api/copilotkit"
-          transcribeAudioUrl="/api/transcribe"
-          textToSpeechUrl="/api/tts"
+    // <NuqsAdapter>
+    <Authenticated onUnauthenticated={onUnauthenticated}>
+      <CopilotKit
+        runtimeUrl="/api/copilotkit"
+        transcribeAudioUrl="/api/transcribe"
+        textToSpeechUrl="/api/tts"
+      >
+        <SidebarProvider
+          defaultOpen={false}
+          style={
+            {
+              "--header-height": "calc(var(--spacing) * 12)",
+            } as React.CSSProperties
+          }
         >
-          <SidebarProvider
-            defaultOpen={false}
-            style={
-              {
-                "--header-height": "calc(var(--spacing) * 12)",
-              } as React.CSSProperties
-            }
-          >
-            <AppSidebar collapsible="icon" variant="inset" />
-            <SidebarInset>
-              <Outlet />
-              <CopilotActions />
-              <CopilotPopup
-                labels={{
-                  initial: "Hello! How can I help you today?",
-                  title: "Rio Copilot",
-                  placeholder: "Ask me anything!",
-                  stopGenerating: "Stop",
-                  regenerateResponse: "Regenerate",
-                }}
-              />
-            </SidebarInset>
-          </SidebarProvider>
-        </CopilotKit>
-      </Authenticated>
-    </NuqsAdapter>
+          <AppSidebar collapsible="icon" variant="inset" />
+          <SidebarInset>
+            <Outlet />
+            <CopilotActions />
+            <CopilotPopup
+              labels={{
+                initial: "Hello! How can I help you today?",
+                title: "Rio Copilot",
+                placeholder: "Ask me anything!",
+                stopGenerating: "Stop",
+                regenerateResponse: "Regenerate",
+              }}
+            />
+          </SidebarInset>
+        </SidebarProvider>
+      </CopilotKit>
+    </Authenticated>
+    // </NuqsAdapter>
   );
 }
 

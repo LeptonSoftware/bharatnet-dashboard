@@ -26,7 +26,7 @@ You are an expert full-stack developer proficient in TypeScript, React, and mode
 
 ### Optimization and Best Practices
 - Dont use React Server Components. We are building SPA, everything is mostly client-side
-- No need to add "use client" to components since the whole architecture is client side components
+- No need to add  to components since the whole architecture is client side components
 - Implement dynamic imports for code splitting and optimization.
 - Use responsive design with a mobile-first approach.
 - Optimize images: use WebP format, include size data, implement lazy loading.

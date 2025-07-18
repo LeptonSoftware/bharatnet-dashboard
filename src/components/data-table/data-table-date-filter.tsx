@@ -1,4 +1,4 @@
-"use client"
+
 
 import { formatDate } from "@/lib/format"
 import type { Column } from "@tanstack/react-table"

@@ -1,5 +1,3 @@
-"use client";
-
 import { dataTableConfig } from "@/config/data-table";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { getDefaultFilterOperator, getFilterOperators } from "@/lib/data-table";
@@ -20,7 +18,6 @@ import {
   ListFilter,
   Trash2,
 } from "lucide-react";
-import { parseAsStringEnum, useQueryState } from "nuqs";
 import * as React from "react";
 
 import { Badge } from "@rio.js/ui/components/badge";
@@ -70,6 +67,8 @@ import {
 } from "@/components/ui/sortable";
 
 import { useDataTableContext } from "./data-table-provider";
+import { parseAsStringEnum } from "@/lib/query-params/parser";
+import { useQueryState } from "@/lib/query-params/use-query-state";
 
 const FILTERS_KEY = "filters";
 const JOIN_OPERATOR_KEY = "joinOperator";
@@ -107,26 +106,24 @@ export function DataTableFilterList<TData>({
 
   const [filters, setFilters] = useQueryState(
     FILTERS_KEY,
-    getFiltersStateParser<TData>(columns.map((field) => field.id))
-      .withDefault([])
-      .withOptions({
-        clearOnDefault: true,
-        shallow,
-        throttleMs,
-      })
+    getFiltersStateParser<TData>(columns.map((field) => field.id)).withDefault(
+      []
+    )
   );
+
+  console.log("filters", filters);
+
   const debouncedSetFilters = useDebouncedCallback(setFilters, debounceMs);
 
   const [joinOperator, setJoinOperator] = useQueryState(
     JOIN_OPERATOR_KEY,
-    parseAsStringEnum(["and", "or"]).withDefault("and").withOptions({
-      clearOnDefault: true,
-      shallow,
-    })
+    parseAsStringEnum(["and", "or"]).withDefault("and")
   );
 
   const onFilterAdd = React.useCallback(() => {
     const column = columns[0];
+
+    console.log("onFilterAdd", column);
 
     if (!column) return;
 
@@ -353,7 +350,9 @@ function DataTableFilterItem<TData>({
   const [showOperatorSelector, setShowOperatorSelector] = React.useState(false);
   const [showValueSelector, setShowValueSelector] = React.useState(false);
 
-  const column = columns.find((column) => column.id === filter.id);
+  const column = columns.find(
+    (column) => column.id || column.accessorKey === filter.id
+  );
 
   const joinOperatorListboxId = `${filterItemId}-join-operator-listbox`;
   const fieldListboxId = `${filterItemId}-field-listbox`;
@@ -442,8 +441,9 @@ function DataTableFilterItem<TData>({
               className="w-32 justify-between rounded font-normal"
             >
               <span className="truncate">
-                {columns.find((column) => column.id === filter.id)?.columnDef
-                  .meta?.label ?? "Select field"}
+                {columns.find(
+                  (column) => column.id || column.accessorKey === filter.id
+                )?.columnDef.meta?.label ?? "Select field"}
               </span>
               <ChevronsUpDown className="opacity-50" />
             </Button>

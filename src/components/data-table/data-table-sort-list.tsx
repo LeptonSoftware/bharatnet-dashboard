@@ -1,5 +1,3 @@
-"use client";
-
 import { dataTableConfig } from "@/config/data-table";
 import type { ColumnSort, SortDirection, Table } from "@tanstack/react-table";
 import {
@@ -87,6 +85,8 @@ export function DataTableSortList<TData>({ ...props }: DataTableSortListProps) {
   const onSortAdd = React.useCallback(() => {
     const firstColumn = columns[0];
     if (!firstColumn) return;
+
+    console.log("onSortAdd", firstColumn);
 
     onSortingChange((prevSorting) => [
       ...prevSorting,
