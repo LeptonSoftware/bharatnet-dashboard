@@ -63,7 +63,7 @@
     "@types/react": "19.1.4",
     "@types/react-dom": "19.1.5",
     "prettier": "3.5.3",
-    "shadcn": "^2.6.3",
+    "shadcn": "^2.9.2",
     "tailwindcss": "4.1.10",
     "typescript": "5.8.3"
   },

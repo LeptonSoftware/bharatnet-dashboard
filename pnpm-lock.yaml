@@ -175,8 +175,8 @@ devDependencies:
     specifier: 3.5.3
     version: 3.5.3
   shadcn:
-    specifier: ^2.6.3
-    version: 2.6.3(@types/node@22.5.5)(typescript@5.8.3)
+    specifier: ^2.9.2
+    version: 2.9.2(@types/node@22.5.5)(typescript@5.8.3)
   tailwindcss:
     specifier: 4.1.10
     version: 4.1.10
@@ -17672,8 +17672,8 @@ packages:
       safe-buffer: 5.2.1
     dev: false
 
-  /shadcn@2.6.3(@types/node@22.5.5)(typescript@5.8.3):
-    resolution: {integrity: sha512-6As/8eKHtZWUVNxn4EbG703emgzPOAJV69IdfnP5Xe9mXARJWP64545SRj5nSOvn8c342U2RaM3TaV/13bGL1w==}
+  /shadcn@2.9.2(@types/node@22.5.5)(typescript@5.8.3):
+    resolution: {integrity: sha512-Ssat5Qlosk3XQckSmHEUZ1WDiXXxZbeXEl2HI4QKlBwmboMHYFaVhOMl3ObRVN578C/d369AsKQcgLWF8F5hCA==}
     hasBin: true
     dependencies:
       '@antfu/ni': 23.3.1
