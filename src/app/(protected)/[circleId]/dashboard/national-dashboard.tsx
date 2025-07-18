@@ -888,7 +888,17 @@ export function NationalDashboard({
           />
           <StatusCard
             title="Physical Survey Progress"
-            value={nationalSummary.totalSurveyCompleted}
+            value={
+              <>
+                <span>
+                  {nationalSummary.totalSurveyCompleted.toLocaleString()}
+                </span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  / {nationalSummary.totalSurveyTarget.toLocaleString()}
+                </span>
+              </>
+            }
             icon={<FileText />}
             description={`${(nationalSummary.totalSurveyTarget > 0
               ? (nationalSummary.totalSurveyCompleted /
@@ -1125,10 +1135,10 @@ export function NationalDashboard({
             cardComponent={AestheticCard}
             key={timePeriod + compareMode.toString()}
           >
-            {/* <DataTableAdvancedToolbar>
+            <DataTableAdvancedToolbar>
               <DataTableFilterList />
               <DataTableSortList />
-            </DataTableAdvancedToolbar> */}
+            </DataTableAdvancedToolbar>
           </DataTable>
         </DataTableProvider>
       </div>
