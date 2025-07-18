@@ -1,23 +1,24 @@
-import { useState } from "react";
-import { SurveyData } from "@/types";
-import { ColumnDef } from "@tanstack/react-table";
+import { SurveyData } from "@/types"
+import { ColumnDef } from "@tanstack/react-table"
+import { Search } from "lucide-react"
+import { useState } from "react"
+
+import { Badge } from "@rio.js/ui/components/badge"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@rio.js/ui/components/card";
-import { Badge } from "@rio.js/ui/components/badge";
-import { Search } from "lucide-react";
-import { Input } from "@rio.js/ui/components/input";
+} from "@rio.js/ui/components/card"
+import { Input } from "@rio.js/ui/components/input"
 
 interface SurveyBlocksTableProps {
-  data: SurveyData[];
-  type: "feasibility" | "hoto";
+  data: SurveyData[]
+  type: "feasibility" | "hoto"
 }
 
 export function SurveyBlocksTable({ data, type }: SurveyBlocksTableProps) {
-  const [filterValue, setFilterValue] = useState("");
+  const [filterValue, setFilterValue] = useState("")
 
   const columns: ColumnDef<SurveyData>[] = [
     {
@@ -38,7 +39,7 @@ export function SurveyBlocksTable({ data, type }: SurveyBlocksTableProps) {
       accessorKey: "totalGp",
       header: "GPs",
       cell: ({ row }) => {
-        return <div className="text-right">{row.getValue("totalGp")}</div>;
+        return <div className="text-right">{row.getValue("totalGp")}</div>
       },
     },
     {
@@ -47,23 +48,23 @@ export function SurveyBlocksTable({ data, type }: SurveyBlocksTableProps) {
       header: "Survey Status",
       cell: ({ row }) => {
         const status = row.getValue(
-          type === "feasibility" ? "feasibilityStatus" : "hotoSurveyStatus"
-        ) as string;
+          type === "feasibility" ? "feasibilityStatus" : "hotoSurveyStatus",
+        ) as string
 
-        if (!status) return <Badge variant="outline">Not Started</Badge>;
+        if (!status) return <Badge variant="outline">Not Started</Badge>
 
         if (status.toLowerCase().includes("done")) {
-          return <Badge className="bg-emerald-500">Completed</Badge>;
+          return <Badge className="bg-emerald-500">Completed</Badge>
         }
 
         if (
           status.toLowerCase().includes("wip") ||
           status.toLowerCase().includes("progress")
         ) {
-          return <Badge className="bg-blue-500">In Progress</Badge>;
+          return <Badge className="bg-blue-500">In Progress</Badge>
         }
 
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge variant="outline">{status}</Badge>
       },
     },
     {
@@ -73,11 +74,11 @@ export function SurveyBlocksTable({ data, type }: SurveyBlocksTableProps) {
       cell: ({ row }) => {
         const value =
           (row.getValue(
-            type === "feasibility" ? "feasibilityOfcDone" : "hotoOfcDone"
-          ) as number) ?? 0;
+            type === "feasibility" ? "feasibilityOfcDone" : "hotoOfcDone",
+          ) as number) ?? 0
         return (
           <div className="text-right">{Number(value)?.toFixed(1) || "0.0"}</div>
-        );
+        )
       },
     },
     {
@@ -86,21 +87,21 @@ export function SurveyBlocksTable({ data, type }: SurveyBlocksTableProps) {
       header: "Pending (km)",
       cell: ({ row }) => {
         const value = row.getValue(
-          type === "feasibility" ? "feasibilityOfcPending" : "hotoOfcPending"
-        ) as number;
+          type === "feasibility" ? "feasibilityOfcPending" : "hotoOfcPending",
+        ) as number
         return (
           <div className="text-right">{Number(value)?.toFixed(1) || "0.0"}</div>
-        );
+        )
       },
     },
-  ];
+  ]
 
   const filteredData = data.filter((item) => {
-    const searchTerm = filterValue.toLowerCase();
-    const district = (item.district || "").toLowerCase();
-    const block = (item.block || "").toLowerCase();
-    return district.includes(searchTerm) || block.includes(searchTerm);
-  });
+    const searchTerm = filterValue.toLowerCase()
+    const district = (item.district || "").toLowerCase()
+    const block = (item.block || "").toLowerCase()
+    return district.includes(searchTerm) || block.includes(searchTerm)
+  })
 
   return (
     <Card className="col-span-full">
@@ -159,5 +160,5 @@ export function SurveyBlocksTable({ data, type }: SurveyBlocksTableProps) {
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

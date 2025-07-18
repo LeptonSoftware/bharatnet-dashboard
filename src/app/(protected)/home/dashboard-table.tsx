@@ -1,28 +1,30 @@
-import { Suspense, useEffect, useState } from "react";
-import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api";
-import { NationalRowData } from "@/types";
-import { DataTable } from "@/components/data-table/data-table";
-import { ColumnDef } from "@tanstack/react-table";
-import { CircleSVG } from "@/components/circle-svg";
-import { circleMap } from "@/lib/utils";
-import { Link } from "react-router";
-import { cn } from "@rio.js/ui/lib/utils";
-import { DataTableProvider } from "@/components/data-table/data-table-provider";
-import { DataTableAdvancedToolbar } from "@/components/data-table/data-table-advanced-toolbar";
-import { DataTableFilterList } from "@/components/data-table/data-table-filter-list";
-import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { Skeleton } from "@rio.js/ui/components/skeleton";
+import { useNationalDashboard } from "@/hooks/use-national-dashboard"
+import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api"
+import { circleMap } from "@/lib/utils"
+import { NationalRowData } from "@/types"
+import { ColumnDef } from "@tanstack/react-table"
+import { Table } from "lucide-react"
+import { Suspense, useEffect, useState } from "react"
+import { Link } from "react-router"
+
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@rio.js/ui/components/select";
-import { Table } from "lucide-react";
-import { AestheticCard } from "@/components/ui/aesthetic-card";
-import { useNationalDashboard } from "@/hooks/use-national-dashboard";
+} from "@rio.js/ui/components/select"
+import { Skeleton } from "@rio.js/ui/components/skeleton"
+import { cn } from "@rio.js/ui/lib/utils"
+
+import { CircleSVG } from "@/components/circle-svg"
+import { DataTable } from "@/components/data-table/data-table"
+import { DataTableAdvancedToolbar } from "@/components/data-table/data-table-advanced-toolbar"
+import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
+import { DataTableFilterList } from "@/components/data-table/data-table-filter-list"
+import { DataTableProvider } from "@/components/data-table/data-table-provider"
+import { DataTableSortList } from "@/components/data-table/data-table-sort-list"
+import { AestheticCard } from "@/components/ui/aesthetic-card"
 
 function TableSkeleton() {
   return (
@@ -66,22 +68,22 @@ function TableSkeleton() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export function DashboardTable() {
   // Use the national dashboard hook
-  const { data, circleRoles, isLoading, error } = useNationalDashboard();
+  const { data, circleRoles, isLoading, error } = useNationalDashboard()
 
-  if (isLoading) return <TableSkeleton />;
+  if (isLoading) return <TableSkeleton />
   if (error)
     return (
       <div className="text-destructive text-center p-8">
         {error.message || "Failed to load national data"}
       </div>
-    );
+    )
   if (!data.length)
-    return <div className="text-center p-8">No data available</div>;
+    return <div className="text-center p-8">No data available</div>
 
   // Define columns for the states table
   const columns: ColumnDef<NationalRowData>[] = [
@@ -109,7 +111,7 @@ export function DashboardTable() {
       cell: ({ row }) => {
         if (
           Object.keys(circleMap).includes(
-            row.original.abbreviation.toLowerCase()
+            row.original.abbreviation.toLowerCase(),
           )
         ) {
           return (
@@ -119,13 +121,13 @@ export function DashboardTable() {
             >
               {row.getValue("state")}
             </Link>
-          );
+          )
         }
         return (
           <div className="font-medium text-wrap min-w-[200px]">
             {row.getValue("state")}
           </div>
-        );
+        )
       },
     },
     {
@@ -138,20 +140,20 @@ export function DashboardTable() {
         />
       ),
       cell: ({ row }) => {
-        const pia = row.original.pia;
+        const pia = row.original.pia
         const isNotPia =
           pia.toLowerCase().includes("tender") ||
-          pia.toLowerCase().includes("bids");
+          pia.toLowerCase().includes("bids")
         return (
           <div
             className={cn(
               "font-medium text-center",
-              isNotPia && "text-destructive"
+              isNotPia && "text-destructive",
             )}
           >
             {pia}
           </div>
-        );
+        )
       },
     },
     {
@@ -175,20 +177,20 @@ export function DashboardTable() {
         <DataTableColumnHeader column={column} title="IE" className="mx-auto" />
       ),
       cell: ({ row }) => {
-        const ie = row.original.ie;
+        const ie = row.original.ie
         const isNotIE =
           ie.toLowerCase().includes("tender") ||
-          ie.toLowerCase().includes("bids");
+          ie.toLowerCase().includes("bids")
         return (
           <div
             className={cn(
               "font-medium text-center",
-              isNotIE && "text-destructive"
+              isNotIE && "text-destructive",
             )}
           >
             {ie}
           </div>
-        );
+        )
       },
     },
     {
@@ -201,9 +203,9 @@ export function DashboardTable() {
         />
       ),
       cell: ({ row }) => {
-        const total = row.original.gPsTotal;
-        const newGPs = row.original.gPsNew;
-        const existing = row.original.gPsExisting;
+        const total = row.original.gPsTotal
+        const newGPs = row.original.gPsNew
+        const existing = row.original.gPsExisting
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -220,7 +222,7 @@ export function DashboardTable() {
               </span>
             </div>
           </div>
-        );
+        )
       },
     },
     {
@@ -233,9 +235,9 @@ export function DashboardTable() {
         />
       ),
       cell: ({ row }) => {
-        const total = row.original.ofcTotalKMs;
-        const existing = row.original.ofcExistingKMs;
-        const newKms = row.original.ofcNewKms;
+        const total = row.original.ofcTotalKMs
+        const existing = row.original.ofcExistingKMs
+        const newKms = row.original.ofcNewKms
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -252,7 +254,7 @@ export function DashboardTable() {
               </span>
             </div>
           </div>
-        );
+        )
       },
     },
     {
@@ -265,13 +267,13 @@ export function DashboardTable() {
         />
       ),
       cell: ({ row }) => {
-        const value = row.getValue("financialProgress");
-        if (!value) return <div className="text-center">N/A</div>;
+        const value = row.getValue("financialProgress")
+        if (!value) return <div className="text-center">N/A</div>
 
         // Ensure value is string and handle the split
-        const parts = String(value).split("\n");
-        const amount = parts[0] || "N/A";
-        const date = parts[1] || "";
+        const parts = String(value).split("\n")
+        const amount = parts[0] || "N/A"
+        const date = parts[1] || ""
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -280,7 +282,7 @@ export function DashboardTable() {
               <div className="text-xs text-muted-foreground">{date}</div>
             )}
           </div>
-        );
+        )
       },
     },
     {
@@ -298,7 +300,7 @@ export function DashboardTable() {
         </div>
       ),
     },
-  ];
+  ]
 
   return (
     <div className="space-y-4 flex flex-col ">
@@ -346,5 +348,5 @@ export function DashboardTable() {
         </DataTable>
       </DataTableProvider>
     </div>
-  );
+  )
 }

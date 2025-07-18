@@ -1,47 +1,49 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@rio.js/ui/components/tabs";
+import { TimePeriod } from "@/lib/trends"
+import { getCircleName } from "@/lib/utils"
+import { Icon } from "@iconify/react/dist/iconify.js"
+import { BarChart3, Cable, FileText, Search, TrendingUp } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useParams } from "react-router"
+
+import { Button } from "@rio.js/ui/components/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@rio.js/ui/components/select";
-import { Button } from "@rio.js/ui/components/button";
-import { DtpDashboard } from "./dashboard/dtp-dashboard";
-import { FeasibilityDashboard } from "./dashboard/feasibility-dashboard";
-import { HotoDashboard } from "./dashboard/hoto-dashboard";
-import { OverviewDashboard } from "./dashboard/overview-dashboard";
-import { NationalDashboardSkeleton } from "./dashboard/loading-skeleton";
-import { FileText, Search, Cable, BarChart3, TrendingUp } from "lucide-react";
-import { getCircleName } from "@/lib/utils";
-import { Icon } from "@iconify/react/dist/iconify.js";
-import { TimePeriod } from "@/lib/trends";
-import { cn } from "@rio.js/ui/lib/utils";
+} from "@rio.js/ui/components/select"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@rio.js/ui/components/tabs"
+import { cn } from "@rio.js/ui/lib/utils"
+
+import { DtpDashboard } from "./dashboard/dtp-dashboard"
+import { FeasibilityDashboard } from "./dashboard/feasibility-dashboard"
+import { HotoDashboard } from "./dashboard/hoto-dashboard"
+import { NationalDashboardSkeleton } from "./dashboard/loading-skeleton"
+import { OverviewDashboard } from "./dashboard/overview-dashboard"
 
 export function Dashboard() {
-  const { circleId: circle = "upe" } = useParams();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { circleId: circle = "upe" } = useParams()
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     // Update document title with circle name
-    const circleName = getCircleName(circle || "");
-    document.title = `${circleName} | BharatNet Dashboard | Lepton`;
+    const circleName = getCircleName(circle || "")
+    document.title = `${circleName} | BharatNet Dashboard | Lepton`
 
     // Initial data load can be handled by individual dashboard components
-    setIsLoading(false);
-  }, [circle]);
+    setIsLoading(false)
+  }, [circle])
 
   const handleTimePeriodChange = (value: string) => {
-    setTimePeriod(value as TimePeriod);
-  };
+    setTimePeriod(value as TimePeriod)
+  }
 
   if (isLoading) {
     return (
@@ -51,7 +53,7 @@ export function Dashboard() {
         </h1>
         <NationalDashboardSkeleton />
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -68,7 +70,7 @@ export function Dashboard() {
           </button>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -162,5 +164,5 @@ export function Dashboard() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

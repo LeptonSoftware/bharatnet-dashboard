@@ -1,13 +1,14 @@
-import { ProjectProgress } from "@/types";
+import { ProjectProgress } from "@/types"
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@rio.js/ui/components/card";
+} from "@rio.js/ui/components/card"
 
 interface ActivityProgressProps {
-  progress: ProjectProgress;
+  progress: ProjectProgress
 }
 
 export function ActivityProgress({ progress }: ActivityProgressProps) {
@@ -55,5 +56,5 @@ export function ActivityProgress({ progress }: ActivityProgressProps) {
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

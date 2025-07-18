@@ -1,44 +1,46 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api";
-import { Button } from "@rio.js/ui/components/button";
+import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api"
+import { getCircleName } from "@/lib/utils"
+import { useQuery } from "@tanstack/react-query"
+import {
+  Building2,
+  Cable,
+  CheckCircle,
+  FileText,
+  LayoutDashboard,
+  Pencil,
+  Wifi,
+  Zap,
+} from "lucide-react"
+import { Suspense, useEffect, useState } from "react"
+import { useParams } from "react-router"
+
+import { Button } from "@rio.js/ui/components/button"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@rio.js/ui/components/card";
+} from "@rio.js/ui/components/card"
+import { Input } from "@rio.js/ui/components/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@rio.js/ui/components/select";
-import { Input } from "@rio.js/ui/components/input";
-import {
-  Pencil,
-  CheckCircle,
-  FileText,
-  Cable,
-  Wifi,
-  Building2,
-  Zap,
-  LayoutDashboard,
-} from "lucide-react";
-import { useState, useEffect, Suspense } from "react";
-import { cn } from "@rio.js/ui/lib/utils";
-import { PageHeader } from "@/components/page-header";
-import { CircleSVG } from "@/components/circle-svg";
-import { getCircleName } from "@/lib/utils";
-import { useParams } from "react-router";
+} from "@rio.js/ui/components/select"
+import { cn } from "@rio.js/ui/lib/utils"
+
+import { CircleSVG } from "@/components/circle-svg"
+import { PageHeader } from "@/components/page-header"
 
 // Add CircleRole type
 interface CircleRole {
-  id: number;
-  created_at: string;
-  user_id: string;
-  circles: Array<{ circle: string }>;
-  role: string;
+  id: number
+  created_at: string
+  user_id: string
+  circles: Array<{ circle: string }>
+  role: string
 }
 
 const DISPLAY_FIELDS = [
@@ -65,60 +67,60 @@ const DISPLAY_FIELDS = [
     icon: Zap,
   },
   { key: "ofcLaidKMs", label: "OFC Laid (KMs)", icon: Cable },
-];
+]
 
 export default function FormPage() {
-  const { circleId } = useParams();
-  const [selectedCircle, setSelectedCircle] = useState<string>(circleId!);
-  const [editedValues, setEditedValues] = useState<Record<string, any>>({});
-  const [isEditing, setIsEditing] = useState<Record<string, boolean>>({});
+  const { circleId } = useParams()
+  const [selectedCircle, setSelectedCircle] = useState<string>(circleId!)
+  const [editedValues, setEditedValues] = useState<Record<string, any>>({})
+  const [isEditing, setIsEditing] = useState<Record<string, boolean>>({})
 
   const { data: circleRoles, isLoading: isLoadingCircles } = useQuery({
     queryKey: ["userCircleRoles"],
     queryFn: () => fetchUserCircleRoles(),
-  });
+  })
 
   const { data: nationalData, isLoading: isLoadingNational } = useQuery({
     queryKey: ["nationalData", selectedCircle],
     queryFn: () => fetchNationalData(),
-  });
+  })
 
   // Select first circle by default when data loads
   useEffect(() => {
     if (circleRoles?.circles?.[0]?.circle && !selectedCircle) {
-      setSelectedCircle(circleRoles.circles[0].circle);
+      setSelectedCircle(circleRoles.circles[0].circle)
     }
-  }, [circleRoles, selectedCircle]);
+  }, [circleRoles, selectedCircle])
 
   const selectedCircleData = nationalData?.find(
-    (row) => row.abbreviation === selectedCircle
-  );
+    (row) => row.abbreviation === selectedCircle,
+  )
 
   if (isLoadingCircles || isLoadingNational) {
-    return <div className="p-8">Loading...</div>;
+    return <div className="p-8">Loading...</div>
   }
 
   const formatValue = (value: any): string => {
     if (typeof value === "number") {
-      return value.toLocaleString();
+      return value.toLocaleString()
     }
-    return value?.toString() || "N/A";
-  };
+    return value?.toString() || "N/A"
+  }
 
   const handleValueChange = (key: string, value: string) => {
-    const numericValue = value.replace(/,/g, "");
+    const numericValue = value.replace(/,/g, "")
     setEditedValues((prev) => ({
       ...prev,
       [key]: numericValue,
-    }));
-  };
+    }))
+  }
 
-  const hasChanges = Object.keys(editedValues).length > 0;
+  const hasChanges = Object.keys(editedValues).length > 0
 
   const handleUpdate = () => {
     // This would be where you handle the update
-    console.log("Updated values:", editedValues);
-  };
+    console.log("Updated values:", editedValues)
+  }
 
   return (
     <>
@@ -163,7 +165,7 @@ export default function FormPage() {
                       >
                         {circleObj.circle}
                       </SelectItem>
-                    )
+                    ),
                   )}
                 </SelectContent>
               </Select>
@@ -200,8 +202,8 @@ export default function FormPage() {
                       const originalValue =
                         selectedCircleData[
                           key as keyof typeof selectedCircleData
-                        ];
-                      const displayValue = editedValues[key] ?? originalValue;
+                        ]
+                      const displayValue = editedValues[key] ?? originalValue
 
                       return (
                         <div key={key} className="space-y-2 p-6">
@@ -225,7 +227,7 @@ export default function FormPage() {
                             </div>
                           </div>
                         </div>
-                      );
+                      )
                     })}
                   </div>
                 </CardContent>
@@ -257,5 +259,5 @@ export default function FormPage() {
         </div>
       </div>
     </>
-  );
+  )
 }

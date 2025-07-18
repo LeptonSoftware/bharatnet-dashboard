@@ -1,6 +1,6 @@
-import { getCommonPinningStyles } from "@/lib/data-table";
-import { type Table as TanstackTable, flexRender } from "@tanstack/react-table";
-import type * as React from "react";
+import { getCommonPinningStyles } from "@/lib/data-table"
+import { type Table as TanstackTable, flexRender } from "@tanstack/react-table"
+import type * as React from "react"
 
 import {
   Table,
@@ -9,15 +9,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@rio.js/ui/components/table";
-import { cn } from "@rio.js/ui/lib/utils";
+} from "@rio.js/ui/components/table"
+import { cn } from "@rio.js/ui/lib/utils"
 
-import { DataTablePagination } from "@/components/data-table/data-table-pagination";
+import { DataTablePagination } from "@/components/data-table/data-table-pagination"
 
-import { useDataTableContext } from "./data-table-provider";
+import { useDataTableContext } from "./data-table-provider"
 
 interface DataTableListProps extends React.ComponentProps<"div"> {
-  actionBar?: React.ReactNode;
+  actionBar?: React.ReactNode
 }
 
 export function DataTableList({
@@ -26,8 +26,8 @@ export function DataTableList({
   className,
   ...props
 }: DataTableListProps) {
-  "use no memo";
-  const { table } = useDataTableContext();
+  "use no memo"
+  const { table } = useDataTableContext()
   return (
     <div
       className={cn("flex w-full flex-col gap-2.5 overflow-auto", className)}
@@ -51,7 +51,7 @@ export function DataTableList({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -74,7 +74,7 @@ export function DataTableList({
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -100,5 +100,5 @@ export function DataTableList({
           actionBar}
       </div>
     </div>
-  );
+  )
 }

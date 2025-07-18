@@ -1,24 +1,25 @@
-import { useState } from "react";
+import { SurveyData, SurveyDistrictSummary } from "@/types"
+import {
+  AlertCircle,
+  BarChart3,
+  Building2,
+  Cable,
+  CheckCircle,
+  Clock,
+  Map as MapIcon,
+  Router,
+  Search,
+} from "lucide-react"
+import { useState } from "react"
+import { useParams } from "react-router"
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@rio.js/ui/components/card";
-import { Input } from "@rio.js/ui/components/input";
-import {
-  Search,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  BarChart3,
-  Cable,
-  Router,
-  Building2,
-  Map as MapIcon,
-} from "lucide-react";
-import { SurveyDistrictSummary, SurveyData } from "@/types";
-import { BlockMap } from "./block-map";
+} from "@rio.js/ui/components/card"
+import { Input } from "@rio.js/ui/components/input"
 import {
   Sheet,
   SheetContent,
@@ -26,27 +27,28 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@rio.js/ui/components/sheet";
-import { useParams } from "react-router";
-import { DistrictMap } from "./district-map";
+} from "@rio.js/ui/components/sheet"
+
+import { BlockMap } from "./block-map"
+import { DistrictMap } from "./district-map"
 
 interface SurveyDistrictProgressProps {
-  districts: SurveyDistrictSummary[];
-  data: SurveyData[];
+  districts: SurveyDistrictSummary[]
+  data: SurveyData[]
 }
 
 export function SurveyDistrictProgress({
   districts,
   data,
 }: SurveyDistrictProgressProps) {
-  const [search, setSearch] = useState("");
-  const { circleId } = useParams();
+  const [search, setSearch] = useState("")
+  const { circleId } = useParams()
 
   const filteredDistricts = districts.filter((district) =>
-    district.name.toLowerCase().includes(search.toLowerCase())
-  );
+    district.name.toLowerCase().includes(search.toLowerCase()),
+  )
 
-  const displayDistricts = search ? filteredDistricts : districts.slice(0, 5);
+  const displayDistricts = search ? filteredDistricts : districts.slice(0, 5)
 
   return (
     <Card className="col-span-full lg:col-span-6">
@@ -72,16 +74,17 @@ export function SurveyDistrictProgress({
           {displayDistricts.length > 0 ? (
             displayDistricts.map((district, index) => {
               const blockProgress = Math.round(
-                ((district.completed + district.ongoing) / district.total) * 100
-              );
+                ((district.completed + district.ongoing) / district.total) *
+                  100,
+              )
               const kmProgress = Math.round(
-                (district.completedKm / district.totalKm) * 100
-              );
+                (district.completedKm / district.totalKm) * 100,
+              )
 
               const districtBlocks = data.filter(
                 (block) =>
-                  block.district.toLowerCase() === district.name.toLowerCase()
-              );
+                  block.district.toLowerCase() === district.name.toLowerCase(),
+              )
 
               return (
                 <div key={district.name}>
@@ -201,7 +204,7 @@ export function SurveyDistrictProgress({
                     <div className="mt-8 border-t border-border" />
                   )}
                 </div>
-              );
+              )
             })
           ) : (
             <div className="text-center text-muted-foreground py-8">
@@ -216,5 +219,5 @@ export function SurveyDistrictProgress({
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

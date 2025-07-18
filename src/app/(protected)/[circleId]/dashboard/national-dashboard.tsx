@@ -1,144 +1,147 @@
-"use no memo";
+"use no memo"
 
-import { Suspense, useEffect, useState } from "react";
-import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api";
-import { NationalRowData } from "@/types";
-import { StatusCard } from "./status-card";
-import { AestheticCard } from "@/components/ui/aesthetic-card";
+import { useEvents } from "@/hooks/use-events"
+import { useNationalDashboard } from "@/hooks/use-national-dashboard"
+import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api"
+import {
+  TimePeriod,
+  calculateAggregateComparativeTrend,
+  calculateAggregateTrend,
+  calculateComparativeTrend,
+  calculateTrend,
+  filterEventsByTimePeriod,
+  getPeriodBoundaries,
+  getTrendColor,
+  getTrendIcon,
+} from "@/lib/trends"
+import { circleMap } from "@/lib/utils"
+import { NationalRowData } from "@/types"
+import { Icon } from "@iconify/react"
+import { ColumnDef } from "@tanstack/react-table"
+import {
+  BarChart3,
+  Building2,
+  Cable,
+  CheckCircle,
+  FileText,
+  LayoutDashboard,
+  Map,
+  Minus,
+  Table,
+  TrendingDown,
+  TrendingUp,
+  Wifi,
+  Zap,
+} from "lucide-react"
+import { Suspense, useEffect, useState } from "react"
+import { Link } from "react-router"
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
+
+import { Badge } from "@rio.js/ui/components/badge"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@rio.js/ui/components/card";
-import { DataTable } from "@/components/data-table/data-table";
-import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@rio.js/ui/components/badge";
-import {
-  LayoutDashboard,
-  Map,
-  CheckCircle,
-  FileText,
-  Cable,
-  Zap,
-  Wifi,
-  Building2,
-  Table,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  BarChart3,
-} from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from "recharts";
-import { DataTableProvider } from "@/components/data-table/data-table-provider";
-import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
-import { DataTableAdvancedToolbar } from "@/components/data-table/data-table-advanced-toolbar";
-import { DataTableFilterList } from "@/components/data-table/data-table-filter-list";
-import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { CircleSVG } from "@/components/circle-svg";
-import { circleMap } from "@/lib/utils";
-import { Link } from "react-router";
-import { Tabs, TabsList, TabsTrigger } from "@rio.js/ui/components/tabs";
+} from "@rio.js/ui/components/card"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@rio.js/ui/components/select";
-import { cn } from "@rio.js/ui/lib/utils";
-import { NationalDashboardSkeleton } from "./loading-skeleton";
-import { Icon } from "@iconify/react";
-import {
-  TimePeriod,
-  filterEventsByTimePeriod,
-  calculateAggregateTrend,
-  calculateAggregateComparativeTrend,
-  calculateComparativeTrend,
-  calculateTrend,
-  getTrendIcon,
-  getTrendColor,
-  getPeriodBoundaries,
-} from "@/lib/trends";
-import { useEvents } from "@/hooks/use-events";
-import { useNationalDashboard } from "@/hooks/use-national-dashboard";
+} from "@rio.js/ui/components/select"
+import { Tabs, TabsList, TabsTrigger } from "@rio.js/ui/components/tabs"
+import { cn } from "@rio.js/ui/lib/utils"
+
+import { CircleSVG } from "@/components/circle-svg"
+import { DataTable } from "@/components/data-table/data-table"
+import { DataTableAdvancedToolbar } from "@/components/data-table/data-table-advanced-toolbar"
+import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
+import { DataTableFilterList } from "@/components/data-table/data-table-filter-list"
+import { DataTableProvider } from "@/components/data-table/data-table-provider"
+import { DataTableSortList } from "@/components/data-table/data-table-sort-list"
+import { DataTableToolbar } from "@/components/data-table/data-table-toolbar"
+import { AestheticCard } from "@/components/ui/aesthetic-card"
+
+import { NationalDashboardSkeleton } from "./loading-skeleton"
+import { StatusCard } from "./status-card"
 
 interface NationalDashboardProps {
-  timePeriod?: TimePeriod;
-  compareMode?: boolean;
+  timePeriod?: TimePeriod
+  compareMode?: boolean
 }
 
 export function NationalDashboard({
   timePeriod = "today",
   compareMode = false,
 }: NationalDashboardProps) {
-  "use no memo";
+  "use no memo"
 
   // Use the national dashboard hook
-  const { data, circleRoles, isLoading, error } = useNationalDashboard();
+  const { data, circleRoles, isLoading, error } = useNationalDashboard()
 
   // Load events data
   const {
     data: eventsData,
     isLoading: eventsLoading,
     error: eventsError,
-  } = useEvents();
+  } = useEvents()
 
-  if (isLoading) return <NationalDashboardSkeleton />;
+  if (isLoading) return <NationalDashboardSkeleton />
   if (error)
     return (
       <div className="text-destructive text-center p-8">
         {error.message || "Failed to load national data"}
       </div>
-    );
+    )
   if (!data.length)
-    return <div className="text-center p-8">No data available</div>;
+    return <div className="text-center p-8">No data available</div>
 
   // Helper function to safely convert values to numbers
   const toNumber = (value: string | number): number => {
-    if (typeof value === "number") return value;
-    if (!value || value === "") return 0;
-    const cleaned = value.toString().replace(/[^\d.-]/g, "");
-    return parseFloat(cleaned) || 0;
-  };
+    if (typeof value === "number") return value
+    if (!value || value === "") return 0
+    const cleaned = value.toString().replace(/[^\d.-]/g, "")
+    return parseFloat(cleaned) || 0
+  }
 
   // Calculate national summaries
   const nationalSummary = data.reduce(
     (acc, state) => {
       if (state.agreementSigningDate) {
-        acc.totalGpsInScope += state.gPsTotal;
-        acc.totalHotoCompleted += state.hotoGPsDone;
-        acc.totalHotoTarget += state.hotoGPsTodo;
-        acc.totalSurveyCompleted += state.physicalSurveyGPsDone;
-        acc.totalSurveyTarget += state.physicalSurveyGPsTodo;
-        acc.totalGpsUptime += state["gPs >98%Uptime"];
-        acc.totalFtthConnections += state.activeFtthConnections;
-        acc.totalOfcLength += state.ofcTotalKMs;
-        acc.totalOfcExisting += state.ofcExistingKMs;
-        acc.totalOfcNew += state.ofcNewKms;
+        acc.totalGpsInScope += state.gPsTotal
+        acc.totalHotoCompleted += state.hotoGPsDone
+        acc.totalHotoTarget += state.hotoGPsTodo
+        acc.totalSurveyCompleted += state.physicalSurveyGPsDone
+        acc.totalSurveyTarget += state.physicalSurveyGPsTodo
+        acc.totalGpsUptime += state["gPs >98%Uptime"]
+        acc.totalFtthConnections += state.activeFtthConnections
+        acc.totalOfcLength += state.ofcTotalKMs
+        acc.totalOfcExisting += state.ofcExistingKMs
+        acc.totalOfcNew += state.ofcNewKms
         acc.totalGpsCommissioned +=
-          state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone;
+          state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone
         acc.totalGpsCommissionedDone += toNumber(
-          state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone
-        );
-        acc.totalDesktopSurveyDone += state.desktopSurveyDone;
-        acc.totalDesktopSurveyTarget += toNumber(state.desktopSurveyTarget);
+          state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone,
+        )
+        acc.totalDesktopSurveyDone += state.desktopSurveyDone
+        acc.totalDesktopSurveyTarget += toNumber(state.desktopSurveyTarget)
       }
 
-      return acc;
+      return acc
     },
     {
       totalGpsInScope: 0,
@@ -155,8 +158,8 @@ export function NationalDashboard({
       totalGpsCommissionedDone: 0,
       totalDesktopSurveyDone: 0,
       totalDesktopSurveyTarget: 0,
-    }
-  );
+    },
+  )
 
   // Prepare chart data
   const progressChartData = data.map((state) => ({
@@ -173,7 +176,7 @@ export function NationalDashboard({
             state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone) *
           100
         : 0,
-  }));
+  }))
 
   const statusDistributionData = [
     { name: "HOTO Completed", value: nationalSummary.totalHotoCompleted },
@@ -189,9 +192,9 @@ export function NationalDashboard({
         nationalSummary.totalSurveyTarget -
         nationalSummary.totalSurveyCompleted,
     },
-  ];
+  ]
 
-  const COLORS = ["#22c55e", "#ef4444", "#3b82f6", "#f59e0b"];
+  const COLORS = ["#22c55e", "#ef4444", "#3b82f6", "#f59e0b"]
 
   // Calculate trends for key metrics
   const getTrendData = () => {
@@ -237,10 +240,10 @@ export function NationalDashboard({
           previousValue: 0,
           currentValue: 0,
         },
-      };
+      }
     }
 
-    const circles = data.map((row) => row.state);
+    const circles = data.map((row) => row.state)
 
     // Use comparative trends when compare mode is enabled
     if (compareMode && ["current-week", "current-month"].includes(timePeriod)) {
@@ -249,37 +252,37 @@ export function NationalDashboard({
           eventsData,
           "hotoGPsDone",
           circles,
-          timePeriod
+          timePeriod,
         ),
         surveyTrend: calculateAggregateComparativeTrend(
           eventsData,
           "physicalSurveyGPsDone",
           circles,
-          timePeriod
+          timePeriod,
         ),
         desktopSurveyTrend: calculateAggregateComparativeTrend(
           eventsData,
           "desktopSurveyDone",
           circles,
-          timePeriod
+          timePeriod,
         ),
         uptimeTrend: calculateAggregateComparativeTrend(
           eventsData,
           "gPs >98%Uptime",
           circles,
-          timePeriod
+          timePeriod,
         ),
         ftthTrend: calculateAggregateComparativeTrend(
           eventsData,
           "activeFtthConnections",
           circles,
-          timePeriod
+          timePeriod,
         ),
-      };
+      }
     }
 
     // Use regular trends for non-compare mode
-    const boundaries = getPeriodBoundaries(timePeriod);
+    const boundaries = getPeriodBoundaries(timePeriod)
     if (!boundaries) {
       return {
         hotoTrend: {
@@ -322,10 +325,10 @@ export function NationalDashboard({
           previousValue: 0,
           currentValue: 0,
         },
-      };
+      }
     }
 
-    const { startDate, endDate } = boundaries;
+    const { startDate, endDate } = boundaries
 
     return {
       hotoTrend: calculateAggregateTrend(
@@ -333,40 +336,40 @@ export function NationalDashboard({
         "hotoGPsDone",
         circles,
         startDate,
-        endDate
+        endDate,
       ),
       surveyTrend: calculateAggregateTrend(
         eventsData,
         "physicalSurveyGPsDone",
         circles,
         startDate,
-        endDate
+        endDate,
       ),
       desktopSurveyTrend: calculateAggregateTrend(
         eventsData,
         "desktopSurveyDone",
         circles,
         startDate,
-        endDate
+        endDate,
       ),
       uptimeTrend: calculateAggregateTrend(
         eventsData,
         "gPs >98%Uptime",
         circles,
         startDate,
-        endDate
+        endDate,
       ),
       ftthTrend: calculateAggregateTrend(
         eventsData,
         "activeFtthConnections",
         circles,
         startDate,
-        endDate
+        endDate,
       ),
-    };
-  };
+    }
+  }
 
-  const trends = getTrendData();
+  const trends = getTrendData()
 
   // TrendIndicator component
   const TrendIndicator = ({
@@ -374,21 +377,21 @@ export function NationalDashboard({
     size = "xs",
   }: {
     trend: {
-      direction: string;
-      hasData: boolean;
-      changeValue: number;
-      changePercentage?: number;
-      currentTotal?: number;
-      previousTotal?: number;
-      currentDailyRate?: number;
-      previousDailyRate?: number;
-    };
-    size?: "xs" | "sm";
+      direction: string
+      hasData: boolean
+      changeValue: number
+      changePercentage?: number
+      currentTotal?: number
+      previousTotal?: number
+      currentDailyRate?: number
+      previousDailyRate?: number
+    }
+    size?: "xs" | "sm"
   }) => {
-    if (!trend.hasData) return null;
+    if (!trend.hasData) return null
 
-    const iconSize = size === "xs" ? "h-3 w-3" : "h-4 w-4";
-    const textSize = size === "xs" ? "text-base" : "text-sm";
+    const iconSize = size === "xs" ? "h-3 w-3" : "h-4 w-4"
+    const textSize = size === "xs" ? "text-base" : "text-sm"
 
     // Show percentage for comparative trends, otherwise show absolute change
     const displayValue =
@@ -396,19 +399,19 @@ export function NationalDashboard({
       ["current-week", "current-month"].includes(timePeriod!) &&
       "changePercentage" in trend
         ? Math.round(trend.changePercentage!)
-        : Math.round(trend.changeValue);
+        : Math.round(trend.changeValue)
 
     const suffix =
       compareMode &&
       ["current-week", "current-month"].includes(timePeriod!) &&
       "changePercentage" in trend
         ? "%"
-        : "";
+        : ""
 
     const showDetailed =
       compareMode &&
       ["current-week", "current-month"].includes(timePeriod!) &&
-      trend.currentTotal !== undefined;
+      trend.currentTotal !== undefined
 
     return (
       <div className="space-y-1">
@@ -418,7 +421,7 @@ export function NationalDashboard({
             textSize,
             trend.direction === "up" && "text-emerald-600",
             trend.direction === "down" && "text-red-600",
-            trend.direction === "stable" && "text-gray-500"
+            trend.direction === "stable" && "text-gray-500",
           )}
         >
           {trend.direction === "up" && (
@@ -469,14 +472,14 @@ export function NationalDashboard({
           </div>
         )}
       </div>
-    );
-  };
+    )
+  }
 
   // Helper function to get individual circle trend
   const getCircleTrend = (stateName: string, eventType: string) => {
-    console.log(timePeriod, stateName, eventType, eventsData);
+    console.log(timePeriod, stateName, eventType, eventsData)
     if (!eventsData || eventsData.length === 0 || timePeriod === null) {
-      return { direction: "stable" as const, hasData: false, changeValue: 0 };
+      return { direction: "stable" as const, hasData: false, changeValue: 0 }
     }
 
     // Use comparative trends when compare mode is enabled
@@ -485,19 +488,19 @@ export function NationalDashboard({
         eventsData,
         eventType,
         stateName,
-        timePeriod
-      );
+        timePeriod,
+      )
     }
 
     // Use regular trends for non-compare mode
-    const boundaries = getPeriodBoundaries(timePeriod);
+    const boundaries = getPeriodBoundaries(timePeriod)
     if (!boundaries) {
-      return { direction: "stable" as const, hasData: false, changeValue: 0 };
+      return { direction: "stable" as const, hasData: false, changeValue: 0 }
     }
 
-    const { startDate, endDate } = boundaries;
-    return calculateTrend(eventsData, eventType, stateName, startDate, endDate);
-  };
+    const { startDate, endDate } = boundaries
+    return calculateTrend(eventsData, eventType, stateName, startDate, endDate)
+  }
 
   // Helper component for compact trend indicator
 
@@ -518,7 +521,7 @@ export function NationalDashboard({
       cell: ({ row }) => {
         if (
           Object.keys(circleMap).includes(
-            row.original.abbreviation.toLowerCase()
+            row.original.abbreviation.toLowerCase(),
           )
         ) {
           return (
@@ -528,16 +531,16 @@ export function NationalDashboard({
             >
               {row.getValue("state")}
             </Link>
-          );
+          )
         }
         return (
           <div className="font-bold text-base text-wrap">
             {row.getValue("state")}
           </div>
-        );
+        )
         return (
           <div className="font-bold text-base">{row.getValue("state")}</div>
-        );
+        )
       },
     },
     {
@@ -550,20 +553,20 @@ export function NationalDashboard({
         />
       ),
       cell: ({ row }) => {
-        const pia = row.original.pia;
+        const pia = row.original.pia
         const isNotPia =
           pia.toLowerCase().includes("tender") ||
-          pia.toLowerCase().includes("bids");
+          pia.toLowerCase().includes("bids")
         return (
           <div
             className={cn(
               "font-medium text-center",
-              isNotPia && "text-destructive"
+              isNotPia && "text-destructive",
             )}
           >
             {pia}
           </div>
-        );
+        )
       },
     },
     {
@@ -587,20 +590,20 @@ export function NationalDashboard({
         <DataTableColumnHeader column={column} title="IE" className="mx-auto" />
       ),
       cell: ({ row }) => {
-        const ie = row.original.ie;
+        const ie = row.original.ie
         const isNotIE =
           ie.toLowerCase().includes("tender") ||
-          ie.toLowerCase().includes("bids");
+          ie.toLowerCase().includes("bids")
         return (
           <div
             className={cn(
               "font-medium text-center",
-              isNotIE && "text-destructive"
+              isNotIE && "text-destructive",
             )}
           >
             {ie}
           </div>
-        );
+        )
       },
     },
     {
@@ -622,19 +625,19 @@ export function NationalDashboard({
     {
       id: "hotoProgress",
       accessorFn: (row) => {
-        const done = row.hotoGPsDone;
-        const todo = row.hotoGPsTodo;
-        const percentage = todo > 0 ? (done / todo) * 100 : 0;
-        return percentage;
+        const done = row.hotoGPsDone
+        const todo = row.hotoGPsTodo
+        const percentage = todo > 0 ? (done / todo) * 100 : 0
+        return percentage
       },
 
       cell: ({ row }) => {
-        "use no memo";
-        const done = row.original.hotoGPsDone;
-        const todo = row.original.hotoGPsTodo;
-        const percentage = todo > 0 ? (done / todo) * 100 : 0;
-        const trend = getCircleTrend(row.original.state, "hotoGPsDone");
-        console.log(trend);
+        "use no memo"
+        const done = row.original.hotoGPsDone
+        const todo = row.original.hotoGPsTodo
+        const percentage = todo > 0 ? (done / todo) * 100 : 0
+        const trend = getCircleTrend(row.original.state, "hotoGPsDone")
+        console.log(trend)
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -658,7 +661,7 @@ export function NationalDashboard({
               {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
             </div>
           </div>
-        );
+        )
       },
       header: ({ column }) => (
         <DataTableColumnHeader
@@ -678,16 +681,16 @@ export function NationalDashboard({
         />
       ),
       accessorFn: (row) => {
-        const done = Number(row.desktopSurveyDone);
-        const todo = Number(row.desktopSurveyTarget);
-        const percentage = todo > 0 ? (done / todo) * 100 : 0;
-        return percentage;
+        const done = Number(row.desktopSurveyDone)
+        const todo = Number(row.desktopSurveyTarget)
+        const percentage = todo > 0 ? (done / todo) * 100 : 0
+        return percentage
       },
       cell: ({ row }) => {
-        const done = Number(row.original.desktopSurveyDone);
-        const todo = Number(row.original.desktopSurveyTarget);
-        const percentage = todo > 0 ? (done / todo) * 100 : 0;
-        const trend = getCircleTrend(row.original.state, "desktopSurveyDone");
+        const done = Number(row.original.desktopSurveyDone)
+        const todo = Number(row.original.desktopSurveyTarget)
+        const percentage = todo > 0 ? (done / todo) * 100 : 0
+        const trend = getCircleTrend(row.original.state, "desktopSurveyDone")
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -711,7 +714,7 @@ export function NationalDashboard({
               {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
             </div>
           </div>
-        );
+        )
       },
     },
     {
@@ -724,19 +727,19 @@ export function NationalDashboard({
         />
       ),
       accessorFn: (row) => {
-        const done = row.physicalSurveyGPsDone;
-        const todo = row.physicalSurveyGPsTodo;
-        const percentage = todo > 0 ? (done / todo) * 100 : 0;
-        return percentage;
+        const done = row.physicalSurveyGPsDone
+        const todo = row.physicalSurveyGPsTodo
+        const percentage = todo > 0 ? (done / todo) * 100 : 0
+        return percentage
       },
       cell: ({ row }) => {
-        const done = row.original.physicalSurveyGPsDone;
-        const todo = row.original.physicalSurveyGPsTodo;
-        const percentage = todo > 0 ? (done / todo) * 100 : 0;
+        const done = row.original.physicalSurveyGPsDone
+        const todo = row.original.physicalSurveyGPsTodo
+        const percentage = todo > 0 ? (done / todo) * 100 : 0
         const trend = getCircleTrend(
           row.original.state,
-          "physicalSurveyGPsDone"
-        );
+          "physicalSurveyGPsDone",
+        )
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -760,7 +763,7 @@ export function NationalDashboard({
               {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
             </div>
           </div>
-        );
+        )
       },
     },
     {
@@ -773,10 +776,10 @@ export function NationalDashboard({
         />
       ),
       cell: ({ row }) => {
-        const uptime = row.original["gPs >98%Uptime"];
-        const total = row.original.gPsTotal;
-        const percentage = total > 0 ? (uptime / total) * 100 : 0;
-        const trend = getCircleTrend(row.original.state, "gPs >98%Uptime");
+        const uptime = row.original["gPs >98%Uptime"]
+        const total = row.original.gPsTotal
+        const percentage = total > 0 ? (uptime / total) * 100 : 0
+        const trend = getCircleTrend(row.original.state, "gPs >98%Uptime")
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -786,7 +789,7 @@ export function NationalDashboard({
             </div>
             <TrendIndicator trend={trend} size="xs" />
           </div>
-        );
+        )
       },
     },
     {
@@ -799,18 +802,18 @@ export function NationalDashboard({
         />
       ),
       cell: ({ row }) => {
-        const connections = row.original.activeFtthConnections;
+        const connections = row.original.activeFtthConnections
         const trend = getCircleTrend(
           row.original.state,
-          "activeFtthConnections"
-        );
+          "activeFtthConnections",
+        )
 
         return (
           <div className="flex flex-col items-center gap-1">
             <TrendIndicator trend={trend} size="xs" />
             <div className="font-mono">{connections.toLocaleString()}</div>
           </div>
-        );
+        )
       },
     },
     {
@@ -823,11 +826,11 @@ export function NationalDashboard({
         />
       ),
       cell: ({ row }) => {
-        const total = row.original.ofcTotalKMs;
-        const existing = row.original.ofcExistingKMs;
-        const newKms = row.original.ofcNewKms;
-        const laid = row.original.ofcLaidKMs;
-        const percentage = total > 0 ? (laid / total) * 100 : 0;
+        const total = row.original.ofcTotalKMs
+        const existing = row.original.ofcExistingKMs
+        const newKms = row.original.ofcNewKms
+        const laid = row.original.ofcLaidKMs
+        const percentage = total > 0 ? (laid / total) * 100 : 0
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -854,10 +857,10 @@ export function NationalDashboard({
               </span>
             </div>
           </div>
-        );
+        )
       },
     },
-  ];
+  ]
 
   return (
     <div className="space-y-6 p-6 overflow-y-auto">
@@ -1272,5 +1275,5 @@ export function NationalDashboard({
         </Card>
       </div>
     </div>
-  );
+  )
 }

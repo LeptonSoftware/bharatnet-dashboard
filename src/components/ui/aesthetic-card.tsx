@@ -1,29 +1,64 @@
-import { cn } from "@rio.js/ui/lib/utils";
-import { Card } from "@rio.js/ui/components/card";
-import { Table, flexRender } from "@tanstack/react-table";
+import { EventLogData, deleteEvent, useCircleEvents } from "@/hooks/use-events"
+import { useNationalDashboard } from "@/hooks/use-national-dashboard"
+import { NationalRowData } from "@/types"
+import { Icon } from "@iconify/react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Table, flexRender } from "@tanstack/react-table"
+import { format, formatDistanceToNow } from "date-fns"
 import {
   Building2,
-  Users,
+  Cable,
+  CheckCircle,
   CheckCircle2,
+  ChevronDownIcon,
   ClipboardCheck,
-  Signal,
-  Network,
-  Router,
+  FileText,
+  LayoutDashboard,
+  LayoutDashboardIcon,
   MapPin,
   MapPinned,
-  Cable,
-  LayoutDashboard,
-  FileText,
-  CheckCircle,
+  Network,
+  Router,
+  Signal,
+  Users,
   Wifi,
   Zap,
-  ChevronDownIcon,
-  LayoutDashboardIcon,
-} from "lucide-react";
-import { CircleSVG } from "../circle-svg";
-import { Icon } from "@iconify/react";
-import { Button } from "@rio.js/ui/components/button";
-import { Link } from "react-router";
+} from "lucide-react"
+import {
+  Activity,
+  Calendar as CalendarIcon,
+  Minus,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react"
+import { useId, useState } from "react"
+import { Link } from "react-router"
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@rio.js/ui/components/alert-dialog"
+import { Badge } from "@rio.js/ui/components/badge"
+import { Button } from "@rio.js/ui/components/button"
+import { Calendar } from "@rio.js/ui/components/calendar"
+import { Card } from "@rio.js/ui/components/card"
+import { Input } from "@rio.js/ui/components/input"
+import { Label } from "@rio.js/ui/components/label"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@rio.js/ui/components/popover"
+import { ScrollArea } from "@rio.js/ui/components/scroll-area"
+import { Separator } from "@rio.js/ui/components/separator"
 import {
   Sheet,
   SheetContent,
@@ -31,13 +66,16 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@rio.js/ui/components/sheet";
-import { NationalRowData } from "@/types";
+} from "@rio.js/ui/components/sheet"
+import { toast } from "@rio.js/ui/components/toast"
+import { cn } from "@rio.js/ui/lib/utils"
+
+import { CircleSVG } from "../circle-svg"
 
 interface AestheticCardProps<TData extends NationalRowData> {
-  row: TData;
-  index: number;
-  table: Table<TData>;
+  row: TData
+  index: number
+  table: Table<TData>
 }
 
 export function AestheticCard<TData extends NationalRowData>({
@@ -48,38 +86,38 @@ export function AestheticCard<TData extends NationalRowData>({
     table
       .getRowModel()
       .rows.find((r) => r.original === row)
-      ?.getVisibleCells() || [];
+      ?.getVisibleCells() || []
 
-  const { circleRoles } = useNationalDashboard();
+  const { circleRoles } = useNationalDashboard()
 
   // Helper function to get icon for a field
   const getFieldIcon = (title: string) => {
-    const iconProps = { className: "h-4 w-4 text-muted-foreground/70" };
+    const iconProps = { className: "h-4 w-4 text-muted-foreground/70" }
     switch (title.toLowerCase()) {
       case "pia":
-        return <Building2 {...iconProps} />;
+        return <Building2 {...iconProps} />
       case "total gps":
-        return <MapPin {...iconProps} />;
+        return <MapPin {...iconProps} />
       case "hoto":
-        return <CheckCircle2 {...iconProps} />;
+        return <CheckCircle2 {...iconProps} />
       case "physical survey":
-        return <ClipboardCheck {...iconProps} />;
+        return <ClipboardCheck {...iconProps} />
       case "gps with >98% uptime":
-        return <Signal {...iconProps} />;
+        return <Signal {...iconProps} />
       case "ftth connections":
-        return <Network {...iconProps} />;
+        return <Network {...iconProps} />
       case "ofc (kms)":
-        return <Router {...iconProps} />;
+        return <Router {...iconProps} />
       default:
-        return <Users {...iconProps} />;
+        return <Users {...iconProps} />
     }
-  };
+  }
 
   // Helper function to format cell content
   const formatCellContent = (content: string) => {
     // Check if content contains a split of existing and new values
     if (content.includes("existing") && content.includes("new")) {
-      const parts = content.split(",").map((part) => part.trim());
+      const parts = content.split(",").map((part) => part.trim())
       return (
         <div className="flex flex-col space-y-1">
           {parts.map((part, idx) => (
@@ -88,59 +126,59 @@ export function AestheticCard<TData extends NationalRowData>({
             </span>
           ))}
         </div>
-      );
+      )
     }
     // Check if content contains a fraction (e.g., "9,386/9,337")
     if (content.includes("/")) {
-      const [numerator, denominator] = content.split("/");
+      const [numerator, denominator] = content.split("/")
       return (
         <div className="flex items-baseline space-x-1 justify-end">
           <span className="text-sm font-medium">{numerator}</span>
           <span className="text-xs text-muted-foreground/70">/</span>
           <span className="text-sm text-muted-foreground">{denominator}</span>
         </div>
-      );
+      )
     }
     // Default rendering
-    return <span className="text-right block">{content}</span>;
-  };
+    return <span className="text-right block">{content}</span>
+  }
 
   // Helper function to get column title
   const getColumnTitle = (column: any) => {
     if (typeof column.columnDef.header === "function") {
-      const headerProps = column.columnDef.header({ column });
-      return headerProps?.props?.title || column.id;
+      const headerProps = column.columnDef.header({ column })
+      return headerProps?.props?.title || column.id
     }
-    return column.columnDef.header?.toString() || column.id;
-  };
+    return column.columnDef.header?.toString() || column.id
+  }
 
   // Get state/UT and icon cells
   const stateCell = cells.find((cell) => {
-    const title = getColumnTitle(cell.column);
-    return title.toLowerCase() === "state/ut";
-  });
+    const title = getColumnTitle(cell.column)
+    return title.toLowerCase() === "state/ut"
+  })
 
   const iconCell = cells.find((cell) => {
-    const title = getColumnTitle(cell.column);
-    return title.toLowerCase() === "icon";
-  });
+    const title = getColumnTitle(cell.column)
+    return title.toLowerCase() === "icon"
+  })
 
   // Filter out state/UT and icon from the main cells
   const contentCells = cells.filter((cell) => {
-    const title = getColumnTitle(cell.column);
-    return !["state/ut", "icon"].includes(title.toLowerCase());
-  });
+    const title = getColumnTitle(cell.column)
+    return !["state/ut", "icon"].includes(title.toLowerCase())
+  })
 
   // Create pairs of cells for the grid layout
   const cellPairs = contentCells.reduce<Array<typeof cells>>(
     (result, cell, index) => {
       if (index % 2 === 0) {
-        result.push(contentCells.slice(index, index + 2));
+        result.push(contentCells.slice(index, index + 2))
       }
-      return result;
+      return result
     },
-    []
-  );
+    [],
+  )
 
   return (
     <Card
@@ -201,12 +239,12 @@ export function AestheticCard<TData extends NationalRowData>({
         {cellPairs.map((pair, pairIndex) => (
           <div key={pairIndex} className="grid grid-cols-1 gap-0">
             {pair.map((cell) => {
-              const column = cell.column;
+              const column = cell.column
               const content = flexRender(
                 cell.column.columnDef.cell,
-                cell.getContext()
-              );
-              const title = getColumnTitle(column);
+                cell.getContext(),
+              )
+              const title = getColumnTitle(column)
 
               return (
                 <div
@@ -229,62 +267,24 @@ export function AestheticCard<TData extends NationalRowData>({
                     </div>
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         ))}
       </div>
     </Card>
-  );
+  )
 }
-
-import { useId, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-
-import { Input } from "@rio.js/ui/components/input";
-import { Label } from "@rio.js/ui/components/label";
-import { Calendar } from "@rio.js/ui/components/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@rio.js/ui/components/popover";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@rio.js/ui/components/alert-dialog";
-import { ScrollArea } from "@rio.js/ui/components/scroll-area";
-import { Badge } from "@rio.js/ui/components/badge";
-import { Separator } from "@rio.js/ui/components/separator";
-import { useCircleEvents, deleteEvent, EventLogData } from "@/hooks/use-events";
-import { formatDistanceToNow, format } from "date-fns";
-import {
-  Trash2,
-  Calendar as CalendarIcon,
-  Activity,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-} from "lucide-react";
-import { toast } from "@rio.js/ui/components/toast";
-import { useNationalDashboard } from "@/hooks/use-national-dashboard";
 
 // API functions for updating dashboard and creating events
 async function updateDashboard(
   row: NationalRowData,
-  updates: Record<string, any>
+  updates: Record<string, any>,
 ) {
-  const url = `https://api.sheety.co/632604ca09353483222880568eb0ebe2/bharatnetMonitoringDashboard/dashboard/${row.id}`;
+  const url = `https://api.sheety.co/632604ca09353483222880568eb0ebe2/bharatnetMonitoringDashboard/dashboard/${row.id}`
   const body = {
     dashboard: { ...row, ...updates },
-  };
+  }
 
   const response = await fetch(url, {
     method: "PUT",
@@ -292,26 +292,26 @@ async function updateDashboard(
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
-  });
+  })
 
   if (!response.ok) {
-    throw new Error(`Failed to update dashboard: ${response.statusText}`);
+    throw new Error(`Failed to update dashboard: ${response.statusText}`)
   }
 
-  return response.json();
+  return response.json()
 }
 
 async function createEvent(event: {
-  circle: string;
-  event: string;
-  data: number;
-  timestamp: string;
+  circle: string
+  event: string
+  data: number
+  timestamp: string
 }) {
   const url =
-    "https://api.sheety.co/632604ca09353483222880568eb0ebe2/bharatnetMonitoringDashboard/events";
+    "https://api.sheety.co/632604ca09353483222880568eb0ebe2/bharatnetMonitoringDashboard/events"
   const body = {
     event: event,
-  };
+  }
 
   const response = await fetch(url, {
     method: "POST",
@@ -319,59 +319,57 @@ async function createEvent(event: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
-  });
+  })
 
   if (!response.ok) {
-    throw new Error(`Failed to create event: ${response.statusText}`);
+    throw new Error(`Failed to create event: ${response.statusText}`)
   }
 
-  return response.json();
+  return response.json()
 }
 
 function AestheticCardHistory({ row }: { row: NationalRowData }) {
-  const queryClient = useQueryClient();
-  const { data: events, isLoading, error } = useCircleEvents(row.state);
-  const { circleRoles } = useNationalDashboard();
+  const queryClient = useQueryClient()
+  const { data: events, isLoading, error } = useCircleEvents(row.state)
+  const { circleRoles } = useNationalDashboard()
 
-  console.log(events);
+  console.log(events)
   const deleteMutation = useMutation({
     mutationFn: deleteEvent,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["events"] });
-      toast.success("Event deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["events"] })
+      toast.success("Event deleted successfully")
     },
     onError: (error) => {
-      toast.error(`Failed to delete event: ${error.message}`);
+      toast.error(`Failed to delete event: ${error.message}`)
     },
-  });
+  })
 
   const handleDeleteEvent = (eventId: number) => {
-    deleteMutation.mutate(eventId);
-  };
+    deleteMutation.mutate(eventId)
+  }
 
   const getEventIcon = (eventType: string) => {
-    const iconProps = { className: "h-4 w-4" };
+    const iconProps = { className: "h-4 w-4" }
     switch (eventType.toLowerCase()) {
       case "hotoGPsDone".toLowerCase():
-        return (
-          <CheckCircle {...iconProps} className="h-4 w-4 text-green-600" />
-        );
+        return <CheckCircle {...iconProps} className="h-4 w-4 text-green-600" />
       case "physicalSurveyGPsDone".toLowerCase():
-        return <FileText {...iconProps} className="h-4 w-4 text-blue-600" />;
+        return <FileText {...iconProps} className="h-4 w-4 text-blue-600" />
       case "desktopSurveyDone".toLowerCase():
         return (
           <LayoutDashboard {...iconProps} className="h-4 w-4 text-purple-600" />
-        );
+        )
       case "gPs >98%Uptime".toLowerCase():
-        return <Wifi {...iconProps} className="h-4 w-4 text-emerald-600" />;
+        return <Wifi {...iconProps} className="h-4 w-4 text-emerald-600" />
       case "activeFtthConnections".toLowerCase():
-        return <Network {...iconProps} className="h-4 w-4 text-orange-600" />;
+        return <Network {...iconProps} className="h-4 w-4 text-orange-600" />
       case "ofcLaidKMs".toLowerCase():
-        return <Cable {...iconProps} className="h-4 w-4 text-cyan-600" />;
+        return <Cable {...iconProps} className="h-4 w-4 text-cyan-600" />
       default:
-        return <Activity {...iconProps} className="h-4 w-4 text-gray-600" />;
+        return <Activity {...iconProps} className="h-4 w-4 text-gray-600" />
     }
-  };
+  }
 
   const getEventDisplayName = (eventType: string) => {
     const eventMap: Record<string, string> = {
@@ -383,40 +381,40 @@ function AestheticCardHistory({ row }: { row: NationalRowData }) {
       noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone:
         "GPs Commissioned in Ring",
       ofcLaidKMs: "OFC Laid (KMs)",
-    };
-    return eventMap[eventType] || eventType;
-  };
+    }
+    return eventMap[eventType] || eventType
+  }
 
   const getTrendDirection = (events: EventLogData[], index: number) => {
-    if (index === events.length - 1) return null; // No previous event
-    const currentValue = events[index].data;
-    const previousValue = events[index + 1].data;
+    if (index === events.length - 1) return null // No previous event
+    const currentValue = events[index].data
+    const previousValue = events[index + 1].data
 
-    if (currentValue > previousValue) return "up";
-    if (currentValue < previousValue) return "down";
-    return "stable";
-  };
+    if (currentValue > previousValue) return "up"
+    if (currentValue < previousValue) return "down"
+    return "stable"
+  }
 
   const getTrendIcon = (direction: string | null) => {
-    const iconProps = { className: "h-3 w-3" };
+    const iconProps = { className: "h-3 w-3" }
     switch (direction) {
       case "up":
-        return <TrendingUp {...iconProps} className="h-3 w-3 text-green-500" />;
+        return <TrendingUp {...iconProps} className="h-3 w-3 text-green-500" />
       case "down":
-        return <TrendingDown {...iconProps} className="h-3 w-3 text-red-500" />;
+        return <TrendingDown {...iconProps} className="h-3 w-3 text-red-500" />
       case "stable":
-        return <Minus {...iconProps} className="h-3 w-3 text-gray-500" />;
+        return <Minus {...iconProps} className="h-3 w-3 text-gray-500" />
       default:
-        return null;
+        return null
     }
-  };
+  }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -424,7 +422,7 @@ function AestheticCardHistory({ row }: { row: NationalRowData }) {
       <div className="text-center py-8">
         <div className="text-destructive">Failed to load events history</div>
       </div>
-    );
+    )
   }
 
   if (!events || events.length === 0) {
@@ -436,7 +434,7 @@ function AestheticCardHistory({ row }: { row: NationalRowData }) {
           No events have been recorded for this circle.
         </p>
       </div>
-    );
+    )
   }
 
   return (
@@ -456,7 +454,7 @@ function AestheticCardHistory({ row }: { row: NationalRowData }) {
       <ScrollArea className="h-[calc(100vh-8rem)]">
         <div className="space-y-3 p-4">
           {events.map((event, index) => {
-            const trendDirection = getTrendDirection(events, index);
+            const trendDirection = getTrendDirection(events, index)
             return (
               <div
                 key={event.id}
@@ -489,7 +487,7 @@ function AestheticCardHistory({ row }: { row: NationalRowData }) {
                           >
                             {trendDirection === "up" ? "+" : "-"}
                             {Math.abs(
-                              event.data - events[index + 1]?.data || 0
+                              event.data - events[index + 1]?.data || 0,
                             )}
                           </Badge>
                         )}
@@ -552,12 +550,12 @@ function AestheticCardHistory({ row }: { row: NationalRowData }) {
                   )}
                 </div>
               </div>
-            );
+            )
           })}
         </div>
       </ScrollArea>
     </>
-  );
+  )
 }
 
 function InputWithAddon({
@@ -565,11 +563,11 @@ function InputWithAddon({
   placeholder,
   addon,
 }: {
-  label: string;
-  placeholder: string;
-  addon?: string;
+  label: string
+  placeholder: string
+  addon?: string
 }) {
-  const id = useId();
+  const id = useId()
   return (
     <div className="*:not-first:mt-2">
       <Label htmlFor={id}>{label}</Label>
@@ -585,7 +583,7 @@ function InputWithAddon({
         </span>
       </div>
     </div>
-  );
+  )
 }
 
 function TextInput({
@@ -598,15 +596,15 @@ function TextInput({
   type = "text",
   ...props
 }: {
-  label: string;
-  placeholder: string;
-  addon?: string;
-  value: string;
-  icon: React.ElementType;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
+  label: string
+  placeholder: string
+  addon?: string
+  value: string
+  icon: React.ElementType
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+  type?: string
 }) {
-  const id = useId();
+  const id = useId()
   return (
     <div className="*:not-first:mt-2">
       <Label htmlFor={id}>
@@ -627,7 +625,7 @@ function TextInput({
         />
       </div>
     </div>
-  );
+  )
 }
 
 const DISPLAY_FIELDS = [
@@ -674,22 +672,22 @@ const DISPLAY_FIELDS = [
     icon: LayoutDashboardIcon,
     type: "text",
   },
-];
+]
 
 function AestheticCardEdit({ row }: { row: NationalRowData }) {
-  const [editedValues, setEditedValues] = useState<Record<string, any>>({});
-  const [date, setDate] = useState(new Date());
-  const [open, setOpen] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const queryClient = useQueryClient();
+  const [editedValues, setEditedValues] = useState<Record<string, any>>({})
+  const [date, setDate] = useState(new Date())
+  const [open, setOpen] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const queryClient = useQueryClient()
 
   const updateMutation = useMutation({
     mutationFn: async ({ updates }: { updates: Record<string, any> }) => {
       // Update dashboard
-      await updateDashboard(row, updates);
+      await updateDashboard(row, updates)
 
       // Create events for each changed field
-      const timestamp = format(date, "dd.MM.yy");
+      const timestamp = format(date, "dd.MM.yy")
       const eventPromises = Object.entries(updates).map(([key, value]) => {
         // Only create events for numeric fields that have changed
         if (key !== "id" && key !== "sNo") {
@@ -698,38 +696,38 @@ function AestheticCardEdit({ row }: { row: NationalRowData }) {
             event: key,
             data: value,
             timestamp: timestamp,
-          });
+          })
         }
-        return Promise.resolve();
-      });
+        return Promise.resolve()
+      })
 
-      await Promise.all(eventPromises);
+      await Promise.all(eventPromises)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["events"] });
-      queryClient.invalidateQueries({ queryKey: ["national-data"] });
-      queryClient.invalidateQueries({ queryKey: ["national-dashboard"] });
-      toast.success("Dashboard updated successfully");
-      setSheetOpen(false);
-      setEditedValues({});
+      queryClient.invalidateQueries({ queryKey: ["events"] })
+      queryClient.invalidateQueries({ queryKey: ["national-data"] })
+      queryClient.invalidateQueries({ queryKey: ["national-dashboard"] })
+      toast.success("Dashboard updated successfully")
+      setSheetOpen(false)
+      setEditedValues({})
     },
     onError: (error) => {
-      toast.error(`Failed to update dashboard: ${error.message}`);
+      toast.error(`Failed to update dashboard: ${error.message}`)
     },
-  });
+  })
 
   const handleSave = () => {
     if (Object.keys(editedValues).length === 0) {
-      toast.error("No changes to save");
-      return;
+      toast.error("No changes to save")
+      return
     }
 
-    updateMutation.mutate({ updates: editedValues });
-  };
+    updateMutation.mutate({ updates: editedValues })
+  }
 
   const getValue = (key: string) => {
-    return editedValues[key] ?? (row as any)[key] ?? "";
-  };
+    return editedValues[key] ?? (row as any)[key] ?? ""
+  }
 
   return (
     <>
@@ -774,8 +772,8 @@ function AestheticCardEdit({ row }: { row: NationalRowData }) {
                 captionLayout="dropdown"
                 onSelect={(date) => {
                   if (date) {
-                    setDate(date);
-                    setOpen(false);
+                    setDate(date)
+                    setOpen(false)
                   }
                 }}
               />
@@ -789,13 +787,13 @@ function AestheticCardEdit({ row }: { row: NationalRowData }) {
             icon={field.icon}
             placeholder={field.label}
             onChange={(e) => {
-              const fieldType = field.type || "number";
+              const fieldType = field.type || "number"
               const value =
-                fieldType === "text" ? e.target.value : Number(e.target.value);
+                fieldType === "text" ? e.target.value : Number(e.target.value)
               setEditedValues({
                 ...editedValues,
                 [field.key]: value,
-              });
+              })
             }}
             type={field.type || "number"}
             value={getValue(field.key).toString()}
@@ -817,5 +815,5 @@ function AestheticCardEdit({ row }: { row: NationalRowData }) {
         </Button>
       </SheetFooter>
     </>
-  );
+  )
 }

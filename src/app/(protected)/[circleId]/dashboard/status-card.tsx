@@ -1,28 +1,29 @@
-import { Icon } from "@iconify/react/dist/iconify.js";
+import { Icon } from "@iconify/react/dist/iconify.js"
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@rio.js/ui/components/card";
-import { cn } from "@rio.js/ui/lib/utils";
+} from "@rio.js/ui/components/card"
+import { cn } from "@rio.js/ui/lib/utils"
 
 interface StatusCardProps {
-  title: string;
-  value: number | string;
-  description?: string;
-  icon?: React.ReactNode;
-  className?: string;
+  title: string
+  value: number | string
+  description?: string
+  icon?: React.ReactNode
+  className?: string
   trend?: {
-    value: number;
-    direction: "up" | "down" | "neutral";
-    period?: string;
-    currentTotal?: number;
-    previousTotal?: number;
-    currentDailyRate?: number;
-    previousDailyRate?: number;
-  };
-  valueFormatter?: (value: number) => string;
+    value: number
+    direction: "up" | "down" | "neutral"
+    period?: string
+    currentTotal?: number
+    previousTotal?: number
+    currentDailyRate?: number
+    previousDailyRate?: number
+  }
+  valueFormatter?: (value: number) => string
 }
 
 export function StatusCard({
@@ -48,7 +49,7 @@ export function StatusCard({
                 "text-[0.9em] font-medium flex items-center gap-1 text-xl sm:text-2xl",
                 trend.direction === "up" && "text-emerald-500",
                 trend.direction === "down" && "text-red-500",
-                trend.direction === "neutral" && "text-gray-500"
+                trend.direction === "neutral" && "text-gray-500",
               )}
             >
               {trend.direction === "up" && (
@@ -111,7 +112,7 @@ export function StatusCard({
           <div
             className={cn(
               "text-xl sm:text-2xl font-bold truncate",
-              trend && "text-muted-foreground sm:text-base text-base"
+              trend && "text-muted-foreground sm:text-base text-base",
             )}
           >
             {typeof value === "number" ? valueFormatter(value) : value}
@@ -125,5 +126,5 @@ export function StatusCard({
         )}
       </CardContent>
     </Card>
-  );
+  )
 }

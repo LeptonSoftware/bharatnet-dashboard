@@ -10,8 +10,8 @@ export const circleMap: Record<string, string> = {
   jharkhand: "Jharkhand",
   odisha: "Odisha",
   punjab: "Punjab",
-};
+}
 
 export function getCircleName(circle: string): string {
-  return circleMap[circle] || circle.toUpperCase();
+  return circleMap[circle] || circle.toUpperCase()
 }

@@ -1,27 +1,27 @@
-import { HTTPEvent, toWebRequest } from "vinxi/http";
+import { HTTPEvent, toWebRequest } from "vinxi/http"
 
 const circleURLs = {
   upe: "http://networkaccess.bnet.leptonsoftware.com/RVNL/Smartinventory_services/api/VectorLayer/GetVectorData",
   upw: "http://networkaccess.bnet.leptonsoftware.com/RVNL_UPW/Smartinventory_services/api/VectorLayer/GetVectorData",
   punjab:
     "http://networkaccess.bnet.leptonsoftware.com/HFCL_Punjab/Smartinventory_services/api/VectorLayer/GetVectorData",
-};
+}
 
 export async function GET(event: HTTPEvent) {
-  const request = toWebRequest(event);
-  const { searchParams } = new URL(request.url);
-  const circleId = searchParams.get("circle")!;
-  const district = searchParams.get("district")!;
-  const entityType = searchParams.get("entityType");
+  const request = toWebRequest(event)
+  const { searchParams } = new URL(request.url)
+  const circleId = searchParams.get("circle")!
+  const district = searchParams.get("district")!
+  const entityType = searchParams.get("entityType")
 
   if (!circleId || !district || !entityType) {
-    return new Response("Missing required parameters", { status: 400 });
+    return new Response("Missing required parameters", { status: 400 })
   }
 
-  const url = circleURLs[circleId.toLowerCase() as keyof typeof circleURLs];
+  const url = circleURLs[circleId.toLowerCase() as keyof typeof circleURLs]
 
   if (!url) {
-    return new Response("Invalid circle ID", { status: 400 });
+    return new Response("Invalid circle ID", { status: 400 })
   }
 
   const options = {
@@ -41,11 +41,11 @@ export async function GET(event: HTTPEvent) {
         ticketID: 0,
       }),
     }),
-  };
+  }
 
   try {
-    const response = await fetch(url, options);
-    const data = await response.json();
+    const response = await fetch(url, options)
+    const data = await response.json()
 
     // Transform to proper GeoJSON format
     const geoJson = {
@@ -63,16 +63,16 @@ export async function GET(event: HTTPEvent) {
           },
           id: layerData.feature.id,
         })) || [],
-    };
+    }
 
     return new Response(JSON.stringify(geoJson), {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
-    });
+    })
   } catch (error) {
-    console.error(error);
-    return new Response("Error", { status: 500 });
+    console.error(error)
+    return new Response("Error", { status: 500 })
   }
 }

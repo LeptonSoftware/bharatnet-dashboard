@@ -1,11 +1,11 @@
-"use no memo";
+"use no memo"
 
-import { Icon } from "@iconify/react/dist/iconify.js";
-import type { Table } from "@tanstack/react-table";
-import { Check, ChevronsUpDown, Settings2 } from "lucide-react";
-import * as React from "react";
+import { Icon } from "@iconify/react/dist/iconify.js"
+import type { Table } from "@tanstack/react-table"
+import { Check, ChevronsUpDown, Settings2 } from "lucide-react"
+import * as React from "react"
 
-import { Button } from "@rio.js/ui/components/button";
+import { Button } from "@rio.js/ui/components/button"
 import {
   Command,
   CommandEmpty,
@@ -13,34 +13,34 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@rio.js/ui/components/command";
+} from "@rio.js/ui/components/command"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@rio.js/ui/components/popover";
-import { Tabs, TabsList, TabsTrigger } from "@rio.js/ui/components/tabs";
-import { cn } from "@rio.js/ui/lib/utils";
+} from "@rio.js/ui/components/popover"
+import { Tabs, TabsList, TabsTrigger } from "@rio.js/ui/components/tabs"
+import { cn } from "@rio.js/ui/lib/utils"
 
-import { useDataTableContext } from "./data-table-provider";
+import { useDataTableContext } from "./data-table-provider"
 
 interface DataTableViewOptionsProps<TData> {}
 
 export function DataTableViewOptions<
   TData,
 >({}: DataTableViewOptionsProps<TData>) {
-  "use no memo";
-  const { view, setView, table } = useDataTableContext();
+  "use no memo"
+  const { view, setView, table } = useDataTableContext()
   const columns = React.useMemo(
     () =>
       table
         .getAllColumns()
         .filter(
           (column) =>
-            typeof column.accessorFn !== "undefined" && column.getCanHide()
+            typeof column.accessorFn !== "undefined" && column.getCanHide(),
         ),
-    [table]
-  );
+    [table],
+  )
 
   return (
     <>
@@ -90,7 +90,7 @@ export function DataTableViewOptions<
                     <Check
                       className={cn(
                         "ml-auto size-4 shrink-0",
-                        column.getIsVisible() ? "opacity-100" : "opacity-0"
+                        column.getIsVisible() ? "opacity-100" : "opacity-0",
                       )}
                     />
                   </CommandItem>
@@ -101,5 +101,5 @@ export function DataTableViewOptions<
         </PopoverContent>
       </Popover>
     </>
-  );
+  )
 }

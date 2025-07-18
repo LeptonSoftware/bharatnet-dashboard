@@ -3,12 +3,12 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@rio.js/ui/components/card";
+} from "@rio.js/ui/components/card"
 
 interface SurveyProgressProps {
-  title: string;
-  completedKm: number;
-  totalKm: number;
+  title: string
+  completedKm: number
+  totalKm: number
 }
 
 export function SurveyProgress({
@@ -17,24 +17,24 @@ export function SurveyProgress({
   totalKm,
 }: SurveyProgressProps) {
   // Calculate progress percentage
-  const completionPercentage = (completedKm / (totalKm || 1)) * 100;
+  const completionPercentage = (completedKm / (totalKm || 1)) * 100
 
   // Calculate completion rate (km per day)
-  const startDate = new Date("2025-04-01");
-  const now = new Date();
+  const startDate = new Date("2025-04-01")
+  const now = new Date()
   const daysSinceStart = Math.max(
     1,
-    (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  const dailyCompletionRate = completedKm / daysSinceStart;
+    (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+  )
+  const dailyCompletionRate = completedKm / daysSinceStart
 
   // Calculate estimated completion date
-  const remainingKm = totalKm - completedKm;
-  const daysToComplete = remainingKm / (dailyCompletionRate || 1);
-  const estimatedCompletionDate = new Date();
+  const remainingKm = totalKm - completedKm
+  const daysToComplete = remainingKm / (dailyCompletionRate || 1)
+  const estimatedCompletionDate = new Date()
   estimatedCompletionDate.setDate(
-    estimatedCompletionDate.getDate() + daysToComplete
-  );
+    estimatedCompletionDate.getDate() + daysToComplete,
+  )
 
   return (
     <Card className="col-span-full mb-6">
@@ -80,5 +80,5 @@ export function SurveyProgress({
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

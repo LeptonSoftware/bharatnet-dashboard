@@ -1,6 +1,6 @@
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react"
 
-import { Badge } from "@rio.js/ui/components/badge";
+import { Badge } from "@rio.js/ui/components/badge"
 import {
   Card,
   CardAction,
@@ -8,7 +8,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@rio.js/ui/components/card";
+} from "@rio.js/ui/components/card"
 
 export function SectionCards() {
   return (
@@ -102,5 +102,5 @@ export function SectionCards() {
         </CardFooter>
       </Card>
     </div>
-  );
+  )
 }

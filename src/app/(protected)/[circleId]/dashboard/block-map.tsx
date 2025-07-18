@@ -1,61 +1,62 @@
-import React, { useEffect } from "react";
-import { MapPin, Maximize2, Minimize2 } from "lucide-react";
-import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
-import { BlockData } from "@/types";
-import { useParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
-import "leaflet/dist/leaflet.css";
+import { BlockData } from "@/types"
+import { useQuery } from "@tanstack/react-query"
+import { MapPin, Maximize2, Minimize2 } from "lucide-react"
+import React, { useEffect } from "react"
+import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet"
+import { useParams } from "react-router"
+
+import "leaflet/dist/leaflet.css"
 
 interface BlockMapProps {
-  blocks: BlockData[];
+  blocks: BlockData[]
 }
 
 function MapController({
   blocks,
   geojson,
 }: {
-  blocks: BlockData[];
-  geojson: any;
+  blocks: BlockData[]
+  geojson: any
 }) {
-  const map = useMap();
+  const map = useMap()
 
   useEffect(() => {
     if (geojson && blocks.length) {
       const features = blocks
         .map((block) =>
           geojson.features.find(
-            (f: any) => parseInt(f.properties.Code) === block.blockCode
-          )
+            (f: any) => parseInt(f.properties.Code) === block.blockCode,
+          ),
         )
-        .filter(Boolean);
+        .filter(Boolean)
 
       if (features.length) {
         // @ts-ignore
         const bounds = L.geoJSON({
           type: "FeatureCollection",
           features,
-        }).getBounds();
-        map.fitBounds(bounds, { padding: [50, 50] });
+        }).getBounds()
+        map.fitBounds(bounds, { padding: [50, 50] })
       }
     }
-  }, [map, blocks, geojson]);
+  }, [map, blocks, geojson])
 
-  return null;
+  return null
 }
 
 async function fetchGeoJson(circle: string) {
   const response = await fetch(
-    `https://cdn.leptonmaps.com/bharatnet/${circle}.geojson`
-  );
+    `https://cdn.leptonmaps.com/bharatnet/${circle}.geojson`,
+  )
   if (!response.ok) {
-    throw new Error("Failed to fetch GeoJSON data");
+    throw new Error("Failed to fetch GeoJSON data")
   }
-  return response.json();
+  return response.json()
 }
 
 export function BlockMap({ blocks }: BlockMapProps) {
-  const { circle = "upe" } = useParams();
-  const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const { circle = "upe" } = useParams()
+  const [isFullscreen, setIsFullscreen] = React.useState(false)
 
   const {
     data: geojson,
@@ -66,7 +67,7 @@ export function BlockMap({ blocks }: BlockMapProps) {
     queryFn: () => fetchGeoJson(circle),
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
     cacheTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
-  });
+  })
 
   if (isLoading) {
     return (
@@ -76,7 +77,7 @@ export function BlockMap({ blocks }: BlockMapProps) {
           <span>Loading map...</span>
         </div>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -87,16 +88,16 @@ export function BlockMap({ blocks }: BlockMapProps) {
           <span>Error loading map data</span>
         </div>
       </div>
-    );
+    )
   }
 
   const blockFeatures = blocks
     .map((block) =>
       geojson.features.find(
-        (f: any) => parseInt(f.properties.Code) === block.blockCode
-      )
+        (f: any) => parseInt(f.properties.Code) === block.blockCode,
+      ),
     )
-    .filter(Boolean);
+    .filter(Boolean)
 
   if (!blockFeatures.length) {
     return (
@@ -106,7 +107,7 @@ export function BlockMap({ blocks }: BlockMapProps) {
           <span>Block geometries not found</span>
         </div>
       </div>
-    );
+    )
   }
   const map = (
     <div className="relative w-full h-full">
@@ -155,11 +156,11 @@ export function BlockMap({ blocks }: BlockMapProps) {
         <MapController blocks={blocks} geojson={geojson} />
       </MapContainer>
     </div>
-  );
+  )
 
   if (isFullscreen) {
-    return <div className="fixed inset-0 z-50 bg-white">{map}</div>;
+    return <div className="fixed inset-0 z-50 bg-white">{map}</div>
   }
 
-  return map;
+  return map
 }

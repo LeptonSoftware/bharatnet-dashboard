@@ -1,10 +1,11 @@
-import { MapProvider, MapCanvas, MapLayer } from "@rio.js/react-maps";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Suspense, useMemo } from "react";
-import { envelope } from "@turf/turf";
-import { fitBounds } from "@math.gl/web-mercator";
-import { Maximize2, Minimize2, X } from "lucide-react";
-import React, { useState } from "react";
+import { fitBounds } from "@math.gl/web-mercator"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { envelope } from "@turf/turf"
+import { Maximize2, Minimize2, X } from "lucide-react"
+import { Suspense, useMemo } from "react"
+import React, { useState } from "react"
+
+import { MapCanvas, MapLayer, MapProvider } from "@rio.js/react-maps"
 
 const entityTypes = {
   Cable: "OFC",
@@ -20,7 +21,7 @@ const entityTypes = {
   SpliceClosure: "FPOI",
   Trench: "Trench",
   BDB: "FDC",
-};
+}
 
 const iconMapping = {
   marker: {
@@ -31,46 +32,46 @@ const iconMapping = {
     anchorY: 0,
     mask: false,
   },
-};
+}
 
 function useLayerStyles() {
   return useSuspenseQuery({
     queryKey: ["layer-styles"],
     queryFn: async () => {
-      const response = await fetch("/api/layers");
-      const data = await response.json();
-      return data;
+      const response = await fetch("/api/layers")
+      const data = await response.json()
+      return data
     },
-  });
+  })
 }
 
 function useLayerData(
   districtId: string,
   circleId: string,
-  entityType: string
+  entityType: string,
 ) {
   return useSuspenseQuery({
     queryKey: ["layer-data", districtId, circleId, entityType],
     queryFn: async () => {
       const response = await fetch(
-        `/api/layer/district?district=${districtId}&circle=${circleId}&entityType=${entityType}`
-      );
-      const data = await response.json();
-      return data;
+        `/api/layer/district?district=${districtId}&circle=${circleId}&entityType=${entityType}`,
+      )
+      const data = await response.json()
+      return data
     },
-  });
+  })
 }
 
 const colors = {
   P: [0, 0, 255, 255],
   D: [255, 255, 0, 255],
   A: [255, 0, 0, 255],
-};
+}
 
 const hexToColorArray = (hex: string) => {
-  const [r, g, b] = hex.match(/\w\w/g)!.map((c) => parseInt(c, 16));
-  return [r, g, b, 255];
-};
+  const [r, g, b] = hex.match(/\w\w/g)!.map((c) => parseInt(c, 16))
+  return [r, g, b, 255]
+}
 
 function MapLayers({
   district,
@@ -79,26 +80,26 @@ function MapLayers({
   onHoverCable,
   onHoverIcon,
 }: {
-  district: any;
-  circleId: string;
-  onHoverDistrict?: (info: any) => void;
-  onHoverCable?: (info: any) => void;
-  onHoverIcon?: (info: any, entityType: string) => void;
+  district: any
+  circleId: string
+  onHoverDistrict?: (info: any) => void
+  onHoverCable?: (info: any) => void
+  onHoverIcon?: (info: any, entityType: string) => void
 }) {
-  const { data: layerStyles } = useLayerStyles();
+  const { data: layerStyles } = useLayerStyles()
   return (
     <>
       {Object.keys(entityTypes).map((entityType, index) => {
         const style = layerStyles.find(
-          (style: any) => style.layer_name === entityType
-        );
+          (style: any) => style.layer_name === entityType,
+        )
 
-        console.log(style);
+        console.log(style)
         const isIconLayer =
           style &&
           style.LayerStyle &&
           style.LayerStyle[0] &&
-          style.LayerStyle[0].line_width == null;
+          style.LayerStyle[0].line_width == null
         return (
           <MapLayer
             order={index}
@@ -130,10 +131,10 @@ function MapLayers({
             getLineWidth={() => 20}
             lineWidthMinPixels={2}
           />
-        );
+        )
       })}
     </>
-  );
+  )
 }
 
 function Map({
@@ -144,12 +145,12 @@ function Map({
   onHoverCable,
   onHoverIcon,
 }: {
-  viewState: any;
-  district: any;
-  circleId: string;
-  onHoverDistrict?: (info: any) => void;
-  onHoverCable?: (info: any) => void;
-  onHoverIcon?: (info: any, entityType: string) => void;
+  viewState: any
+  district: any
+  circleId: string
+  onHoverDistrict?: (info: any) => void
+  onHoverCable?: (info: any) => void
+  onHoverIcon?: (info: any, entityType: string) => void
 }) {
   return (
     <MapProvider initialViewState={viewState}>
@@ -164,7 +165,7 @@ function Map({
         />
       </Suspense>
     </MapProvider>
-  );
+  )
 }
 
 function useDistrictInfo(district: string, circleId: string) {
@@ -172,60 +173,60 @@ function useDistrictInfo(district: string, circleId: string) {
     queryKey: ["district-info", district, circleId],
     queryFn: async () => {
       const response = await fetch(
-        `https://api.sheety.co/632604ca09353483222880568eb0ebe2/bharatnetMonitoringDashboard/districts`
-      );
-      const data = await response.json();
+        `https://api.sheety.co/632604ca09353483222880568eb0ebe2/bharatnetMonitoringDashboard/districts`,
+      )
+      const data = await response.json()
       const districtInfo = data.districts.find(
         (d: any) =>
           d.circle.toLowerCase() === circleId?.toLowerCase() &&
-          d.provinceName.toLowerCase() === district.toLowerCase()
-      );
-      return districtInfo;
+          d.provinceName.toLowerCase() === district.toLowerCase(),
+      )
+      return districtInfo
     },
-  });
+  })
 }
 
 export function DistrictMap({
   district,
   circleId,
 }: {
-  district: any;
-  circleId: string;
+  district: any
+  circleId: string
 }) {
-  const { data: districtInfo } = useDistrictInfo(district.name, circleId);
+  const { data: districtInfo } = useDistrictInfo(district.name, circleId)
   const { data: layerData } = useLayerData(
     districtInfo.provinceId,
     circleId,
-    "POD"
-  );
-  const { data: layerStyles } = useLayerStyles();
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showLegend, setShowLegend] = useState(false);
+    "POD",
+  )
+  const { data: layerStyles } = useLayerStyles()
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [showLegend, setShowLegend] = useState(false)
   const [hoveredCable, setHoveredCable] = useState<{
-    cable_name: string;
-    cable_type: string;
-    cable_cores: string;
-    network_id: string;
-    ownership_type: string;
-    display_name?: string;
-    x: number;
-    y: number;
-  } | null>(null);
+    cable_name: string
+    cable_type: string
+    cable_cores: string
+    network_id: string
+    ownership_type: string
+    display_name?: string
+    x: number
+    y: number
+  } | null>(null)
   const [hoveredDistrict, setHoveredDistrict] = useState<{
-    name: string;
-    code: string;
-    x: number;
-    y: number;
-  } | null>(null);
+    name: string
+    code: string
+    x: number
+    y: number
+  } | null>(null)
   const [hoveredIcon, setHoveredIcon] = useState<{
-    label: string;
-    x: number;
-    y: number;
-  } | null>(null);
-  const mapRef = React.useRef<HTMLDivElement>(null);
+    label: string
+    x: number
+    y: number
+  } | null>(null)
+  const mapRef = React.useRef<HTMLDivElement>(null)
 
   const viewState = useMemo(() => {
-    const bbox = envelope(layerData);
+    const bbox = envelope(layerData)
     const viewport = fitBounds({
       width: 500,
       height: 750,
@@ -239,44 +240,44 @@ export function DistrictMap({
           bbox.geometry.coordinates[0][1][1],
         ],
       ],
-    });
-    return viewport;
-  }, []);
+    })
+    return viewport
+  }, [])
 
   // Legend logic: show only entities present in layerStyles (i.e., rendered on the map), but exclude Trench, Duct, Cable
   const legendItems = useMemo(() => {
-    const exclude = ["Trench", "Duct", "Cable"];
+    const exclude = ["Trench", "Duct", "Cable"]
     return (layerStyles as Array<{ layer_name: keyof typeof entityTypes }>)
       .filter(
         (layer) =>
           Object.prototype.hasOwnProperty.call(entityTypes, layer.layer_name) &&
-          !exclude.includes(layer.layer_name)
+          !exclude.includes(layer.layer_name),
       )
       .map((layer) => ({
         key: layer.layer_name,
         label: entityTypes[layer.layer_name],
         icon: `/icons/${layer.layer_name}/A/${layer.layer_name}.png`,
-      }));
-  }, [layerStyles]);
+      }))
+  }, [layerStyles])
 
   // Cable (OFC) legend for network status colors
   const cableLegend = useMemo(() => {
     const cableLayer = (layerStyles as Array<{ layer_name: string }>).find(
-      (layer) => layer.layer_name === "Cable"
-    );
-    if (!cableLayer) return [];
+      (layer) => layer.layer_name === "Cable",
+    )
+    if (!cableLayer) return []
     // Use the colors object for swatches and labels
     const statusLabels: Record<string, string> = {
       P: "Planned",
       D: "Deployed",
       A: "Active",
-    };
+    }
     return Object.entries(colors).map(([status, colorArr]) => ({
       status,
       label: statusLabels[status] || status,
       color: `rgba(${colorArr.join(",")})`,
-    }));
-  }, [layerStyles]);
+    }))
+  }, [layerStyles])
 
   const map = (
     <div ref={mapRef} className="relative w-full h-full">
@@ -394,7 +395,7 @@ export function DistrictMap({
                 ([key, value]) =>
                   ["x", "y"].indexOf(key) === -1 &&
                   value &&
-                  typeof value === "string"
+                  typeof value === "string",
               )
               .map(([key, value]) => (
                 <div key={key} className="flex justify-between gap-2">
@@ -429,9 +430,9 @@ export function DistrictMap({
                 code: info.object.properties.code || "",
                 x: info.x,
                 y: info.y,
-              });
+              })
             } else {
-              setHoveredDistrict(null);
+              setHoveredDistrict(null)
             }
           }}
           onHoverCable={(info: any) => {
@@ -445,33 +446,33 @@ export function DistrictMap({
                 display_name: info.object.properties.display_name || undefined,
                 x: info.x,
                 y: info.y,
-              });
+              })
             } else {
-              setHoveredCable(null);
+              setHoveredCable(null)
             }
           }}
           onHoverIcon={(info: any, entityType: string) => {
             if (info?.object?.properties && info.x && info.y) {
               const label = info.object.properties.display_name
                 ? String(info.object.properties.display_name).trim()
-                : "NA";
+                : "NA"
               setHoveredIcon({
                 label,
                 x: info.x,
                 y: info.y,
-              });
+              })
             } else {
-              setHoveredIcon(null);
+              setHoveredIcon(null)
             }
           }}
         />
       </Suspense>
     </div>
-  );
+  )
 
   if (isFullscreen) {
-    return <div className="fixed inset-0 z-50 bg-white">{map}</div>;
+    return <div className="fixed inset-0 z-50 bg-white">{map}</div>
   }
 
-  return map;
+  return map
 }

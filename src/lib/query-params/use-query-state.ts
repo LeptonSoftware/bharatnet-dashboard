@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useRef } from "react";
-import { safeParse, type Parser } from "./parser";
-import { useSearchParams } from "react-router";
+import { useCallback, useMemo, useRef } from "react"
+import { useSearchParams } from "react-router"
+
+import { type Parser, safeParse } from "./parser"
 
 export interface UseQueryStateOptions<T> extends Parser<T> {}
 
@@ -13,10 +14,10 @@ export type UseQueryStateReturn<Parsed, Default> = [
       | null
       | Parsed
       | ((
-          old: Default extends Parsed ? Parsed : Parsed | null
-        ) => Parsed | null)
+          old: Default extends Parsed ? Parsed : Parsed | null,
+        ) => Parsed | null),
   ) => Promise<URLSearchParams>,
-];
+]
 
 // Overload type signatures ----------------------------------------------------
 // Note: the order of declaration matters (from the most specific to the least).
@@ -51,11 +52,11 @@ export type UseQueryStateReturn<Parsed, Default> = [
  */
 export function useQueryState<T>(
   key: string,
-  options: UseQueryStateOptions<T> & { defaultValue: T }
+  options: UseQueryStateOptions<T> & { defaultValue: T },
 ): UseQueryStateReturn<
   NonNullable<ReturnType<typeof options.parse>>,
   typeof options.defaultValue
->;
+>
 
 /**
  * React state hook synchronized with a URL query string in Next.js
@@ -74,11 +75,8 @@ export function useQueryState<T>(
  */
 export function useQueryState<T>(
   key: string,
-  options: UseQueryStateOptions<T>
-): UseQueryStateReturn<
-  NonNullable<ReturnType<typeof options.parse>>,
-  undefined
->;
+  options: UseQueryStateOptions<T>,
+): UseQueryStateReturn<NonNullable<ReturnType<typeof options.parse>>, undefined>
 
 /**
  * Default type string, limited options & default value
@@ -86,9 +84,9 @@ export function useQueryState<T>(
 export function useQueryState(
   key: string,
   options: {
-    defaultValue: string;
-  }
-): UseQueryStateReturn<string, typeof options.defaultValue>;
+    defaultValue: string
+  },
+): UseQueryStateReturn<string, typeof options.defaultValue>
 
 /**
  * React state hook synchronized with a URL query string in Next.js
@@ -113,8 +111,8 @@ export function useQueryState(
  */
 export function useQueryState(
   key: string,
-  options: UseQueryStateOptions<string>
-): UseQueryStateReturn<string, undefined>;
+  options: UseQueryStateOptions<string>,
+): UseQueryStateReturn<string, undefined>
 
 /**
  * React state hook synchronized with a URL query string in Next.js
@@ -137,8 +135,8 @@ export function useQueryState(
  * @param key The URL query string key to bind to
  */
 export function useQueryState(
-  key: string
-): UseQueryStateReturn<string, undefined>;
+  key: string,
+): UseQueryStateReturn<string, undefined>
 
 /**
  * React state hook synchronized with a URL query string in Next.js
@@ -195,25 +193,25 @@ export function useQueryState<T = string>(
     eq = (a, b) => a === b,
     defaultValue = undefined,
   }: Partial<UseQueryStateOptions<T>> & {
-    defaultValue?: T;
+    defaultValue?: T
   } = {
     parse: (x) => x as unknown as T,
     serialize: String,
     eq: (a, b) => a === b,
     defaultValue: undefined,
-  }
+  },
 ) {
   // const hookId = useId();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const initialSearchParams = searchParams;
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialSearchParams = searchParams
   // const queryRef = useRef<string | null>(initialSearchParams?.get(key) ?? null);
   const internalState = useMemo<T | null>(() => {
-    const query = initialSearchParams?.get(key) ?? null;
-    return query === null ? null : safeParse(parse, query, key);
-  }, [key, initialSearchParams?.get(key)]);
+    const query = initialSearchParams?.get(key) ?? null
+    return query === null ? null : safeParse(parse, query, key)
+  }, [key, initialSearchParams?.get(key)])
 
-  const stateRef = useRef(internalState);
-  stateRef.current = internalState;
+  const stateRef = useRef(internalState)
+  stateRef.current = internalState
 
   // useEffect(() => {
   //   const query =
@@ -250,17 +248,17 @@ export function useQueryState<T = string>(
     (stateUpdater: React.SetStateAction<T | null>) => {
       let newValue: T | null = isUpdaterFunction(stateUpdater)
         ? stateUpdater(stateRef.current ?? defaultValue ?? null)
-        : stateUpdater;
+        : stateUpdater
 
-      console.log("newValue", newValue);
+      console.log("newValue", newValue)
       if (
         newValue !== null &&
         defaultValue !== undefined &&
         eq(newValue, defaultValue)
       ) {
-        newValue = null;
+        newValue = null
       }
-      const query = newValue === null ? null : serialize(newValue);
+      const query = newValue === null ? null : serialize(newValue)
       // Sync all hooks state (including this one)
       // emitter.emit(key, { state: newValue, query });
       // const update: UpdateQueuePushArgs = {
@@ -282,21 +280,21 @@ export function useQueryState<T = string>(
       ) {
         setSearchParams((prev) => {
           if (query === null) {
-            prev.delete(key);
+            prev.delete(key)
           } else {
-            prev.set(key, query);
+            prev.set(key, query)
           }
-          return prev;
-        });
+          return prev
+        })
       }
     },
-    [key]
-  );
-  return [internalState ?? defaultValue ?? null, update];
+    [key],
+  )
+  return [internalState ?? defaultValue ?? null, update]
 }
 
 function isUpdaterFunction<T>(
-  stateUpdater: React.SetStateAction<T>
+  stateUpdater: React.SetStateAction<T>,
 ): stateUpdater is (prevState: T) => T {
-  return typeof stateUpdater === "function";
+  return typeof stateUpdater === "function"
 }

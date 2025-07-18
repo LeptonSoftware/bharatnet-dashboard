@@ -1,25 +1,25 @@
-import { useState } from "react";
+import { BlockData, DistrictSummary } from "@/types"
+import {
+  AlertCircle,
+  BarChart3,
+  Building2,
+  Cable,
+  CheckCircle,
+  Clock,
+  FileText,
+  HardHat,
+  Map as MapIcon,
+  Search,
+} from "lucide-react"
+import { useState } from "react"
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@rio.js/ui/components/card";
-import { Input } from "@rio.js/ui/components/input";
-import {
-  Search,
-  CheckCircle,
-  FileText,
-  AlertCircle,
-  Clock,
-  BarChart3,
-  HardHat,
-  Cable,
-  Building2,
-  Map as MapIcon,
-} from "lucide-react";
-import { BlockData, DistrictSummary } from "@/types";
-import { BlockMap } from "./block-map";
+} from "@rio.js/ui/components/card"
+import { Input } from "@rio.js/ui/components/input"
 import {
   Sheet,
   SheetContent,
@@ -27,21 +27,23 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@rio.js/ui/components/sheet";
+} from "@rio.js/ui/components/sheet"
+
+import { BlockMap } from "./block-map"
 
 interface DistrictProgressProps {
-  districts: DistrictSummary[];
-  data: BlockData[];
+  districts: DistrictSummary[]
+  data: BlockData[]
 }
 
 export function DistrictProgress({ districts, data }: DistrictProgressProps) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("")
 
   const filteredDistricts = districts.filter((district) =>
-    district.name.toLowerCase().includes(search.toLowerCase())
-  );
+    district.name.toLowerCase().includes(search.toLowerCase()),
+  )
 
-  const displayDistricts = search ? filteredDistricts : districts.slice(0, 5);
+  const displayDistricts = search ? filteredDistricts : districts.slice(0, 5)
 
   return (
     <Card className="col-span-full lg:col-span-6">
@@ -68,17 +70,17 @@ export function DistrictProgress({ districts, data }: DistrictProgressProps) {
             displayDistricts.map((district, index) => {
               const blockProgress = Math.round(
                 ((district.approved + district.submitted) / district.total) *
-                  100
-              );
-              const totalKm = district.existingKm + district.plannedKm;
-              const existingPercent = (district.existingKm / totalKm) * 100;
-              const plannedPercent = (district.plannedKm / totalKm) * 100;
+                  100,
+              )
+              const totalKm = district.existingKm + district.plannedKm
+              const existingPercent = (district.existingKm / totalKm) * 100
+              const plannedPercent = (district.plannedKm / totalKm) * 100
 
               const districtBlocks = data.filter(
                 (block) =>
                   block.nameOfDistrict.toLowerCase() ===
-                  district.name.toLowerCase()
-              );
+                  district.name.toLowerCase(),
+              )
 
               return (
                 <div key={district.name}>
@@ -210,7 +212,7 @@ export function DistrictProgress({ districts, data }: DistrictProgressProps) {
                     <div className="mt-8 border-t border-border" />
                   )}
                 </div>
-              );
+              )
             })
           ) : (
             <div className="text-center text-muted-foreground py-8">
@@ -225,5 +227,5 @@ export function DistrictProgress({ districts, data }: DistrictProgressProps) {
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

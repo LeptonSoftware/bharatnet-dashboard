@@ -1,19 +1,20 @@
-import { Separator } from "@rio.js/ui/components/separator";
-import { SidebarTrigger } from "@rio.js/ui/components/sidebar";
-import { format } from "date-fns";
-import { Button } from "@rio.js/ui/components/button";
-import { RefreshCw } from "lucide-react";
+import { format } from "date-fns"
+import { RefreshCw } from "lucide-react"
+
+import { Button } from "@rio.js/ui/components/button"
+import { Separator } from "@rio.js/ui/components/separator"
+import { SidebarTrigger } from "@rio.js/ui/components/sidebar"
 
 export function PageHeader({
   breadcrumbs,
   children,
 }: {
   breadcrumbs?: {
-    icon?: React.ReactNode;
-    title: string;
-    url?: string;
-  }[];
-  children?: React.ReactNode;
+    icon?: React.ReactNode
+    title: string
+    url?: string
+  }[]
+  children?: React.ReactNode
 }) {
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) group-has-data-[variant=floating]/sidebar-wrapper:h-[calc(var(--header-height)+var(--spacing)*2)]">
@@ -62,5 +63,5 @@ export function PageHeader({
         {/* <img src="/lepton-logo.png" alt="Lepton Logo" className="h-6 w-auto" /> */}
       </div>
     </header>
-  );
+  )
 }

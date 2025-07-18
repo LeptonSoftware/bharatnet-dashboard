@@ -1,13 +1,5 @@
-
-
-import type { Column } from "@tanstack/react-table";
-import {
-  ChevronDown,
-  ChevronUp,
-  ChevronsUpDown,
-  EyeOff,
-  X,
-} from "lucide-react";
+import type { Column } from "@tanstack/react-table"
+import { ChevronDown, ChevronUp, ChevronsUpDown, EyeOff, X } from "lucide-react"
 
 import {
   DropdownMenu,
@@ -15,13 +7,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@rio.js/ui/components/dropdown-menu";
-import { cn } from "@rio.js/ui/lib/utils";
+} from "@rio.js/ui/components/dropdown-menu"
+import { cn } from "@rio.js/ui/lib/utils"
 
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.ComponentProps<typeof DropdownMenuTrigger> {
-  column: Column<TData, TValue>;
-  title: string;
+  column: Column<TData, TValue>
+  title: string
 }
 
 export function DataTableColumnHeader<TData, TValue>({
@@ -30,9 +22,9 @@ export function DataTableColumnHeader<TData, TValue>({
   className,
   ...props
 }: DataTableColumnHeaderProps<TData, TValue>) {
-  "use no memo";
+  "use no memo"
   if (!column.getCanSort() && !column.getCanHide()) {
-    return <div className={cn(className)}>{title}</div>;
+    return <div className={cn(className)}>{title}</div>
   }
 
   return (
@@ -40,7 +32,7 @@ export function DataTableColumnHeader<TData, TValue>({
       <DropdownMenuTrigger
         className={cn(
           "-ml-1.5 flex h-8 items-center gap-1.5 rounded-md px-2 py-1.5 hover:bg-accent focus:outline-none focus:ring-1 focus:ring-ring data-[state=open]:bg-accent [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground",
-          className
+          className,
         )}
         {...props}
       >
@@ -96,5 +88,5 @@ export function DataTableColumnHeader<TData, TValue>({
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }

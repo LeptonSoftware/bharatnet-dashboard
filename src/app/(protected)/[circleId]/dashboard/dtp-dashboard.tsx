@@ -1,89 +1,90 @@
-import { useEffect, useState } from "react";
-import { BlockData } from "@/types";
-import { fetchData } from "@/lib/api";
+import { useNationalDashboard } from "@/hooks/use-national-dashboard"
+import { fetchData } from "@/lib/api"
 import {
-  calculateSummaryStats,
-  getDistrictSummaries,
-  getApprovalTimeData,
-  getDtpStatusDistribution,
   calculateProjectProgress,
-} from "@/lib/data-utils";
-import { StatusCard } from "./status-card";
-import { OverviewChart } from "./overview-chart";
-import { DistrictProgress } from "./district-progress";
-import { BlocksTable } from "./blocks-table";
-import { DtpDashboardSkeleton } from "./loading-skeleton";
+  calculateSummaryStats,
+  getApprovalTimeData,
+  getDistrictSummaries,
+  getDtpStatusDistribution,
+} from "@/lib/data-utils"
+import { getCircleName } from "@/lib/utils"
+import { BlockData } from "@/types"
 import {
-  CheckCircle,
-  FileText,
-  FileQuestion,
-  Map,
-  LayoutDashboard,
   Building2,
+  CheckCircle,
+  FileQuestion,
+  FileText,
+  LayoutDashboard,
+  Map,
   Table,
-} from "lucide-react";
-import { useNationalDashboard } from "@/hooks/use-national-dashboard";
-import { getCircleName } from "@/lib/utils";
+} from "lucide-react"
+import { useEffect, useState } from "react"
+
+import { BlocksTable } from "./blocks-table"
+import { DistrictProgress } from "./district-progress"
+import { DtpDashboardSkeleton } from "./loading-skeleton"
+import { OverviewChart } from "./overview-chart"
+import { StatusCard } from "./status-card"
 
 interface DtpDashboardProps {
-  circle: string;
+  circle: string
 }
 
 export function DtpDashboard({ circle }: DtpDashboardProps) {
-  const [data, setData] = useState<BlockData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<BlockData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const {
     data: nationalData,
     isLoading: nationalLoading,
     error: nationalError,
-  } = useNationalDashboard();
+  } = useNationalDashboard()
 
   useEffect(() => {
     async function loadData() {
       try {
-        setIsLoading(true);
-        const response = await fetchData(circle, "dtp");
-        const circleData = response[`${circle}Dtp`] as BlockData[];
+        setIsLoading(true)
+        const response = await fetchData(circle, "dtp")
+        const circleData = response[`${circle}Dtp`] as BlockData[]
         // Filter out any null or undefined entries before setting the state
         const validData = (circleData || []).filter(
-          (item): item is BlockData => item != null
-        );
-        setData(validData);
+          (item): item is BlockData => item != null,
+        )
+        setData(validData)
       } catch (err) {
-        setError("Failed to load data");
-        console.error(err);
+        setError("Failed to load data")
+        console.error(err)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
 
-    loadData();
-  }, [circle]);
+    loadData()
+  }, [circle])
 
-  if (isLoading || nationalLoading) return <DtpDashboardSkeleton />;
+  if (isLoading || nationalLoading) return <DtpDashboardSkeleton />
   if (error || nationalError)
     return (
       <div className="text-destructive">
         {error || nationalError?.message || "Failed to load data"}
       </div>
-    );
+    )
   if (!data.length)
-    return <div className="text-center p-8">No data available</div>;
+    return <div className="text-center p-8">No data available</div>
 
-  const stats = calculateSummaryStats(data);
-  const districts = getDistrictSummaries(data);
-  const progress = calculateProjectProgress(data);
-  const approvalTimeData = getApprovalTimeData(data);
-  const statusDistribution = getDtpStatusDistribution(data);
+  const stats = calculateSummaryStats(data)
+  const districts = getDistrictSummaries(data)
+  const progress = calculateProjectProgress(data)
+  const approvalTimeData = getApprovalTimeData(data)
+  const statusDistribution = getDtpStatusDistribution(data)
 
   // Calculate total submitted (including approved) with default values
-  const totalSubmitted = (stats.submitted || 0) + (stats.approved || 0);
+  const totalSubmitted = (stats.submitted || 0) + (stats.approved || 0)
 
   const circleNationalData = nationalData.find(
     (item) =>
-      item.state === getCircleName(circle) || item.abbreviation === circle
-  );
+      item.state === getCircleName(circle) || item.abbreviation === circle,
+  )
 
   return (
     <div className="space-y-6">
@@ -166,5 +167,5 @@ export function DtpDashboard({ circle }: DtpDashboardProps) {
         <BlocksTable data={data} />
       </div>
     </div>
-  );
+  )
 }

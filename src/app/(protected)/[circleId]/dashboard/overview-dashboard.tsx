@@ -1,84 +1,87 @@
-import { useEffect, useState } from "react";
-import { fetchNationalData } from "@/lib/api";
-import { NationalRowData } from "@/types";
-import { StatusCard } from "./status-card";
-import {
-  Map,
-  FileText,
-  Cable,
-  Zap,
-  Wifi,
-  Building2,
-  CheckCircle,
-} from "lucide-react";
-import { Icon } from "@iconify/react";
-import { NationalDashboardSkeleton } from "./loading-skeleton";
-import { useEvents } from "@/hooks/use-events";
+import { useEvents } from "@/hooks/use-events"
+import { fetchNationalData } from "@/lib/api"
 import {
   TimePeriod,
   calculateComparativeTrend,
   calculateTrend,
   getPeriodBoundaries,
-} from "@/lib/trends";
+} from "@/lib/trends"
+import { getCircleName } from "@/lib/utils"
+import { NationalRowData } from "@/types"
+import { Icon } from "@iconify/react"
+import {
+  Building2,
+  Cable,
+  CheckCircle,
+  FileText,
+  Map,
+  Wifi,
+  Zap,
+} from "lucide-react"
+import { useEffect, useState } from "react"
+
+import { Label } from "@rio.js/ui/components/label"
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
-} from "@rio.js/ui/components/select";
-import { Switch } from "@rio.js/ui/components/switch";
-import { Tabs, TabsList, TabsTrigger } from "@rio.js/ui/components/tabs";
-import { Label } from "@rio.js/ui/components/label";
-import { CircleSVG } from "@/components/circle-svg";
-import { getCircleName } from "@/lib/utils";
+  SelectTrigger,
+  SelectValue,
+} from "@rio.js/ui/components/select"
+import { Switch } from "@rio.js/ui/components/switch"
+import { Tabs, TabsList, TabsTrigger } from "@rio.js/ui/components/tabs"
+
+import { CircleSVG } from "@/components/circle-svg"
+
+import { NationalDashboardSkeleton } from "./loading-skeleton"
+import { StatusCard } from "./status-card"
 
 interface OverviewDashboardProps {
-  circle: string;
+  circle: string
 }
 
 export function OverviewDashboard({ circle }: OverviewDashboardProps) {
-  const [data, setData] = useState<NationalRowData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<NationalRowData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Load events data for trend calculations
   const {
     data: eventsData,
     isLoading: eventsLoading,
     error: eventsError,
-  } = useEvents();
+  } = useEvents()
 
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>(null);
-  const [compareMode, setCompareMode] = useState(false);
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>(null)
+  const [compareMode, setCompareMode] = useState(false)
   useEffect(() => {
     async function loadData() {
       try {
-        setIsLoading(true);
-        const nationalData = await fetchNationalData();
+        setIsLoading(true)
+        const nationalData = await fetchNationalData()
 
         // Find the specific circle data
         const circleData = nationalData.find(
           (row) =>
             row.abbreviation.toLowerCase() === circle.toLowerCase() ||
-            row.state.toLowerCase() === circle.toLowerCase()
-        );
+            row.state.toLowerCase() === circle.toLowerCase(),
+        )
 
         if (circleData) {
-          setData(circleData);
+          setData(circleData)
         } else {
-          setError(`No data found for circle: ${circle}`);
+          setError(`No data found for circle: ${circle}`)
         }
       } catch (err) {
-        setError("Failed to load overview data");
-        console.error(err);
+        setError("Failed to load overview data")
+        console.error(err)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
 
-    loadData();
-  }, [circle]);
+    loadData()
+  }, [circle])
   // Helper function to get trend for a specific metric
   const getTrend = (eventType: string) => {
     if (!eventsData || eventsData.length === 0 || !timePeriod || !data) {
@@ -89,7 +92,7 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
         changeValue: 0,
         previousValue: 0,
         currentValue: 0,
-      };
+      }
     }
 
     // Use comparative trends when compare mode is enabled
@@ -98,12 +101,12 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
         eventsData,
         eventType,
         data.state,
-        timePeriod
-      );
+        timePeriod,
+      )
     }
 
     // Use regular trends for non-compare mode
-    const boundaries = getPeriodBoundaries(timePeriod);
+    const boundaries = getPeriodBoundaries(timePeriod)
     if (!boundaries) {
       return {
         direction: "stable" as const,
@@ -112,38 +115,32 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
         changeValue: 0,
         previousValue: 0,
         currentValue: 0,
-      };
+      }
     }
 
-    const { startDate, endDate } = boundaries;
-    return calculateTrend(
-      eventsData,
-      eventType,
-      data.state,
-      startDate,
-      endDate
-    );
-  };
+    const { startDate, endDate } = boundaries
+    return calculateTrend(eventsData, eventType, data.state, startDate, endDate)
+  }
 
-  if (isLoading) return <NationalDashboardSkeleton />;
+  if (isLoading) return <NationalDashboardSkeleton />
   if (error)
-    return <div className="text-destructive text-center p-8">{error}</div>;
-  if (!data) return <div className="text-center p-8">No data available</div>;
+    return <div className="text-destructive text-center p-8">{error}</div>
+  if (!data) return <div className="text-center p-8">No data available</div>
 
   // Helper function to safely convert values to numbers
   const toNumber = (value: string | number): number => {
-    if (typeof value === "number") return value;
-    if (!value || value === "") return 0;
-    const cleaned = value.toString().replace(/[^\d.-]/g, "");
-    return parseFloat(cleaned) || 0;
-  };
+    if (typeof value === "number") return value
+    if (!value || value === "") return 0
+    const cleaned = value.toString().replace(/[^\d.-]/g, "")
+    return parseFloat(cleaned) || 0
+  }
 
   // Get trends for relevant metrics
-  const hotoTrend = getTrend("hotoGPsDone");
-  const surveyTrend = getTrend("physicalSurveyGPsDone");
-  const desktopSurveyTrend = getTrend("desktopSurveyDone");
-  const uptimeTrend = getTrend("gPs >98%Uptime");
-  const ftthTrend = getTrend("activeFtthConnections");
+  const hotoTrend = getTrend("hotoGPsDone")
+  const surveyTrend = getTrend("physicalSurveyGPsDone")
+  const desktopSurveyTrend = getTrend("desktopSurveyDone")
+  const uptimeTrend = getTrend("gPs >98%Uptime")
+  const ftthTrend = getTrend("activeFtthConnections")
 
   return (
     <div className="space-y-6 p-6">
@@ -192,13 +189,13 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
               id="compare-mode"
               checked={compareMode}
               onCheckedChange={() => {
-                setCompareMode(!compareMode);
+                setCompareMode(!compareMode)
                 if (!compareMode) {
                   if (timePeriod === "last-week") {
-                    setTimePeriod("current-week");
+                    setTimePeriod("current-week")
                   }
                   if (timePeriod === "last-month") {
-                    setTimePeriod("current-month");
+                    setTimePeriod("current-month")
                   }
                 }
               }}
@@ -478,7 +475,7 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
           <StatusCard
             title="GPS Commissioned Done"
             value={toNumber(
-              data.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone
+              data.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone,
             )}
             icon={<CheckCircle />}
             description="GPs already commissioned"
@@ -489,7 +486,7 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
             value={
               data.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone > 0
                 ? (toNumber(
-                    data.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone
+                    data.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone,
                   ) /
                     data.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone) *
                   100
@@ -541,5 +538,5 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
         </div>
       </div>
     </div>
-  );
+  )
 }

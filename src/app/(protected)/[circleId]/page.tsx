@@ -1,11 +1,13 @@
-import { PageHeader } from "@/components/page-header";
-import { Dashboard } from "./dashboard";
-import { useParams } from "react-router";
-import { getCircleName } from "@/lib/utils";
-import { CircleSVG } from "@/components/circle-svg";
+import { getCircleName } from "@/lib/utils"
+import { useParams } from "react-router"
+
+import { CircleSVG } from "@/components/circle-svg"
+import { PageHeader } from "@/components/page-header"
+
+import { Dashboard } from "./dashboard"
 
 export default function DashboardPage() {
-  const { circleId } = useParams();
+  const { circleId } = useParams()
   return (
     <>
       <PageHeader
@@ -22,5 +24,5 @@ export default function DashboardPage() {
       />
       <Dashboard />
     </>
-  );
+  )
 }

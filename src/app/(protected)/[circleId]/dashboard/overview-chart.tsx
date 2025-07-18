@@ -1,15 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@rio.js/ui/components/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@rio.js/ui/components/tabs";
+import { PieChart as PieChartIcon } from "lucide-react"
 import {
   Bar,
   BarChart,
@@ -22,17 +11,29 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
-import { PieChart as PieChartIcon } from "lucide-react";
+} from "recharts"
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@rio.js/ui/components/card"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@rio.js/ui/components/tabs"
 
 interface ChartData {
-  labels: string[];
-  data: number[];
+  labels: string[]
+  data: number[]
 }
 
 interface OverviewChartProps {
-  approvalTimeData: ChartData;
-  statusDistribution: ChartData;
+  approvalTimeData: ChartData
+  statusDistribution: ChartData
 }
 
 export function OverviewChart({
@@ -45,18 +46,18 @@ export function OverviewChart({
     "pending approval": "#3B82F6", // blue-500
     "on hold": "#EF4444", // red-500
     pending: "#6B7280", // gray-500
-  };
+  }
 
   const monthlyData = approvalTimeData.labels.map((label, index) => ({
     month: label,
     count: approvalTimeData.data[index] || 0,
-  }));
+  }))
 
   const statusData = statusDistribution.labels.map((label, index) => ({
     name: label.charAt(0).toUpperCase() + label.slice(1),
     value: statusDistribution.data[index] || 0,
     color: STATUS_COLORS[label as keyof typeof STATUS_COLORS],
-  }));
+  }))
 
   return (
     <Card className="col-span-full lg:col-span-6">
@@ -125,5 +126,5 @@ export function OverviewChart({
         </Tabs>
       </CardContent>
     </Card>
-  );
+  )
 }

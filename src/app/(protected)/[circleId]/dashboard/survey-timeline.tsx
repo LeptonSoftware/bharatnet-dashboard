@@ -1,36 +1,31 @@
-import { format, addMonths } from "date-fns";
-import {
-  CalendarDays,
-  Target,
-  CheckCircle2,
-  Circle,
-  Clock,
-} from "lucide-react";
-import { cn } from "@rio.js/ui/lib/utils";
-import { Icon } from "@iconify/react/dist/iconify.js";
+import { Icon } from "@iconify/react/dist/iconify.js"
+import { addMonths, format } from "date-fns"
+import { CalendarDays, CheckCircle2, Circle, Clock, Target } from "lucide-react"
+
+import { cn } from "@rio.js/ui/lib/utils"
 
 interface Milestone {
-  id: number;
-  name: string;
-  targetPercentage: number;
-  date: Date;
-  monthsFromStart: number;
+  id: number
+  name: string
+  targetPercentage: number
+  date: Date
+  monthsFromStart: number
 }
 
 interface SurveyTimelineProps {
-  currentProgress: number; // Percentage of completion
-  totalGpsInScope: number; // Total GPs to be surveyed
-  agreementDate?: Date; // PIA agreement date
-  milestoneType?: "feasibility" | "hoto"; // Type of milestones to show
-  title?: string; // Custom title for the timeline
+  currentProgress: number // Percentage of completion
+  totalGpsInScope: number // Total GPs to be surveyed
+  agreementDate?: Date // PIA agreement date
+  milestoneType?: "feasibility" | "hoto" // Type of milestones to show
+  title?: string // Custom title for the timeline
 }
 
 // Default agreement date if not provided
-const DEFAULT_AGREEMENT_DATE = new Date(2025, 4, 1); // May 1, 2025 (month is 0-indexed)
+const DEFAULT_AGREEMENT_DATE = new Date(2025, 4, 1) // May 1, 2025 (month is 0-indexed)
 
 function createMilestones(
   agreementDate: Date,
-  type: "feasibility" | "hoto" = "feasibility"
+  type: "feasibility" | "hoto" = "feasibility",
 ): Milestone[] {
   if (type === "hoto") {
     return [
@@ -69,7 +64,7 @@ function createMilestones(
         date: addMonths(agreementDate, 6),
         monthsFromStart: 6,
       },
-    ];
+    ]
   }
 
   // Default feasibility milestones
@@ -102,25 +97,25 @@ function createMilestones(
       date: addMonths(agreementDate, 12),
       monthsFromStart: 12,
     },
-  ];
+  ]
 }
 
 function getMilestoneStatus(
   milestone: Milestone,
   currentProgress: number,
-  currentDate: Date
+  currentDate: Date,
 ) {
-  const isPast = currentDate > milestone.date;
-  const isAchieved = currentProgress >= milestone.targetPercentage;
+  const isPast = currentDate > milestone.date
+  const isAchieved = currentProgress >= milestone.targetPercentage
 
-  if (isAchieved) return "completed";
-  if (isPast && !isAchieved) return "overdue";
+  if (isAchieved) return "completed"
+  if (isPast && !isAchieved) return "overdue"
   if (
     currentDate <= milestone.date &&
     currentProgress < milestone.targetPercentage
   )
-    return "upcoming";
-  return "current";
+    return "upcoming"
+  return "current"
 }
 
 function getStatusIcon(status: string) {
@@ -131,32 +126,32 @@ function getStatusIcon(status: string) {
           icon="material-symbols:check-circle"
           className="h-6 w-6 text-emerald-600"
         />
-      );
+      )
     case "overdue":
       return (
         <Icon icon="mingcute:warning-fill" className="h-4 w-6 text-red-500" />
-      );
+      )
     case "current":
       return (
         <Icon icon="ic:sharp-watch-later" className="h-6 w-6 text-blue-500" />
-      );
+      )
     default:
       return (
         <Icon icon="ic:sharp-watch-later" className="h-6 w-6 text-gray-400" />
-      );
+      )
   }
 }
 
 function getStatusColor(status: string) {
   switch (status) {
     case "completed":
-      return "bg-emerald-500";
+      return "bg-emerald-500"
     case "overdue":
-      return "bg-red-500";
+      return "bg-red-500"
     case "current":
-      return "bg-blue-500";
+      return "bg-blue-500"
     default:
-      return "bg-gray-300";
+      return "bg-gray-300"
   }
 }
 
@@ -164,28 +159,28 @@ function getStatusColor(status: string) {
 function calculateCurrentTarget(
   milestones: Milestone[],
   currentDate: Date,
-  totalGps: number
+  totalGps: number,
 ): {
-  expectedPercentage: number;
-  expectedGps: number;
+  expectedPercentage: number
+  expectedGps: number
 } {
   // Find the current milestone period
-  const currentMilestone = milestones.find((m) => currentDate <= m.date);
+  const currentMilestone = milestones.find((m) => currentDate <= m.date)
 
   if (!currentMilestone) {
     // Past all milestones
-    const lastMilestone = milestones[milestones.length - 1];
+    const lastMilestone = milestones[milestones.length - 1]
     return {
       expectedPercentage: lastMilestone.targetPercentage,
       expectedGps: Math.round(
-        (lastMilestone.targetPercentage / 100) * totalGps
+        (lastMilestone.targetPercentage / 100) * totalGps,
       ),
-    };
+    }
   }
 
-  const currentIndex = milestones.indexOf(currentMilestone);
+  const currentIndex = milestones.indexOf(currentMilestone)
   const previousMilestone =
-    currentIndex > 0 ? milestones[currentIndex - 1] : null;
+    currentIndex > 0 ? milestones[currentIndex - 1] : null
 
   if (!previousMilestone) {
     // Before first milestone
@@ -193,35 +188,35 @@ function calculateCurrentTarget(
       (currentDate.getTime() -
         milestones[0].date.getTime() +
         currentMilestone.monthsFromStart * 30 * 24 * 60 * 60 * 1000) /
-      (1000 * 60 * 60 * 24);
-    const totalDaysToMilestone = currentMilestone.monthsFromStart * 30;
+      (1000 * 60 * 60 * 24)
+    const totalDaysToMilestone = currentMilestone.monthsFromStart * 30
     const progress = Math.max(
       0,
-      Math.min(1, daysSinceStart / totalDaysToMilestone)
-    );
-    const expectedPercentage = progress * currentMilestone.targetPercentage;
+      Math.min(1, daysSinceStart / totalDaysToMilestone),
+    )
+    const expectedPercentage = progress * currentMilestone.targetPercentage
 
     return {
       expectedPercentage,
       expectedGps: Math.round((expectedPercentage / 100) * totalGps),
-    };
+    }
   }
 
   // Between two milestones - linear interpolation
   const totalDuration =
-    currentMilestone.date.getTime() - previousMilestone.date.getTime();
-  const elapsed = currentDate.getTime() - previousMilestone.date.getTime();
-  const progress = Math.max(0, Math.min(1, elapsed / totalDuration));
+    currentMilestone.date.getTime() - previousMilestone.date.getTime()
+  const elapsed = currentDate.getTime() - previousMilestone.date.getTime()
+  const progress = Math.max(0, Math.min(1, elapsed / totalDuration))
 
   const expectedPercentage =
     previousMilestone.targetPercentage +
     (currentMilestone.targetPercentage - previousMilestone.targetPercentage) *
-      progress;
+      progress
 
   return {
     expectedPercentage,
     expectedGps: Math.round((expectedPercentage / 100) * totalGps),
-  };
+  }
 }
 
 export function SurveyTimeline({
@@ -231,14 +226,14 @@ export function SurveyTimeline({
   milestoneType = "feasibility",
   title,
 }: SurveyTimelineProps) {
-  const currentDate = new Date();
-  const startDate = agreementDate || DEFAULT_AGREEMENT_DATE;
-  const milestones = createMilestones(startDate, milestoneType);
+  const currentDate = new Date()
+  const startDate = agreementDate || DEFAULT_AGREEMENT_DATE
+  const milestones = createMilestones(startDate, milestoneType)
   const currentTarget = calculateCurrentTarget(
     milestones,
     currentDate,
-    totalGpsInScope
-  );
+    totalGpsInScope,
+  )
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg border p-6 mb-6">
@@ -272,11 +267,11 @@ export function SurveyTimeline({
               const status = getMilestoneStatus(
                 milestone,
                 currentProgress,
-                currentDate
-              );
+                currentDate,
+              )
               const targetGps = Math.round(
-                (milestone.targetPercentage / 100) * totalGpsInScope
-              );
+                (milestone.targetPercentage / 100) * totalGpsInScope,
+              )
 
               return (
                 <div
@@ -312,7 +307,7 @@ export function SurveyTimeline({
                               ? "bg-red-500"
                               : status === "current"
                                 ? "bg-blue-500"
-                                : "bg-gray-300"
+                                : "bg-gray-300",
                         )}
                         style={{
                           width: `${Math.min(100, (currentProgress / milestone.targetPercentage) * 100)}%`,
@@ -328,22 +323,22 @@ export function SurveyTimeline({
                     </div>
                   </div>
                 </div>
-              );
+              )
             })}
 
             {/* Today indicator */}
             {(() => {
-              const today = currentDate.getTime();
+              const today = currentDate.getTime()
 
               // Find which milestone period we're in
-              let currentMilestoneIndex = -1;
-              let previousMilestoneIndex = -1;
+              let currentMilestoneIndex = -1
+              let previousMilestoneIndex = -1
 
               for (let i = 0; i < milestones.length; i++) {
                 if (today <= milestones[i].date.getTime()) {
-                  currentMilestoneIndex = i;
-                  previousMilestoneIndex = i - 1;
-                  break;
+                  currentMilestoneIndex = i
+                  previousMilestoneIndex = i - 1
+                  break
                 }
               }
 
@@ -361,30 +356,30 @@ export function SurveyTimeline({
                       Today
                     </div>
                   </div>
-                );
+                )
               }
 
               // Calculate position between milestones
               const periodStartDate =
                 previousMilestoneIndex >= 0
                   ? milestones[previousMilestoneIndex].date.getTime()
-                  : startDate.getTime();
+                  : startDate.getTime()
               const periodEndDate =
-                milestones[currentMilestoneIndex].date.getTime();
+                milestones[currentMilestoneIndex].date.getTime()
               const progressBetweenMilestones =
-                (today - periodStartDate) / (periodEndDate - periodStartDate);
+                (today - periodStartDate) / (periodEndDate - periodStartDate)
 
               // Calculate timeline positions (milestones are evenly spaced)
               const startPosition =
                 previousMilestoneIndex >= 0
                   ? (previousMilestoneIndex / (milestones.length - 1)) * 100
-                  : 0;
+                  : 0
               const endPosition =
-                (currentMilestoneIndex / (milestones.length - 1)) * 100;
+                (currentMilestoneIndex / (milestones.length - 1)) * 100
 
               const position =
                 startPosition +
-                progressBetweenMilestones * (endPosition - startPosition);
+                progressBetweenMilestones * (endPosition - startPosition)
 
               if (position >= 0 && position <= 100) {
                 return (
@@ -407,9 +402,9 @@ export function SurveyTimeline({
                       {currentProgress.toFixed(1)}%
                     </div>
                   </div>
-                );
+                )
               }
-              return null;
+              return null
             })()}
           </div>
         </div>
@@ -426,11 +421,11 @@ export function SurveyTimeline({
               const status = getMilestoneStatus(
                 milestone,
                 currentProgress,
-                currentDate
-              );
+                currentDate,
+              )
               const targetGps = Math.round(
-                (milestone.targetPercentage / 100) * totalGpsInScope
-              );
+                (milestone.targetPercentage / 100) * totalGpsInScope,
+              )
 
               return (
                 <div
@@ -470,7 +465,7 @@ export function SurveyTimeline({
                               ? "bg-red-500"
                               : status === "current"
                                 ? "bg-blue-500"
-                                : "bg-gray-300"
+                                : "bg-gray-300",
                         )}
                         style={{
                           width: `${Math.min(100, (currentProgress / milestone.targetPercentage) * 100)}%`,
@@ -486,7 +481,7 @@ export function SurveyTimeline({
                     </div>
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         </div>
@@ -502,11 +497,11 @@ export function SurveyTimeline({
             {format(startDate, "MMM d, yyyy")} →{" "}
             {format(
               addMonths(startDate, milestoneType === "hoto" ? 6 : 12),
-              "MMM d, yyyy"
+              "MMM d, yyyy",
             )}
           </span>
         </div>
       </div>
     </div>
-  );
+  )
 }

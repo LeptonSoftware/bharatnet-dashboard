@@ -1,57 +1,57 @@
-import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
-import { useNavigate } from "react-router";
-import { useState } from "react";
+import { TimePeriod } from "@/lib/trends"
+import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core"
+import { Icon } from "@iconify/react/dist/iconify.js"
+import { ChartBar } from "lucide-react"
+import { useState } from "react"
+import { useNavigate } from "react-router"
 
-import { useObserver, useRio } from "@rio.js/client";
-
-import { PageHeader } from "@/components/page-header";
-
-import { NationalDashboard } from "../[circleId]/dashboard/national-dashboard";
+import { useObserver, useRio } from "@rio.js/client"
+import { Label } from "@rio.js/ui/components/label"
 import {
   Select,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@rio.js/ui/components/select";
-import { SelectContent } from "@rio.js/ui/components/select";
-import { Tabs, TabsList, TabsTrigger } from "@rio.js/ui/components/tabs";
-import { ChartBar } from "lucide-react";
-import { Icon } from "@iconify/react/dist/iconify.js";
-import { TimePeriod } from "@/lib/trends";
-import { Switch } from "@rio.js/ui/components/switch";
-import { Label } from "@rio.js/ui/components/label";
+} from "@rio.js/ui/components/select"
+import { SelectContent } from "@rio.js/ui/components/select"
+import { Switch } from "@rio.js/ui/components/switch"
+import { Tabs, TabsList, TabsTrigger } from "@rio.js/ui/components/tabs"
+
+import { PageHeader } from "@/components/page-header"
+
+import { NationalDashboard } from "../[circleId]/dashboard/national-dashboard"
 
 export default function HomePage() {
-  using _ = useObserver();
-  const rio = useRio();
-  const me = rio.auth.me;
-  const navigate = useNavigate();
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>(null);
-  const [compareMode, setCompareMode] = useState(false);
+  using _ = useObserver()
+  const rio = useRio()
+  const me = rio.auth.me
+  const navigate = useNavigate()
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>(null)
+  const [compareMode, setCompareMode] = useState(false)
 
   useCopilotReadable({
     description: "The current user's name",
     value: me?.user_metadata.full_name,
-  });
+  })
 
   useCopilotReadable({
     description: "The current user's email",
     value: me?.email,
-  });
+  })
 
   useCopilotReadable({
     description: "Today's date",
     value: new Date().toLocaleDateString(),
-  });
+  })
 
   useCopilotAction({
     name: "logout",
     description: "Logout the current user",
     async handler() {
-      await rio.auth.logout();
-      navigate("/login");
+      await rio.auth.logout()
+      navigate("/login")
     },
-  });
+  })
 
   useCopilotAction({
     name: "showAlert",
@@ -64,9 +64,9 @@ export default function HomePage() {
       },
     ],
     handler({ message }) {
-      alert("Alert: " + message);
+      alert("Alert: " + message)
     },
-  });
+  })
 
   useCopilotAction({
     name: "set-time-period-selector",
@@ -80,9 +80,9 @@ export default function HomePage() {
       },
     ],
     handler({ timePeriod }) {
-      setTimePeriod(timePeriod as TimePeriod);
+      setTimePeriod(timePeriod as TimePeriod)
     },
-  });
+  })
 
   useCopilotAction({
     name: "set-compare-mode",
@@ -95,9 +95,9 @@ export default function HomePage() {
       },
     ],
     handler({ compareMode }) {
-      setCompareMode(compareMode);
+      setCompareMode(compareMode)
     },
-  });
+  })
 
   return (
     <>
@@ -134,13 +134,13 @@ export default function HomePage() {
               id="compare-mode"
               checked={compareMode}
               onCheckedChange={() => {
-                setCompareMode(!compareMode);
+                setCompareMode(!compareMode)
                 if (!compareMode) {
                   if (timePeriod === "last-week") {
-                    setTimePeriod("current-week");
+                    setTimePeriod("current-week")
                   }
                   if (timePeriod === "last-month") {
-                    setTimePeriod("current-month");
+                    setTimePeriod("current-month")
                   }
                 }
               }}
@@ -176,13 +176,13 @@ export default function HomePage() {
             id="compare-mode"
             checked={compareMode}
             onCheckedChange={() => {
-              setCompareMode(!compareMode);
+              setCompareMode(!compareMode)
               if (!compareMode) {
                 if (timePeriod === "last-week") {
-                  setTimePeriod("current-week");
+                  setTimePeriod("current-week")
                 }
                 if (timePeriod === "last-month") {
-                  setTimePeriod("current-month");
+                  setTimePeriod("current-month")
                 }
               }
             }}
@@ -198,5 +198,5 @@ export default function HomePage() {
       </div>
       <NationalDashboard timePeriod={timePeriod} compareMode={compareMode} />
     </>
-  );
+  )
 }

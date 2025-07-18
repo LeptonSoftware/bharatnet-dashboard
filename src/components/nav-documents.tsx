@@ -1,6 +1,4 @@
-
-
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react"
 
 import {
   DropdownMenu,
@@ -8,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@rio.js/ui/components/dropdown-menu";
+} from "@rio.js/ui/components/dropdown-menu"
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -17,18 +15,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@rio.js/ui/components/sidebar";
+} from "@rio.js/ui/components/sidebar"
 
 export function NavDocuments({
   items,
 }: {
   items: {
-    name: string;
-    url: string;
-    icon: string;
-  }[];
+    name: string
+    url: string
+    icon: string
+  }[]
 }) {
-  const { isMobile } = useSidebar();
+  const { isMobile } = useSidebar()
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -82,5 +80,5 @@ export function NavDocuments({
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
-  );
+  )
 }

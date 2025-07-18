@@ -1,15 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@rio.js/ui/components/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@rio.js/ui/components/tabs";
+import { PieChartIcon } from "lucide-react"
 import {
   Cell,
   Legend,
@@ -17,17 +6,29 @@ import {
   PieChart,
   ResponsiveContainer,
   Tooltip,
-} from "recharts";
-import { PieChartIcon } from "lucide-react";
+} from "recharts"
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@rio.js/ui/components/card"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@rio.js/ui/components/tabs"
 
 interface ChartData {
-  labels: string[];
-  data: number[];
+  labels: string[]
+  data: number[]
 }
 
 interface SurveyOverviewChartProps {
-  blockDistribution: ChartData;
-  kmDistribution: ChartData;
+  blockDistribution: ChartData
+  kmDistribution: ChartData
 }
 
 export function SurveyOverviewChart({
@@ -39,12 +40,12 @@ export function SurveyOverviewChart({
     completed: "#10B981", // emerald-500
     ongoing: "#3B82F6", // blue-500
     pending: "#6B7280", // gray-500
-  };
+  }
 
   const KM_COLORS = {
     surveyed: "#A855F7", // purple-500
     remaining: "#6B7280", // gray-500
-  };
+  }
 
   const blockData = blockDistribution.labels.map((label, index) => ({
     name:
@@ -55,13 +56,13 @@ export function SurveyOverviewChart({
           : "Pending",
     value: blockDistribution.data[index] || 0,
     color: STATUS_COLORS[label as keyof typeof STATUS_COLORS],
-  }));
+  }))
 
   const kmData = kmDistribution.labels.map((label, index) => ({
     name: label === "surveyed" ? "Surveyed" : "Remaining",
     value: kmDistribution.data[index] || 0,
     color: KM_COLORS[label as keyof typeof KM_COLORS],
-  }));
+  }))
 
   return (
     <Card className="col-span-full lg:col-span-6">
@@ -128,5 +129,5 @@ export function SurveyOverviewChart({
         </Tabs>
       </CardContent>
     </Card>
-  );
+  )
 }

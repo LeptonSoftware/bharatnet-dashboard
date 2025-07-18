@@ -1,130 +1,131 @@
-import { useEffect, useState } from "react";
-import { SurveyData, NationalRowData } from "@/types";
-import { fetchData } from "@/lib/api";
-import { getCircleName } from "@/lib/utils";
+import { useNationalDashboard } from "@/hooks/use-national-dashboard"
+import { fetchData } from "@/lib/api"
 import {
   calculateSurveySummaryStats,
   getSurveyDistrictSummaries,
   getSurveyProgressData,
   getSurveyStatusDistribution,
-} from "@/lib/survey-utils";
-import { StatusCard } from "./status-card";
-import { SurveyOverviewChart } from "./survey-overview-chart";
-import { SurveyDistrictProgress } from "./survey-district-progress";
-import { SurveyBlocksTable } from "./survey-blocks-table";
-import { SurveyDashboardSkeleton } from "./loading-skeleton";
-import { SurveyTimeline } from "./survey-timeline";
-import { useNationalDashboard } from "@/hooks/use-national-dashboard";
+} from "@/lib/survey-utils"
+import { getCircleName } from "@/lib/utils"
+import { NationalRowData, SurveyData } from "@/types"
 import {
+  Building2,
+  Cable,
   CheckCircle,
   Clock,
   FileQuestion,
-  Map,
-  Cable,
-  Router,
   LayoutDashboard,
-  Building2,
+  Map,
+  Router,
   Table,
-} from "lucide-react";
+} from "lucide-react"
+import { useEffect, useState } from "react"
+
+import { SurveyDashboardSkeleton } from "./loading-skeleton"
+import { StatusCard } from "./status-card"
+import { SurveyBlocksTable } from "./survey-blocks-table"
+import { SurveyDistrictProgress } from "./survey-district-progress"
+import { SurveyOverviewChart } from "./survey-overview-chart"
+import { SurveyTimeline } from "./survey-timeline"
 
 interface FeasibilityDashboardProps {
-  circle: string;
+  circle: string
 }
 
 const parseDate = (date: string) => {
-  const [day, month, year] = date.trim().split(".");
-  return new Date(Number(year), Number(month) - 1, Number(day));
-};
+  const [day, month, year] = date.trim().split(".")
+  return new Date(Number(year), Number(month) - 1, Number(day))
+}
 
 export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
-  const [data, setData] = useState<SurveyData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<SurveyData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Use the national dashboard hook
   const {
     data: nationalData,
     isLoading: nationalLoading,
     error: nationalError,
-  } = useNationalDashboard();
+  } = useNationalDashboard()
 
   useEffect(() => {
     async function loadData() {
       try {
-        setIsLoading(true);
+        setIsLoading(true)
 
         // Only fetch survey data
-        const surveyResponse = await fetchData(circle, "survey");
-        const circleData = surveyResponse[`${circle}Survey`] as SurveyData[];
+        const surveyResponse = await fetchData(circle, "survey")
+        const circleData = surveyResponse[`${circle}Survey`] as SurveyData[]
         setData(
           circleData?.filter(
-            (item) => Boolean(item.sNo) && item.block != "B-1"
-          ) || []
-        );
+            (item) => Boolean(item.sNo) && item.block != "B-1",
+          ) || [],
+        )
       } catch (err) {
-        setError("Failed to load data");
-        console.error(err);
+        setError("Failed to load data")
+        console.error(err)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
 
-    loadData();
-  }, [circle]);
+    loadData()
+  }, [circle])
 
   // Show loading if either survey data or national data is loading
-  if (isLoading || nationalLoading) return <SurveyDashboardSkeleton />;
+  if (isLoading || nationalLoading) return <SurveyDashboardSkeleton />
 
   // Show error if either failed
-  if (error) return <div className="text-destructive">{error}</div>;
+  if (error) return <div className="text-destructive">{error}</div>
   if (nationalError)
     return (
       <div className="text-destructive">
         {nationalError.message || "Failed to load national data"}
       </div>
-    );
+    )
 
   if (!data.length)
-    return <div className="text-center p-8">No data available</div>;
+    return <div className="text-center p-8">No data available</div>
 
-  const stats = calculateSurveySummaryStats(data, "feasibility", circle);
-  const districts = getSurveyDistrictSummaries(data, "feasibility", circle);
-  const statusDistribution = getSurveyStatusDistribution(data, "feasibility");
+  const stats = calculateSurveySummaryStats(data, "feasibility", circle)
+  const districts = getSurveyDistrictSummaries(data, "feasibility", circle)
+  const statusDistribution = getSurveyStatusDistribution(data, "feasibility")
   const kmDistribution = {
     labels: ["surveyed", "remaining"],
     data: [stats.completedKm || 0, stats.pendingKm || 0],
-  };
+  }
 
   // Calculate current progress percentage for timeline using GP data from national dashboard
   const getGpProgress = () => {
-    const circleName = getCircleName(circle);
+    const circleName = getCircleName(circle)
     const circleNationalData = nationalData.find(
-      (item) => item.state === circleName || item.abbreviation === circle
-    );
+      (item) => item.state === circleName || item.abbreviation === circle,
+    )
 
     if (circleNationalData && circleNationalData.physicalSurveyGPsTodo > 0) {
       return (
         (circleNationalData.physicalSurveyGPsDone /
           circleNationalData.physicalSurveyGPsTodo) *
         100
-      );
+      )
     }
 
     // Fallback to KM-based calculation if GP data is not available
-    return ((stats.completedKm || 0) / (stats.totalPlannedKm || 1)) * 100;
-  };
+    return ((stats.completedKm || 0) / (stats.totalPlannedKm || 1)) * 100
+  }
 
-  const currentProgress = getGpProgress();
+  const currentProgress = getGpProgress()
 
   // Get circle national data for timeline
   const getCircleNationalData = () => {
-    const circleName = getCircleName(circle);
+    const circleName = getCircleName(circle)
     return nationalData.find(
-      (item) => item.state === circleName || item.abbreviation === circle
-    );
-  };
+      (item) => item.state === circleName || item.abbreviation === circle,
+    )
+  }
 
-  const circleNationalData = getCircleNationalData();
+  const circleNationalData = getCircleNationalData()
 
   return (
     <div className="space-y-6">
@@ -183,10 +184,10 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
 
       {/* GP Progress Section */}
       {(() => {
-        const circleName = getCircleName(circle);
+        const circleName = getCircleName(circle)
         const circleNationalData = nationalData.find(
-          (item) => item.state === circleName
-        );
+          (item) => item.state === circleName,
+        )
 
         if (circleNationalData) {
           return (
@@ -229,9 +230,9 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
                 />
               </div>
             </div>
-          );
+          )
         }
-        return null;
+        return null
       })()}
 
       <div>
@@ -292,5 +293,5 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
         <SurveyBlocksTable data={data} type="feasibility" />
       </div>
     </div>
-  );
+  )
 }

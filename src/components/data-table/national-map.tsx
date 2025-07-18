@@ -1,18 +1,20 @@
-import { MapProvider, MapCanvas, MapLayer } from "@rio.js/react-maps";
-import { useQuery } from "@tanstack/react-query";
-import { NationalRowData } from "@/types";
-import { useMemo, useState } from "react";
-import { Button } from "@rio.js/ui/components/button";
-import { Maximize2, Minimize2, X } from "lucide-react";
-import { AestheticCard } from "@/components/ui/aesthetic-card";
-import { Table } from "@tanstack/react-table";
-import { useDataTable } from "@/hooks/use-data-table";
-import { ColumnDef } from "@tanstack/react-table";
-import { CircleSVG } from "@/components/circle-svg";
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { cn } from "@rio.js/ui/lib/utils";
-import { Link } from "react-router";
-import { Suspense } from "react";
+import { useDataTable } from "@/hooks/use-data-table"
+import { NationalRowData } from "@/types"
+import { useQuery } from "@tanstack/react-query"
+import { Table } from "@tanstack/react-table"
+import { ColumnDef } from "@tanstack/react-table"
+import { Maximize2, Minimize2, X } from "lucide-react"
+import { useMemo, useState } from "react"
+import { Suspense } from "react"
+import { Link } from "react-router"
+
+import { MapCanvas, MapLayer, MapProvider } from "@rio.js/react-maps"
+import { Button } from "@rio.js/ui/components/button"
+import { cn } from "@rio.js/ui/lib/utils"
+
+import { CircleSVG } from "@/components/circle-svg"
+import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
+import { AestheticCard } from "@/components/ui/aesthetic-card"
 
 // Copy the columns definition from dashboard-table.tsx
 const columns: ColumnDef<NationalRowData>[] = [
@@ -44,13 +46,13 @@ const columns: ColumnDef<NationalRowData>[] = [
           >
             {row.getValue("state")}
           </Link>
-        );
+        )
       }
       return (
         <div className="font-medium text-wrap min-w-[200px]">
           {row.getValue("state")}
         </div>
-      );
+      )
     },
   },
   {
@@ -59,22 +61,22 @@ const columns: ColumnDef<NationalRowData>[] = [
       <DataTableColumnHeader column={column} title="PIA" className="mx-auto" />
     ),
     cell: ({ row }) => {
-      const pia = row.original.pia;
+      const pia = row.original.pia
       const isNotPia =
         pia &&
         typeof pia === "string" &&
         (pia.toLowerCase().includes("tender") ||
-          pia.toLowerCase().includes("bids"));
+          pia.toLowerCase().includes("bids"))
       return (
         <div
           className={cn(
             "font-medium text-center",
-            isNotPia && "text-destructive"
+            isNotPia && "text-destructive",
           )}
         >
           {pia}
         </div>
-      );
+      )
     },
   },
   {
@@ -102,9 +104,9 @@ const columns: ColumnDef<NationalRowData>[] = [
       />
     ),
     cell: ({ row }) => {
-      const total = row.original.gPsTotal;
-      const newGPs = row.original.gPsNew;
-      const existing = row.original.gPsExisting;
+      const total = row.original.gPsTotal
+      const newGPs = row.original.gPsNew
+      const existing = row.original.gPsExisting
       return (
         <div className="flex flex-col items-center gap-1">
           <div className="font-medium tabular-nums">
@@ -120,7 +122,7 @@ const columns: ColumnDef<NationalRowData>[] = [
             </span>
           </div>
         </div>
-      );
+      )
     },
   },
   {
@@ -133,9 +135,9 @@ const columns: ColumnDef<NationalRowData>[] = [
       />
     ),
     cell: ({ row }) => {
-      const total = row.original.ofcTotalKMs;
-      const existing = row.original.ofcExistingKMs;
-      const newKms = row.original.ofcNewKms;
+      const total = row.original.ofcTotalKMs
+      const existing = row.original.ofcExistingKMs
+      const newKms = row.original.ofcNewKms
       return (
         <div className="flex flex-col items-center gap-1">
           <div className="font-medium tabular-nums">
@@ -151,7 +153,7 @@ const columns: ColumnDef<NationalRowData>[] = [
             </span>
           </div>
         </div>
-      );
+      )
     },
   },
   {
@@ -164,17 +166,17 @@ const columns: ColumnDef<NationalRowData>[] = [
       />
     ),
     cell: ({ row }) => {
-      const value = row.getValue("financialProgress");
-      if (!value) return <div className="text-center">N/A</div>;
-      const parts = String(value).split("\n");
-      const amount = parts[0] || "N/A";
-      const date = parts[1] || "";
+      const value = row.getValue("financialProgress")
+      if (!value) return <div className="text-center">N/A</div>
+      const parts = String(value).split("\n")
+      const amount = parts[0] || "N/A"
+      const date = parts[1] || ""
       return (
         <div className="flex flex-col items-center gap-1">
           <div className="font-medium">₹ {amount}</div>
           {date && <div className="text-xs text-muted-foreground">{date}</div>}
         </div>
-      );
+      )
     },
   },
   {
@@ -192,11 +194,11 @@ const columns: ColumnDef<NationalRowData>[] = [
       </div>
     ),
   },
-];
+]
 
 interface NationalMapProps {
-  data: NationalRowData[];
-  table: Table<NationalRowData>;
+  data: NationalRowData[]
+  table: Table<NationalRowData>
 }
 
 const colors = [
@@ -215,56 +217,56 @@ const colors = [
   { name: "Hot Pink", hex: "#FF2D95" },
   { name: "Shocking Pink", hex: "#FF5ACD" },
   { name: "Coral Pop", hex: "#FF6D6D" },
-];
+]
 
 function hash(str: string) {
-  let hash = 0;
+  let hash = 0
   for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
   }
-  return hash;
+  return hash
 }
 
 export function NationalMap({ data, table }: NationalMapProps) {
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const [selectedState, setSelectedState] = useState<NationalRowData | null>(
-    null
-  );
+    null,
+  )
   const [hoveredState, setHoveredState] = useState<{
-    name: string;
-    abbreviation: string;
-    x: number;
-    y: number;
-  } | null>(null);
+    name: string
+    abbreviation: string
+    x: number
+    y: number
+  } | null>(null)
 
   // Fetch india-states.json directly from public
   const { data: geojson, isLoading } = useQuery({
     queryKey: ["india-states-geojson"],
     queryFn: async () => {
-      const response = await fetch("/india-states.json");
-      return response.json();
+      const response = await fetch("/india-states.json")
+      return response.json()
     },
     staleTime: 60 * 60 * 1000,
-  });
+  })
 
   // Filter features to only those states present in the data
   const filteredGeoJson = useMemo(() => {
-    if (!geojson?.features || !data?.length) return null;
-    const stateNames = data.map((row) => row.state.toLowerCase());
+    if (!geojson?.features || !data?.length) return null
+    const stateNames = data.map((row) => row.state.toLowerCase())
     return {
       ...geojson,
       features: geojson.features
         .filter((f: any) =>
-          stateNames.includes((f.properties.name as string)?.toLowerCase())
+          stateNames.includes((f.properties.name as string)?.toLowerCase()),
         )
         .map((feature: any) => {
-          const stateName = feature.properties.name as string;
+          const stateName = feature.properties.name as string
           const stateData = data.find(
-            (row) => row.state.toLowerCase() === stateName.toLowerCase()
-          );
+            (row) => row.state.toLowerCase() === stateName.toLowerCase(),
+          )
           const color = stateData
             ? colors[Math.abs(hash(stateData.state)) % colors.length].hex
-            : "#cccccc";
+            : "#cccccc"
           return {
             ...feature,
             properties: {
@@ -272,12 +274,12 @@ export function NationalMap({ data, table }: NationalMapProps) {
               color,
               stateData: stateData || null,
             },
-          };
+          }
         }),
-    };
-  }, [geojson, data]);
+    }
+  }, [geojson, data])
 
-  const toggleFullscreen = () => setIsFullscreen((f) => !f);
+  const toggleFullscreen = () => setIsFullscreen((f) => !f)
 
   // Adjusted view to fit all of India better
   const viewState = useMemo(
@@ -288,26 +290,26 @@ export function NationalMap({ data, table }: NationalMapProps) {
       pitch: 0,
       bearing: 0,
     }),
-    []
-  );
+    [],
+  )
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[600px]">
         <div className="text-lg">Loading map...</div>
       </div>
-    );
+    )
   }
   if (!filteredGeoJson || filteredGeoJson.features.length === 0) {
     return (
       <div className="flex items-center justify-center h-[600px]">
         <div className="text-lg">No state data available for map display</div>
       </div>
-    );
+    )
   }
   const mapContainerClass = isFullscreen
     ? "fixed inset-0 z-50 bg-white"
-    : "relative w-full h-[600px] rounded-lg border";
+    : "relative w-full h-[600px] rounded-lg border"
   return (
     <div className={mapContainerClass}>
       {/* Fullscreen button top left */}
@@ -355,12 +357,12 @@ export function NationalMap({ data, table }: NationalMapProps) {
           type={MapLayer.GeoJsonLayer}
           data={filteredGeoJson}
           getFillColor={(feature: any) => {
-            const color = feature.properties.color;
-            if (!color) return new Uint8Array([204, 204, 204, 180]);
-            const r = parseInt(color.slice(1, 3), 16);
-            const g = parseInt(color.slice(3, 5), 16);
-            const b = parseInt(color.slice(5, 7), 16);
-            return new Uint8Array([r, g, b, 180]);
+            const color = feature.properties.color
+            if (!color) return new Uint8Array([204, 204, 204, 180])
+            const r = parseInt(color.slice(1, 3), 16)
+            const g = parseInt(color.slice(3, 5), 16)
+            const b = parseInt(color.slice(5, 7), 16)
+            return new Uint8Array([r, g, b, 180])
           }}
           getLineColor={new Uint8Array([255, 255, 255, 255])}
           getLineWidth={2}
@@ -370,7 +372,7 @@ export function NationalMap({ data, table }: NationalMapProps) {
           highlightColor={[255, 255, 0]}
           onClick={(info: any) => {
             if (info?.object?.properties?.stateData) {
-              setSelectedState(info.object.properties.stateData);
+              setSelectedState(info.object.properties.stateData)
             }
           }}
           onHover={(info: any) => {
@@ -380,9 +382,9 @@ export function NationalMap({ data, table }: NationalMapProps) {
                 abbreviation: info.object.properties.stateData.abbreviation,
                 x: info.x,
                 y: info.y,
-              });
+              })
             } else {
-              setHoveredState(null);
+              setHoveredState(null)
             }
           }}
         />
@@ -398,5 +400,5 @@ export function NationalMap({ data, table }: NationalMapProps) {
         </div>
       )}
     </div>
-  );
+  )
 }

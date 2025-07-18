@@ -1,5 +1,5 @@
-import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api"
+import { useQuery } from "@tanstack/react-query"
 
 export function useNationalDashboard() {
   const {
@@ -9,7 +9,7 @@ export function useNationalDashboard() {
   } = useQuery({
     queryKey: ["national-dashboard"],
     queryFn: () => fetchNationalData(),
-  });
+  })
 
   const {
     data: circleRoles,
@@ -18,10 +18,10 @@ export function useNationalDashboard() {
   } = useQuery({
     queryKey: ["user-circle-roles"],
     queryFn: () => fetchUserCircleRoles(),
-  });
+  })
 
-  const isLoading = nationalLoading || rolesLoading;
-  const error = nationalError || rolesError;
+  const isLoading = nationalLoading || rolesLoading
+  const error = nationalError || rolesError
 
   // Filter national data based on circle roles
   const filteredData =
@@ -29,20 +29,20 @@ export function useNationalDashboard() {
       ? (() => {
           if (circleRoles && circleRoles.circles.length > 0) {
             const allowedCircles = circleRoles.circles.map((c: string) =>
-              c.circle.toLowerCase()
-            );
+              c.circle.toLowerCase(),
+            )
             return nationalData.filter((row) =>
-              allowedCircles.includes(row.abbreviation.toLowerCase())
-            );
+              allowedCircles.includes(row.abbreviation.toLowerCase()),
+            )
           }
-          return nationalData;
+          return nationalData
         })()
-      : [];
+      : []
 
   return {
     data: filteredData,
     circleRoles,
     isLoading,
     error,
-  };
+  }
 }

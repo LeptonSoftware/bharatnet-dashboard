@@ -1,23 +1,23 @@
 export function safeParse<T>(
   parser: Parser<T>["parse"],
   value: string,
-  key?: string
+  key?: string,
 ): T | null {
   try {
-    return parser(value);
+    return parser(value)
   } catch (error) {
     console.warn(
       "[nuqs] Error while parsing value `%s`: %O" +
         (key ? " (for key `%s`)" : ""),
       value,
       error,
-      key
-    );
-    return null;
+      key,
+    )
+    return null
   }
 }
 
-type Require<T, Keys extends keyof T> = Pick<Required<T>, Keys> & Omit<T, Keys>;
+type Require<T, Keys extends keyof T> = Pick<Required<T>, Keys> & Omit<T, Keys>
 
 export type Parser<T> = {
   /**
@@ -26,12 +26,12 @@ export type Parser<T> = {
    * If the string value does not represent a valid state value,
    * the parser should return `null`. Throwing an error is also supported.
    */
-  parse: (value: string) => T | null;
+  parse: (value: string) => T | null
 
   /**
    * Render the state value into a query string value.
    */
-  serialize?: (value: T) => string;
+  serialize?: (value: T) => string
 
   /**
    * Check if two state values are equal.
@@ -42,8 +42,8 @@ export type Parser<T> = {
    * It makes sense to provide this function when the state value is an object
    * or an array, as the default referential equality check will not work.
    */
-  eq?: (a: T, b: T) => boolean;
-};
+  eq?: (a: T, b: T) => boolean
+}
 
 export type ParserBuilder<T> = Required<Parser<T>> & {
   /**
@@ -64,9 +64,9 @@ export type ParserBuilder<T> = Required<Parser<T>> & {
    */
   withDefault(
     this: ParserBuilder<T>,
-    defaultValue: NonNullable<T>
+    defaultValue: NonNullable<T>,
   ): Omit<ParserBuilder<T>, "parseServerSide"> & {
-    readonly defaultValue: NonNullable<T>;
+    readonly defaultValue: NonNullable<T>
 
     // /**
     //  * Use the parser in Server Components
@@ -86,7 +86,7 @@ export type ParserBuilder<T> = Required<Parser<T>> & {
     //  * bond between the data type and the search param key.
     //  */
     // parseServerSide(value: string | string[] | undefined): NonNullable<T>;
-  };
+  }
 
   // /**
   //  * Use the parser in Server Components
@@ -106,14 +106,14 @@ export type ParserBuilder<T> = Required<Parser<T>> & {
   //  * bond between the data type and the search param key.
   //  */
   // parseServerSide(value: string | string[] | undefined): T | null;
-};
+}
 
 /**
  * Wrap a set of parse/serialize functions into a builder pattern parser
  * you can pass to one of the hooks, making its default value type safe.
  */
 export function createParser<T>(
-  parser: Require<Parser<T>, "parse" | "serialize">
+  parser: Require<Parser<T>, "parse" | "serialize">,
 ): ParserBuilder<T> {
   // function parseServerSideNullable(value: string | string[] | undefined) {
   //   if (typeof value === "undefined") {
@@ -145,7 +145,7 @@ export function createParser<T>(
         // parseServerSide(value) {
         //   return parseServerSideNullable(value) ?? defaultValue;
         // },
-      };
+      }
     },
     // withOptions(options: Options) {
     //   return {
@@ -153,7 +153,7 @@ export function createParser<T>(
     //     ...options,
     //   };
     // },
-  };
+  }
 }
 
 // Parsers implementations -----------------------------------------------------
@@ -161,62 +161,62 @@ export function createParser<T>(
 export const parseAsString: ParserBuilder<string> = createParser({
   parse: (v) => v,
   serialize: (v) => `${v}`,
-});
+})
 
 export const parseAsInteger: ParserBuilder<number> = createParser({
   parse: (v) => {
-    const int = parseInt(v);
+    const int = parseInt(v)
     if (Number.isNaN(int)) {
-      return null;
+      return null
     }
-    return int;
+    return int
   },
   serialize: (v) => Math.round(v).toFixed(),
-});
+})
 
 export const parseAsIndex: ParserBuilder<number> = createParser({
   parse: (v) => {
-    const int = parseAsInteger.parse(v);
+    const int = parseAsInteger.parse(v)
     if (int === null) {
-      return null;
+      return null
     }
-    return int - 1;
+    return int - 1
   },
   serialize: (v) => parseAsInteger.serialize(v + 1),
-});
+})
 
 export const parseAsHex: ParserBuilder<number> = createParser({
   parse: (v) => {
-    const int = parseInt(v, 16);
+    const int = parseInt(v, 16)
     if (Number.isNaN(int)) {
-      return null;
+      return null
     }
-    return int;
+    return int
   },
   serialize: (v) => {
-    const hex = Math.round(v).toString(16);
-    return hex.padStart(hex.length + (hex.length % 2), "0");
+    const hex = Math.round(v).toString(16)
+    return hex.padStart(hex.length + (hex.length % 2), "0")
   },
-});
+})
 
 export const parseAsFloat: ParserBuilder<number> = createParser({
   parse: (v) => {
-    const float = parseFloat(v);
+    const float = parseFloat(v)
     if (Number.isNaN(float)) {
-      return null;
+      return null
     }
-    return float;
+    return float
   },
   serialize: (v) => v.toString(),
-});
+})
 
 export const parseAsBoolean: ParserBuilder<boolean> = createParser({
   parse: (v) => v === "true",
   serialize: (v) => (v ? "true" : "false"),
-});
+})
 
 function compareDates(a: Date, b: Date) {
-  return a.valueOf() === b.valueOf();
+  return a.valueOf() === b.valueOf()
 }
 
 /**
@@ -225,15 +225,15 @@ function compareDates(a: Date, b: Date) {
  */
 export const parseAsTimestamp: ParserBuilder<Date> = createParser({
   parse: (v) => {
-    const ms = parseInt(v);
+    const ms = parseInt(v)
     if (Number.isNaN(ms)) {
-      return null;
+      return null
     }
-    return new Date(ms);
+    return new Date(ms)
   },
   serialize: (v: Date) => v.valueOf().toString(),
   eq: compareDates,
-});
+})
 
 /**
  * Querystring encoded as an ISO-8601 string (UTC),
@@ -241,15 +241,15 @@ export const parseAsTimestamp: ParserBuilder<Date> = createParser({
  */
 export const parseAsIsoDateTime: ParserBuilder<Date> = createParser({
   parse: (v) => {
-    const date = new Date(v);
+    const date = new Date(v)
     if (Number.isNaN(date.valueOf())) {
-      return null;
+      return null
     }
-    return date;
+    return date
   },
   serialize: (v: Date) => v.toISOString(),
   eq: compareDates,
-});
+})
 
 /**
  * Querystring encoded as an ISO-8601 string (UTC)
@@ -261,15 +261,15 @@ export const parseAsIsoDateTime: ParserBuilder<Date> = createParser({
  */
 export const parseAsIsoDate: ParserBuilder<Date> = createParser({
   parse: (v) => {
-    const date = new Date(v.slice(0, 10));
+    const date = new Date(v.slice(0, 10))
     if (Number.isNaN(date.valueOf())) {
-      return null;
+      return null
     }
-    return date;
+    return date
   },
   serialize: (v: Date) => v.toISOString().slice(0, 10),
   eq: compareDates,
-});
+})
 
 /**
  * String-based enums provide better type-safety for known sets of values.
@@ -299,18 +299,18 @@ export const parseAsIsoDate: ParserBuilder<Date> = createParser({
  * @param validValues The values you want to accept
  */
 export function parseAsStringEnum<Enum extends string>(
-  validValues: Enum[]
+  validValues: Enum[],
 ): ParserBuilder<Enum> {
   return createParser({
     parse: (query: string) => {
-      const asEnum = query as unknown as Enum;
+      const asEnum = query as unknown as Enum
       if (validValues.includes(asEnum)) {
-        return asEnum;
+        return asEnum
       }
-      return null;
+      return null
     },
     serialize: (value: Enum) => value.toString(),
-  });
+  })
 }
 
 /**
@@ -333,18 +333,18 @@ export function parseAsStringEnum<Enum extends string>(
  * @param validValues The values you want to accept
  */
 export function parseAsStringLiteral<const Literal extends string>(
-  validValues: readonly Literal[]
+  validValues: readonly Literal[],
 ): ParserBuilder<Literal> {
   return createParser({
     parse: (query: string) => {
-      const asConst = query as unknown as Literal;
+      const asConst = query as unknown as Literal
       if (validValues.includes(asConst)) {
-        return asConst;
+        return asConst
       }
-      return null;
+      return null
     },
     serialize: (value: Literal) => value.toString(),
-  });
+  })
 }
 
 /**
@@ -367,18 +367,18 @@ export function parseAsStringLiteral<const Literal extends string>(
  * @param validValues The values you want to accept
  */
 export function parseAsNumberLiteral<const Literal extends number>(
-  validValues: readonly Literal[]
+  validValues: readonly Literal[],
 ): ParserBuilder<Literal> {
   return createParser({
     parse: (query: string) => {
-      const asConst = parseFloat(query) as unknown as Literal;
+      const asConst = parseFloat(query) as unknown as Literal
       if (validValues.includes(asConst)) {
-        return asConst;
+        return asConst
       }
-      return null;
+      return null
     },
     serialize: (value: Literal) => value.toString(),
-  });
+  })
 }
 
 /**
@@ -389,12 +389,12 @@ export function parseAsNumberLiteral<const Literal extends number>(
  * @param runtimeParser Runtime parser (eg: Zod schema or Standard Schema) to validate after JSON.parse
  */
 export function parseAsJson<T>(
-  validator: (value: unknown) => T | null
+  validator: (value: unknown) => T | null,
 ): ParserBuilder<T> {
   return createParser({
     parse: (query) => {
       try {
-        const obj = JSON.parse(query);
+        const obj = JSON.parse(query)
         // if ("~standard" in validator) {
         //   const result = validator["~standard"].validate(obj);
         //   if (result instanceof Promise) {
@@ -404,17 +404,17 @@ export function parseAsJson<T>(
         //   }
         //   return result.issues ? null : result.value;
         // }
-        return validator(obj);
+        return validator(obj)
       } catch {
-        return null;
+        return null
       }
     },
     serialize: (value) => JSON.stringify(value),
     eq(a, b) {
       // Check for referential equality first
-      return a === b || JSON.stringify(a) === JSON.stringify(b);
+      return a === b || JSON.stringify(a) === JSON.stringify(b)
     },
-  });
+  })
 }
 
 /**
@@ -426,17 +426,17 @@ export function parseAsJson<T>(
  */
 export function parseAsArrayOf<ItemType>(
   itemParser: Parser<ItemType>,
-  separator = ","
+  separator = ",",
 ): ParserBuilder<ItemType[]> {
-  const itemEq = itemParser.eq ?? ((a: ItemType, b: ItemType) => a === b);
-  const encodedSeparator = encodeURIComponent(separator);
+  const itemEq = itemParser.eq ?? ((a: ItemType, b: ItemType) => a === b)
+  const encodedSeparator = encodeURIComponent(separator)
   // todo: Handle default item values and make return type non-nullable
   return createParser({
     parse: (query) => {
       if (query === "") {
         // Empty query should not go through the split/map/filter logic,
         // see https://github.com/47ng/nuqs/issues/329
-        return [] as ItemType[];
+        return [] as ItemType[]
       }
       return query
         .split(separator)
@@ -444,45 +444,45 @@ export function parseAsArrayOf<ItemType>(
           safeParse(
             itemParser.parse,
             item.replaceAll(encodedSeparator, separator),
-            `[${index}]`
-          )
+            `[${index}]`,
+          ),
         )
-        .filter((value) => value !== null && value !== undefined) as ItemType[];
+        .filter((value) => value !== null && value !== undefined) as ItemType[]
     },
     serialize: (values) =>
       values
         .map<string>((value) => {
           const str = itemParser.serialize
             ? itemParser.serialize(value)
-            : String(value);
-          return str.replaceAll(separator, encodedSeparator);
+            : String(value)
+          return str.replaceAll(separator, encodedSeparator)
         })
         .join(separator),
     eq(a, b) {
       if (a === b) {
-        return true; // Referentially stable
+        return true // Referentially stable
       }
       if (a.length !== b.length) {
-        return false;
+        return false
       }
-      return a.every((value, index) => itemEq(value, b[index]!));
+      return a.every((value, index) => itemEq(value, b[index]!))
     },
-  });
+  })
 }
 
 type inferSingleParserType<Parser> = Parser extends ParserBuilder<
   infer Value
 > & {
-  defaultValue: infer Value;
+  defaultValue: infer Value
 }
   ? Value
   : Parser extends ParserBuilder<infer Value>
     ? Value | null
-    : never;
+    : never
 
 type inferParserRecordType<Map extends Record<string, ParserBuilder<any>>> = {
-  [Key in keyof Map]: inferSingleParserType<Map[Key]>;
-} & {};
+  [Key in keyof Map]: inferSingleParserType<Map[Key]>
+} & {}
 
 /**
  * Type helper to extract the underlying returned data type of a parser
@@ -513,9 +513,9 @@ export type inferParserType<Input> =
     ? inferSingleParserType<Input>
     : Input extends Record<string, ParserBuilder<any>>
       ? inferParserRecordType<Input>
-      : never;
+      : never
 
 export type ParserWithOptionalDefault<T> = ParserBuilder<T> & {
-  defaultValue?: T;
-};
-export type ParserMap = Record<string, ParserWithOptionalDefault<any>>;
+  defaultValue?: T
+}
+export type ParserMap = Record<string, ParserWithOptionalDefault<any>>

@@ -1,6 +1,6 @@
-import { eventHandler } from "vinxi/http";
+import { eventHandler } from "vinxi/http"
 
-import { GoogleFonts, renderHTML } from "@rio.js/vinxi/render";
+import { GoogleFonts, renderHTML } from "@rio.js/vinxi/render"
 
 export default eventHandler(
   renderHTML(({ headPrepend, head, scripts, env }) => (
@@ -25,5 +25,5 @@ export default eventHandler(
         {scripts}
       </body>
     </html>
-  ))
-);
+  )),
+)

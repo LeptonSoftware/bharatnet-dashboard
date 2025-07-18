@@ -1,5 +1,5 @@
-import { Skeleton } from "@rio.js/ui/components/skeleton";
-import { Card, CardContent, CardHeader } from "@rio.js/ui/components/card";
+import { Card, CardContent, CardHeader } from "@rio.js/ui/components/card"
+import { Skeleton } from "@rio.js/ui/components/skeleton"
 
 export function SurveyDashboardSkeleton() {
   return (
@@ -128,7 +128,7 @@ export function SurveyDashboardSkeleton() {
         </Card>
       </div>
     </div>
-  );
+  )
 }
 
 export function DtpDashboardSkeleton() {
@@ -234,7 +234,7 @@ export function DtpDashboardSkeleton() {
         </Card>
       </div>
     </div>
-  );
+  )
 }
 
 export function NationalDashboardSkeleton() {
@@ -350,5 +350,5 @@ export function NationalDashboardSkeleton() {
         </Card>
       </div>
     </div>
-  );
+  )
 }

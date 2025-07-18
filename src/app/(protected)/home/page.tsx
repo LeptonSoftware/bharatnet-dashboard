@@ -1,5 +1,6 @@
-import { PageHeader } from "@/components/page-header";
-import { DashboardTable } from "./dashboard-table";
+import { PageHeader } from "@/components/page-header"
+
+import { DashboardTable } from "./dashboard-table"
 
 export default function DashboardPage() {
   return (
@@ -16,5 +17,5 @@ export default function DashboardPage() {
         <DashboardTable />
       </div>
     </>
-  );
+  )
 }
