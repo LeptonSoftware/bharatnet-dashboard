@@ -62,8 +62,8 @@ dependencies:
     specifier: ^1.2.3
     version: 1.2.3(@types/react@19.1.4)(react@19.1.0)
   '@rio.js/auth':
-    specifier: 0.0.7
-    version: 0.0.7(@types/node@22.5.5)(@types/react@19.1.4)(react@19.1.0)
+    specifier: 0.0.8
+    version: 0.0.8(@types/node@22.5.5)(@types/react@19.1.4)(react@19.1.0)
   '@rio.js/client':
     specifier: 0.0.4
     version: 0.0.4(@types/node@22.5.5)(@types/react@19.1.4)(react@19.1.0)
@@ -6087,14 +6087,14 @@ packages:
     resolution: {integrity: sha512-Javneu5lsuhwNCryN+pXH93VPQ8g0dBX7wItHFgYiwQmzE1sVdg5tWHiOgHywzL2W21XQopa7IwIEnNbmeUJYA==}
     dev: false
 
-  /@rio.js/auth@0.0.7(@types/node@22.5.5)(@types/react@19.1.4)(react@19.1.0):
-    resolution: {integrity: sha512-k/dd63rHStH2SypQ2CiSvl8j1T5CatTU1Jgcou5g0VjWrIMFpaIqAFSJH4toB9Py2SH0/vzjX2xwBUNhnyGi0g==}
+  /@rio.js/auth@0.0.8(@types/node@22.5.5)(@types/react@19.1.4)(react@19.1.0):
+    resolution: {integrity: sha512-uX6X2g1S+Q2c7x4z+5nS1piGa9n1FOh+OTpJLprTsrqqZIlf9Ik4MSu/Gk3TiTamK/Pa4cyCqMYkX6UCB7uizA==}
     dependencies:
       '@rio.js/client': 0.0.4(@types/node@22.5.5)(@types/react@19.1.4)(react@19.1.0)
       '@rio.js/crypto': 0.0.3(@types/node@22.5.5)(@types/react@19.1.4)(react@19.1.0)
       '@rio.js/env': 0.0.4(@types/node@22.5.5)
       '@rio.js/postgrest': 0.0.4(@types/node@22.5.5)(@types/react@19.1.4)(react@19.1.0)
-      '@supabase/gotrue-js': 2.70.0
+      '@supabase/auth-js': 2.70.0
       '@supabase/postgrest-js': 1.19.4(patch_hash=7hmnbl2ychajmulkovzgbr6zkm)
       '@supabase/supabase-js': 2.50.0
       '@types/crypto-js': 4.2.2
@@ -7418,12 +7418,6 @@ packages:
 
   /@supabase/functions-js@2.4.4:
     resolution: {integrity: sha512-WL2p6r4AXNGwop7iwvul2BvOtuJ1YQy8EbOd0dhG1oN1q8el/BIRSFCFnWAMM/vJJlHWLi4ad22sKbKr9mvjoA==}
-    dependencies:
-      '@supabase/node-fetch': 2.6.15(patch_hash=zkn5jw7d32gvykfogsqhlnnkmy)
-    dev: false
-
-  /@supabase/gotrue-js@2.70.0:
-    resolution: {integrity: sha512-36qluSKMW4bqB5TeDmGb0iG6VuaxxDDRvehz5RjROaE7hAyr6ME90bmcmVF+nf4Xie8b7/5gldMa/BOim2dyfw==}
     dependencies:
       '@supabase/node-fetch': 2.6.15(patch_hash=zkn5jw7d32gvykfogsqhlnnkmy)
     dev: false

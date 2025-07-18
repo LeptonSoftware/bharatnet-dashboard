@@ -1,10 +1,10 @@
-import { ReactNode } from "react";
-import { Link } from "react-router";
+import { ReactNode } from "react"
+import { Link } from "react-router"
 
-import { env } from "@rio.js/env";
+import { env } from "@rio.js/env"
 
 interface AuthLayoutProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 export function AuthLayout({ children }: AuthLayoutProps) {
@@ -16,17 +16,15 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             <div className="bg-transparent text-primary-foreground flex size-8 items-center justify-center rounded-md">
               <img src="/logo.png" className="size-6" />
             </div>
-            {env.PUBLIC_APP_NAME}
+            {env.PUBLIC_APP_NAME ?? "My App"}
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">{children}</div>
         </div>
-        <div className="flex items-center gap-2">
-          <img src="/lepton-logo.png" className="h-6" />
-          <div className="text-center text-sm text-muted-foreground ml-auto">
-            &copy; {new Date().getFullYear()} Lepton Software
-          </div>
+        <div className="text-center text-sm text-muted-foreground ml-auto">
+          &copy; {new Date().getFullYear()}{" "}
+          {env.PUBLIC_COMPANY_NAME ?? "My Company"}
         </div>
       </div>
       <div className="bg-muted relative hidden lg:block">
@@ -37,5 +35,5 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         />
       </div>
     </div>
-  );
+  )
 }

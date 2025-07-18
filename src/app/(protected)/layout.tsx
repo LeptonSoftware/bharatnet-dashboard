@@ -1,62 +1,135 @@
-import { rio } from "@/lib/rio";
+import { rio } from "@/lib/rio"
 import {
   CopilotKit,
   useCopilotAction,
   useCopilotReadable,
-} from "@copilotkit/react-core";
-import { CopilotPopup } from "@copilotkit/react-ui";
-import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
-import "@copilotkit/react-ui/styles.css";
+} from "@copilotkit/react-core"
 
-import { useCallback } from "react";
+import "@copilotkit/react-ui/styles.css"
+
+import { fetchNationalData } from "@/lib/api"
+import { Icon } from "@iconify/react"
+import { useQuery } from "@tanstack/react-query"
+import { useCallback } from "react"
 import {
   LoaderFunctionArgs,
   Outlet,
   redirect,
   useLocation,
   useNavigate,
-} from "react-router";
+} from "react-router"
 
-import { Authenticated } from "@rio.js/auth";
-import { SidebarInset, SidebarProvider } from "@rio.js/ui/components/sidebar";
+import { Authenticated } from "@rio.js/auth"
+import { SidebarInset } from "@rio.js/ui/components/sidebar"
 
-import { AppSidebar } from "@/components/app-sidebar";
-import { fetchNationalData } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { AppSidebar } from "@/components/sidebar/app-sidebar"
+import { AppSidebarProvider } from "@/components/sidebar/app-sidebar"
+import { SidebarSection } from "@/components/sidebar/sidebar-section"
 
 export function loader({ request }: LoaderFunctionArgs) {
   if (!rio.auth.isLoggedIn()) {
-    throw redirect(`/login?to=${new URL(request.url).pathname}`);
+    throw redirect(`/login?to=${new URL(request.url).pathname}`)
   }
 
-  return null;
+  return null
+}
+
+const data = {
+  user: {
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+    role: "admin", // This would come from auth context
+  },
+  teams: [
+    {
+      id: "lepton",
+      name: "Lepton Software",
+      logo: ({ ...props }) => (
+        <img src="/lepton-logo-small.png" {...props} alt="Lepton Software" />
+      ),
+      plan: "Enterprise",
+    },
+    {
+      id: "acme",
+      name: "Acme Inc",
+      logo: ({ ...props }) => <Icon icon="tabler:building" {...props} />,
+      plan: "Enterprise",
+    },
+    {
+      id: "acme-corp",
+      name: "Acme Corp.",
+      logo: ({ ...props }) => <Icon icon="tabler:building" {...props} />,
+      plan: "Startup",
+    },
+  ],
+  navMain: [
+    {
+      title: "Home",
+      url: "/home",
+      icon: "tabler:home",
+    },
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: "tabler:dashboard",
+    },
+    {
+      title: "Analytics",
+      url: "#",
+      icon: "tabler:chart-bar",
+    },
+    {
+      title: "Projects",
+      url: "#",
+      icon: "tabler:folder",
+    },
+    {
+      title: "Team",
+      url: "#",
+      icon: "tabler:users",
+    },
+  ],
+
+  navSecondary: [
+    {
+      title: "Settings",
+      url: "/settings",
+      icon: "tabler:settings",
+    },
+    {
+      title: "Help & Support",
+      url: "/help",
+      icon: "tabler:help",
+    },
+    {
+      title: "Search",
+      url: "/search",
+      icon: "tabler:search",
+    },
+  ],
 }
 
 export default function ProtectedLayout() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useNavigate()
+  const location = useLocation()
   const onUnauthenticated = useCallback(() => {
     navigate(`/login?to=${location.pathname}`, {
       viewTransition: true,
-    });
-  }, [navigate, location.pathname]);
+    })
+  }, [navigate, location.pathname])
   return (
-    // <NuqsAdapter>
     <Authenticated onUnauthenticated={onUnauthenticated}>
       <CopilotKit
         runtimeUrl="/api/copilotkit"
         transcribeAudioUrl="/api/transcribe"
         textToSpeechUrl="/api/tts"
       >
-        <SidebarProvider
-          defaultOpen={false}
-          style={
-            {
-              "--header-height": "calc(var(--spacing) * 12)",
-            } as React.CSSProperties
-          }
-        >
-          <AppSidebar collapsible="icon" variant="inset" />
+        <AppSidebarProvider defaultOpen={false}>
+          <AppSidebar collapsible="icon" variant="inset">
+            <SidebarSection items={data.navMain} />
+            <SidebarSection items={data.navSecondary} className="mt-auto" />
+          </AppSidebar>
           <SidebarInset>
             <Outlet />
             <CopilotActions />
@@ -70,20 +143,19 @@ export default function ProtectedLayout() {
               }}
             /> */}
           </SidebarInset>
-        </SidebarProvider>
+        </AppSidebarProvider>
       </CopilotKit>
     </Authenticated>
-    // </NuqsAdapter>
-  );
+  )
 }
 
 function CopilotActions() {
   const { data: nationalData, isLoading: isLoadingNational } = useQuery({
     queryKey: ["nationalData", "punjab"],
     queryFn: () => fetchNationalData(),
-  });
+  })
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   useCopilotReadable({
     description: "The list of states and abbreviations",
@@ -91,23 +163,23 @@ function CopilotActions() {
       state: row.state,
       abbreviation: row.abbreviation,
     })),
-  });
+  })
 
   useCopilotAction({
     description: "Navigate to or show the home page",
     name: "home",
     handler() {
-      navigate("/home");
+      navigate("/home")
     },
-  });
+  })
 
   useCopilotAction({
     description: "Navigate to or show the dashboard page",
     name: "dashboard",
     handler() {
-      navigate("/dashboard");
+      navigate("/dashboard")
     },
-  });
+  })
 
   useCopilotAction({
     description:
@@ -121,8 +193,8 @@ function CopilotActions() {
       },
     ],
     handler({ abbreviation }) {
-      navigate(`/${abbreviation}`);
+      navigate(`/${abbreviation}`)
     },
-  });
-  return null;
+  })
+  return null
 }

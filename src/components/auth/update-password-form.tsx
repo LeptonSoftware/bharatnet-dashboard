@@ -1,6 +1,6 @@
-import { createClient } from "@/lib/supabase/client"
 import { useState } from "react"
 
+import { useRio } from "@rio.js/client"
 import { Button } from "@rio.js/ui/components/button"
 import { Input } from "@rio.js/ui/components/input"
 import { Label } from "@rio.js/ui/components/label"
@@ -13,15 +13,15 @@ export function UpdatePasswordForm({
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const rio = useRio()
 
   const handleForgotPassword = async (e: React.FormEvent) => {
-    const supabase = createClient()
     e.preventDefault()
     setIsLoading(true)
     setError(null)
 
     try {
-      const { error } = await supabase.auth.updateUser({ password })
+      const { error } = await rio.auth.updatePassword({ password })
       if (error) throw error
       // Update this route to redirect to an authenticated route. The user already has an active session.
       location.href = "/protected"

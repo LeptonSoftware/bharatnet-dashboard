@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/client"
 import { Icon } from "@iconify/react"
 import { useState } from "react"
 import { Link } from "react-router"
 
+import { useRio } from "@rio.js/client"
 import { Button } from "@rio.js/ui/components/button"
 import { Input } from "@rio.js/ui/components/input"
 import { Label } from "@rio.js/ui/components/label"
@@ -18,9 +18,9 @@ export function SignUpForm({
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const rio = useRio()
 
   const handleSignUp = async (e: React.FormEvent) => {
-    const supabase = createClient()
     e.preventDefault()
     setError(null)
 
@@ -31,7 +31,7 @@ export function SignUpForm({
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { error } = await rio.auth.signUp({
         email,
         password,
       })

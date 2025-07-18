@@ -32,7 +32,7 @@ export function LoginForm({
     setError(null)
 
     try {
-      const { error } = await rio.auth.login({
+      const { error } = await rio.auth.signIn({
         email,
         password,
       })
@@ -106,8 +106,11 @@ export function LoginForm({
           className="w-full"
           type="button"
           onClick={async () => {
-            const response = await rio.auth.login({
+            const response = await rio.auth.signIn({
               provider: "google",
+              options: {
+                redirectTo: `${window.location.origin}/`,
+              },
             })
             if (response.success) {
               navigate(searchParams.get("to") || "/", {

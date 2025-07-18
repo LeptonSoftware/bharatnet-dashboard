@@ -1,4 +1,4 @@
-import { ChevronsUpDown, Plus } from "lucide-react"
+import { Icon } from "@iconify/react"
 import * as React from "react"
 
 import {
@@ -17,17 +17,35 @@ import {
   useSidebar,
 } from "@rio.js/ui/components/sidebar"
 
+export interface Team {
+  id: string
+  name: string
+  logo: React.ElementType
+  plan: string
+}
+
 export function TeamSwitcher({
   teams,
+  activeTeamId,
+  onActiveTeamChange,
+  onAddTeam,
 }: {
   teams: {
+    id: string
     name: string
     logo: React.ElementType
     plan: string
   }[]
+  activeTeamId: string | null
+  onActiveTeamChange: (team: Team) => void
+  onAddTeam: () => void
 }) {
   const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  const activeTeam = teams.find((team) => team.id === activeTeamId)
+
+  if (!activeTeam) {
+    throw new Error("Active team not found in list of teams")
+  }
 
   return (
     <SidebarMenu>
@@ -47,7 +65,7 @@ export function TeamSwitcher({
                 </span>
                 <span className="truncate text-xs">{activeTeam.plan}</span>
               </div>
-              {teams.length > 1 && <ChevronsUpDown className="ml-auto" />}
+              <Icon icon="tabler:chevron-down" className="ml-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -62,7 +80,7 @@ export function TeamSwitcher({
             {teams.map((team, index) => (
               <DropdownMenuItem
                 key={team.name}
-                onClick={() => setActiveTeam(team)}
+                onClick={() => onActiveTeamChange(team)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border bg-white overflow-hidden">
@@ -73,9 +91,9 @@ export function TeamSwitcher({
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
+            <DropdownMenuItem className="gap-2 p-2" onClick={onAddTeam}>
               <div className="bg-background flex size-6 items-center justify-center rounded-md border">
-                <Plus className="size-4" />
+                <Icon icon="tabler:plus" className="size-4" />
               </div>
               <div className="text-muted-foreground font-medium">Add team</div>
             </DropdownMenuItem>

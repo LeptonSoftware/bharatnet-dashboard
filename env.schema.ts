@@ -4,11 +4,11 @@ import {
   type ToEnvVariables,
   createEnvSchema,
   z,
-} from "@rio.js/env/utils";
+} from "@rio.js/env/utils"
 
-const SUPABASE_URL = "https://hzgytqitccsaffrvvdff.supabase.co/";
+const SUPABASE_URL = "https://hzgytqitccsaffrvvdff.supabase.co/"
 const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Z3l0cWl0Y2NzYWZmcnZ2ZGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5ODc4MDYsImV4cCI6MjA1NTU2MzgwNn0.L26B3duhlES6yEPLJ2ZmeSdpmkfjsBbTxAdbtz9UhEg";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Z3l0cWl0Y2NzYWZmcnZ2ZGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5ODc4MDYsImV4cCI6MjA1NTU2MzgwNn0.L26B3duhlES6yEPLJ2ZmeSdpmkfjsBbTxAdbtz9UhEg"
 
 // Base CSP values that should always be present
 const getBaseCSP = (publicRioEngineUrl = SUPABASE_URL) =>
@@ -21,12 +21,15 @@ const getBaseCSP = (publicRioEngineUrl = SUPABASE_URL) =>
     STYLE_SRC: "'self' 'unsafe-inline' https://fonts.googleapis.com",
     FONT_SRC: "'self' data: https://fonts.gstatic.com",
     FRAME_ANCESTORS: "'self' https://*.qlikcloud.com",
-  }) as const;
+  }) as const
 
 const settingsSchema = z.object({
   PUBLIC: z.object({
     APP: z.object({
       NAME: z.string().default("BharatNet"),
+    }),
+    COMPANY: z.object({
+      NAME: z.string().default("Lepton Software"),
     }),
     SUPABASE: z.object({
       URL: z.string().default(SUPABASE_URL),
@@ -61,7 +64,7 @@ const settingsSchema = z.object({
       SERVICE_ROLE_KEY: z
         .string()
         .default(
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Z3l0cWl0Y2NzYWZmcnZ2ZGZmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczOTk4NzgwNiwiZXhwIjoyMDU1NTYzODA2fQ.sM7pcgzgljN9dB-25taj6fLROBGZRjNbH374A3liHqM"
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Z3l0cWl0Y2NzYWZmcnZ2ZGZmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczOTk4NzgwNiwiZXhwIjoyMDU1NTYzODA2fQ.sM7pcgzgljN9dB-25taj6fLROBGZRjNbH374A3liHqM",
         ),
       AUTH: z.object({
         URL: z.string().default(`${SUPABASE_URL}auth/v1`),
@@ -75,10 +78,10 @@ const settingsSchema = z.object({
       .string()
       .default("AIzaSyCN5moMjI6jHNwOO77SjA4YAHY7onVrTK0"),
   }),
-});
+})
 
 export type EnvVariables = Simplify<
   ToEnvVariables<z.infer<typeof settingsSchema>>
->;
-export type EnvSchema = ToEnvSchema<EnvVariables>;
-export const envSchema = createEnvSchema<EnvSchema>(settingsSchema);
+>
+export type EnvSchema = ToEnvSchema<EnvVariables>
+export const envSchema = createEnvSchema<EnvSchema>(settingsSchema)
