@@ -1,20 +1,21 @@
-import "vinxi/client";
-import "unfonts.css";
-import "./globals.css";
+import "vinxi/client"
+import "unfonts.css"
+import "./globals.css"
 
-import { startTransition } from "react";
-import { createRoot } from "react-dom/client";
-import { createBrowserRouter } from "react-router";
-import { RouterProvider } from "react-router/dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { startTransition } from "react"
+import { createRoot } from "react-dom/client"
+import { createBrowserRouter } from "react-router"
+import { RouterProvider } from "react-router/dom"
 
-import { SupabaseAuthService } from "@rio.js/auth";
-import { RioClientProvider, useObserver } from "@rio.js/client";
-import { ThemeProvider } from "@rio.js/ui/components/theme-provider";
-import { TooltipProvider } from "@rio.js/ui/components/tooltip";
-import { fsRoutes } from "@rio.js/vinxi/fs-routes";
+import { SupabaseAuthService } from "@rio.js/auth"
+import { RioClientProvider, useObserver } from "@rio.js/client"
+import { Toaster } from "@rio.js/ui/components/sonner"
+import { ThemeProvider } from "@rio.js/ui/components/theme-provider"
+import { TooltipProvider } from "@rio.js/ui/components/tooltip"
+import { fsRoutes } from "@rio.js/vinxi/fs-routes"
 
-import { rio } from "./lib/rio";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { rio } from "./lib/rio"
 
 await rio.services.register("auth", async (rio) => {
   let service = new SupabaseAuthService(rio, {
@@ -26,20 +27,20 @@ await rio.services.register("auth", async (rio) => {
         key: rio.env.PUBLIC_SUPABASE_ANON_KEY,
       },
     },
-  });
+  })
 
-  await service.init();
-  return service;
-});
+  await service.init()
+  return service
+})
 
-const router = createBrowserRouter(fsRoutes());
+const router = createBrowserRouter(fsRoutes())
 
 function AppRouter() {
-  using _ = useObserver();
-  return <RouterProvider router={router} />;
+  using _ = useObserver()
+  return <RouterProvider router={router} />
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 function App() {
   return (
@@ -48,15 +49,16 @@ function App() {
         <ThemeProvider defaultTheme="light" storageKey="ui-theme">
           <TooltipProvider>
             <AppRouter />
+            <Toaster />
           </TooltipProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </RioClientProvider>
-  );
+  )
 }
 
-const root = createRoot(document.getElementById("root")!);
+const root = createRoot(document.getElementById("root")!)
 
 startTransition(() => {
-  root.render(<App />);
-});
+  root.render(<App />)
+})
