@@ -60,7 +60,7 @@ export default function ProtectedLayout() {
           <SidebarInset>
             <Outlet />
             <CopilotActions />
-            <CopilotPopup
+            {/* <CopilotPopup
               labels={{
                 initial: "Hello! How can I help you today?",
                 title: "Rio Copilot",
@@ -68,7 +68,7 @@ export default function ProtectedLayout() {
                 stopGenerating: "Stop",
                 regenerateResponse: "Regenerate",
               }}
-            />
+            /> */}
           </SidebarInset>
         </SidebarProvider>
       </CopilotKit>

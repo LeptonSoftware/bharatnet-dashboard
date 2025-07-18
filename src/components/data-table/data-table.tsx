@@ -16,6 +16,7 @@ export function DataTable<TData>({
       <div className="space-y-4">
         {children}
         <NationalMap
+          table={table}
           data={
             table
               .getFilteredRowModel()

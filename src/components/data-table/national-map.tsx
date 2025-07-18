@@ -196,6 +196,7 @@ const columns: ColumnDef<NationalRowData>[] = [
 
 interface NationalMapProps {
   data: NationalRowData[];
+  table: Table<NationalRowData>;
 }
 
 const colors = [
@@ -224,7 +225,7 @@ function hash(str: string) {
   return hash;
 }
 
-export function NationalMap({ data }: NationalMapProps) {
+export function NationalMap({ data, table }: NationalMapProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedState, setSelectedState] = useState<NationalRowData | null>(
     null
@@ -290,15 +291,6 @@ export function NationalMap({ data }: NationalMapProps) {
     []
   );
 
-  // Always call the hook at the top level, never conditionally
-  const selectedTable = useDataTable({
-    data: selectedState ? [selectedState] : [],
-    columns,
-    pageCount: 1,
-    initialState: { pagination: { pageIndex: 0, pageSize: 1 } },
-    getRowId: (row) => row.id.toString(),
-  }).table;
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[600px]">
@@ -341,22 +333,18 @@ export function NationalMap({ data }: NationalMapProps) {
       </div>
       {/* Card panel top right */}
       {selectedState && (
-        <div className="absolute top-4 right-4 z-20 w-[350px] max-w-full">
+        <div className="fixed top-16 right-4 z-20 w-[350px] max-w-ful shadow-lg">
           <div className="relative">
             <Button
               size="icon"
               variant="ghost"
-              className="absolute top-2 right-2 z-30"
+              className="absolute top-0 right-10 z-30"
               onClick={() => setSelectedState(null)}
               aria-label="Close card"
             >
               <X className="h-5 w-5" />
             </Button>
-            <AestheticCard
-              row={selectedState}
-              index={0}
-              table={selectedTable}
-            />
+            <AestheticCard row={selectedState} index={0} table={table} />
           </div>
         </div>
       )}
