@@ -17,7 +17,7 @@ export default eventHandler(
         <meta charSet="UTF-8" />
         <link rel="icon" type="image/png" href="/logo.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{`${env.PUBLIC_APP_NAME} | Lepton`}</title>
+        <title>{`${env.PUBLIC_APP_NAME}`}</title>
         {head}
       </head>
       <body>

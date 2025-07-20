@@ -35,7 +35,7 @@ export function Dashboard() {
   useEffect(() => {
     // Update document title with circle name
     const circleName = getCircleName(circle || "")
-    document.title = `${circleName} | BharatNet Dashboard | Lepton`
+    document.title = `${circleName} | BharatNet Dashboard`
 
     // Initial data load can be handled by individual dashboard components
     setIsLoading(false)
