@@ -11,6 +11,22 @@ interface CircleRole {
   created_at: string
 }
 
+// Types for attendance data
+export interface AttendanceData {
+  total_users: number
+  total_present: number
+  total_absent: number
+  total_punch_out: number
+  total_on_time: number
+  total_late_time: number
+}
+
+export interface AttendanceResponse {
+  status: number
+  data: AttendanceData[]
+  errors: string[]
+}
+
 const BASE_API_URL =
   "https://api.sheety.co/632604ca09353483222880568eb0ebe2/bharatNetPhase3ProjectReport"
 const NATIONAL_API_URL =
@@ -111,6 +127,39 @@ export async function fetchNationalData(): Promise<NationalRowData[]> {
     throw error
   }
 }
+
+export async function fetchAttendanceData(): Promise<AttendanceData> {
+  try {
+    const response = await fetch(
+      "https://glitscrm.digitalrupay.com/apirt1/crm/attendance/overallstats",
+    )
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`)
+    }
+
+    const data: AttendanceResponse = await response.json()
+
+    // Return the first (and should be only) item in the data array
+    if (data.data && data.data.length > 0) {
+      return data.data[0]
+    }
+
+    // Return default values if no data
+    return {
+      total_users: 0,
+      total_present: 0,
+      total_absent: 0,
+      total_punch_out: 0,
+      total_on_time: 0,
+      total_late_time: 0,
+    }
+  } catch (error) {
+    console.error("Error fetching attendance data:", error)
+    throw error
+  }
+}
+
 export async function fetchrelevantCircleData(
   circle: string,
 ): Promise<ApiResponse> {

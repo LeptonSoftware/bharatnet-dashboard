@@ -124,6 +124,7 @@ export interface NationalRowData {
   state: string
   abbreviation: string
   pia: string
+  ie: string
   agreementSigningDate: string
   gPsTotal: number
   gPsNew: number

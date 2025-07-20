@@ -1,5 +1,6 @@
 "use no memo"
 
+import { useAttendance } from "@/hooks/use-attendance"
 import { useEvents } from "@/hooks/use-events"
 import { useNationalDashboard } from "@/hooks/use-national-dashboard"
 import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api"
@@ -99,6 +100,13 @@ export function NationalDashboard({
     isLoading: eventsLoading,
     error: eventsError,
   } = useEvents()
+
+  // Load attendance data
+  const {
+    data: attendanceData,
+    isLoading: attendanceLoading,
+    error: attendanceError,
+  } = useAttendance()
 
   if (isLoading) return <NationalDashboardSkeleton />
   if (error)
@@ -1130,6 +1138,56 @@ export function NationalDashboard({
         </div>
       </div>
 
+      {/* Attendance Overview Section */}
+      <div>
+        <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
+          <Icon icon="mdi:account-group" className="h-5 w-5" />
+          Attendance Overview
+        </h2>
+        {attendanceLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-32 bg-muted rounded-lg animate-pulse" />
+            ))}
+          </div>
+        ) : attendanceError ? (
+          <div className="text-destructive text-sm mb-4">
+            Failed to load attendance data: {attendanceError.message}
+          </div>
+        ) : attendanceData ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            <StatusCard
+              title="Total Users"
+              value={attendanceData.total_users}
+              icon={<Icon icon="mdi:account-group" className="size-6" />}
+              description="Total registered users"
+              className="bg-slate-50 dark:bg-slate-950/20"
+            />
+            <StatusCard
+              title="Present Today"
+              value={attendanceData.total_present}
+              icon={<Icon icon="mdi:account-check" className="size-6" />}
+              description={`${attendanceData.total_users > 0 ? ((attendanceData.total_present / attendanceData.total_users) * 100).toFixed(1) : 0}% attendance rate`}
+              className="bg-green-50 dark:bg-green-950/20"
+            />
+            <StatusCard
+              title="Absent Today"
+              value={attendanceData.total_absent}
+              icon={<Icon icon="mdi:account-remove" className="size-6" />}
+              description={`${attendanceData.total_users > 0 ? ((attendanceData.total_absent / attendanceData.total_users) * 100).toFixed(1) : 0}% absent rate`}
+              className="bg-red-50 dark:bg-red-950/20"
+            />
+            <StatusCard
+              title="Late Arrivals"
+              value={attendanceData.total_late_time}
+              icon={<Icon icon="mdi:clock-alert" className="size-6" />}
+              description={`${attendanceData.total_present > 0 ? ((attendanceData.total_late_time / attendanceData.total_present) * 100).toFixed(1) : 0}% of present users`}
+              className="bg-orange-50 dark:bg-orange-950/20"
+            />
+          </div>
+        ) : null}
+      </div>
+
       <div>
         <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
           <Table className="h-5 w-5" />
@@ -1142,6 +1200,7 @@ export function NationalDashboard({
           skeletonRow={{
             id: "skeleton",
             sNo: 0,
+            ie: "",
             state: "",
             abbreviation: "",
             pia: "",

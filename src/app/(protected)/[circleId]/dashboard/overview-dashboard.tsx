@@ -1,3 +1,4 @@
+import { useCircleAttendance } from "@/hooks/use-attendance"
 import { useEvents } from "@/hooks/use-events"
 import { fetchNationalData } from "@/lib/api"
 import {
@@ -51,6 +52,12 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
     isLoading: eventsLoading,
     error: eventsError,
   } = useEvents()
+
+  const {
+    data: attendanceData,
+    isLoading: attendanceLoading,
+    error: attendanceError,
+  } = useCircleAttendance(circle)
 
   const [timePeriod, setTimePeriod] = useState<TimePeriod>(null)
   const [compareMode, setCompareMode] = useState(false)
@@ -498,6 +505,48 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
             valueFormatter={(value) => `${value.toFixed(1)}%`}
           />
         </div>
+      </div>
+
+      <div>
+        <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
+          <Icon icon="mdi:account-group" className="h-5 w-5" />
+          Attendance Overview
+        </h2>
+        {attendanceLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-32 bg-muted rounded-lg animate-pulse" />
+            ))}
+          </div>
+        ) : attendanceError ? (
+          <div className="text-destructive text-sm mb-4">
+            Failed to load attendance data: {attendanceError.message}
+          </div>
+        ) : attendanceData ? (
+          <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3 mb-8">
+            <StatusCard
+              title="Total Users"
+              value={attendanceData.total_users}
+              icon={<Icon icon="mdi:account-group" className="size-6" />}
+              description="Total registered users"
+              className="bg-slate-50 dark:bg-slate-950/20"
+            />
+            <StatusCard
+              title="Present Today"
+              value={attendanceData.total_punch_in}
+              icon={<Icon icon="mdi:account-check" className="size-6" />}
+              description={`${attendanceData.total_users > 0 ? ((attendanceData.total_punch_in / attendanceData.total_users) * 100).toFixed(1) : 0}% attendance rate`}
+              className="bg-green-50 dark:bg-green-950/20"
+            />
+            <StatusCard
+              title="Absent Today"
+              value={attendanceData.total_absent}
+              icon={<Icon icon="mdi:account-remove" className="size-6" />}
+              description={`${attendanceData.total_users > 0 ? ((attendanceData.total_absent / attendanceData.total_users) * 100).toFixed(1) : 0}% absent rate`}
+              className="bg-red-50 dark:bg-red-950/20"
+            />
+          </div>
+        ) : null}
       </div>
 
       <div>
