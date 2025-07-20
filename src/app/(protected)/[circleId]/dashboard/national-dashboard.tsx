@@ -1155,36 +1155,38 @@ export function NationalDashboard({
             Failed to load attendance data: {attendanceError.message}
           </div>
         ) : attendanceData ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-            <StatusCard
-              title="Total Users"
-              value={attendanceData.total_users}
-              icon={<Icon icon="mdi:account-group" className="size-6" />}
-              description="Total registered users"
-              className="bg-slate-50 dark:bg-slate-950/20"
-            />
-            <StatusCard
-              title="Present Today"
-              value={attendanceData.total_present}
-              icon={<Icon icon="mdi:account-check" className="size-6" />}
-              description={`${attendanceData.total_users > 0 ? ((attendanceData.total_present / attendanceData.total_users) * 100).toFixed(1) : 0}% attendance rate`}
-              className="bg-green-50 dark:bg-green-950/20"
-            />
-            <StatusCard
-              title="Absent Today"
-              value={attendanceData.total_absent}
-              icon={<Icon icon="mdi:account-remove" className="size-6" />}
-              description={`${attendanceData.total_users > 0 ? ((attendanceData.total_absent / attendanceData.total_users) * 100).toFixed(1) : 0}% absent rate`}
-              className="bg-red-50 dark:bg-red-950/20"
-            />
-            <StatusCard
-              title="Late Arrivals"
-              value={attendanceData.total_late_time}
-              icon={<Icon icon="mdi:clock-alert" className="size-6" />}
-              description={`${attendanceData.total_present > 0 ? ((attendanceData.total_late_time / attendanceData.total_present) * 100).toFixed(1) : 0}% of present users`}
-              className="bg-orange-50 dark:bg-orange-950/20"
-            />
-          </div>
+          <a href="https://glitscrm.digitalrupay.com/monitoring_dashboard/dashboard/manpower/Package-1">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+              <StatusCard
+                title="Total Users"
+                value={attendanceData.total_users}
+                icon={<Icon icon="mdi:account-group" className="size-6" />}
+                description="Total registered users"
+                className="bg-slate-50 dark:bg-slate-950/20"
+              />
+              <StatusCard
+                title="Present Today"
+                value={attendanceData.total_present}
+                icon={<Icon icon="mdi:account-check" className="size-6" />}
+                description={`${attendanceData.total_users > 0 ? ((attendanceData.total_present / attendanceData.total_users) * 100).toFixed(1) : 0}% attendance rate`}
+                className="bg-green-50 dark:bg-green-950/20"
+              />
+              <StatusCard
+                title="Absent Today"
+                value={attendanceData.total_absent}
+                icon={<Icon icon="mdi:account-remove" className="size-6" />}
+                description={`${attendanceData.total_users > 0 ? ((attendanceData.total_absent / attendanceData.total_users) * 100).toFixed(1) : 0}% absent rate`}
+                className="bg-red-50 dark:bg-red-950/20"
+              />
+              <StatusCard
+                title="Late Arrivals"
+                value={attendanceData.total_late_time}
+                icon={<Icon icon="mdi:clock-alert" className="size-6" />}
+                description={`${attendanceData.total_present > 0 ? ((attendanceData.total_late_time / attendanceData.total_present) * 100).toFixed(1) : 0}% of present users`}
+                className="bg-orange-50 dark:bg-orange-950/20"
+              />
+            </div>
+          </a>
         ) : null}
       </div>
 
