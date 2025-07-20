@@ -256,17 +256,19 @@ export function NationalMap({ data, table }: NationalMapProps) {
     return {
       ...geojson,
       features: geojson.features
-        .filter((f: any) =>
-          stateNames.includes((f.properties.name as string)?.toLowerCase()),
-        )
+        // .filter((f: any) =>
+        //   stateNames.includes((f.properties.name as string)?.toLowerCase()),
+        // )
         .map((feature: any) => {
           const stateName = feature.properties.name as string
           const stateData = data.find(
             (row) => row.state.toLowerCase() === stateName.toLowerCase(),
           )
-          const color = stateData
-            ? colors[Math.abs(hash(stateData.state)) % colors.length].hex
-            : "#cccccc"
+          const color = stateData?.agreementSigningDate
+            ? "#FF671F"
+            : stateData
+              ? "#E2E8F0"
+              : "#046A38"
           return {
             ...feature,
             properties: {
@@ -333,6 +335,22 @@ export function NationalMap({ data, table }: NationalMapProps) {
           )}
         </Button>
       </div>
+      <div className="absolute bottom-4 left-4 z-10">
+        <div className="flex flex-col items-start gap-2 bg-white/90 backdrop-blur-sm rounded-md p-2">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-[#FF671F] rounded-full border-2 border-black"></div>
+            <div className="text-xs">Agreement Done</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-[#E2E8F0] rounded-full border-2 border-black"></div>
+            <div className="text-xs">Under Consideration</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-[#046A38] rounded-full border-2 border-black"></div>
+            <div className="text-xs">State Led</div>
+          </div>
+        </div>
+      </div>
       {/* Card panel top right */}
       {selectedState && (
         <div className="fixed top-16 right-4 z-20 w-[350px] max-w-ful shadow-lg">
@@ -350,7 +368,13 @@ export function NationalMap({ data, table }: NationalMapProps) {
           </div>
         </div>
       )}
-      <MapProvider initialViewState={viewState}>
+      <MapProvider
+        initialViewState={viewState}
+        initialStyle={{
+          baseProvider: "mapbox",
+          baseStyle: "mapbox://styles/mapbox/light-v11",
+        }}
+      >
         <MapCanvas />
         <MapLayer
           id="states-layer"
@@ -364,7 +388,7 @@ export function NationalMap({ data, table }: NationalMapProps) {
             const b = parseInt(color.slice(5, 7), 16)
             return new Uint8Array([r, g, b, 180])
           }}
-          getLineColor={new Uint8Array([255, 255, 255, 255])}
+          getLineColor={new Uint8Array([0, 0, 0, 255])}
           getLineWidth={2}
           lineWidthMinPixels={1}
           pickable
