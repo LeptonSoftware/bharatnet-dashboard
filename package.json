@@ -27,7 +27,7 @@
     "@rio.js/auth": "0.0.8",
     "@rio.js/client": "0.0.4",
     "@rio.js/env": "0.0.4",
-    "@rio.js/react-maps": "^0.0.7",
+    "@rio.js/react-maps": "^0.0.8",
     "@rio.js/ui": "0.0.13",
     "@rio.js/vinxi": "0.0.20",
     "@supabase/supabase-js": "2.50.0",

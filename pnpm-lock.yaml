@@ -71,8 +71,8 @@ dependencies:
     specifier: 0.0.4
     version: 0.0.4(@types/node@22.5.5)
   '@rio.js/react-maps':
-    specifier: ^0.0.7
-    version: 0.0.7(@deck.gl/extensions@8.9.36)(@loaders.gl/core@3.4.15)(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@3.4.15)(@luma.gl/constants@8.5.21)(@luma.gl/core@8.5.21)(@luma.gl/engine@8.5.21)(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@8.5.21)(@luma.gl/webgl@8.5.21)(@math.gl/core@3.6.3)(@types/node@22.5.5)(@types/react-dom@19.1.5)(@types/react@19.1.4)(react-dom@19.1.0)(react@19.1.0)
+    specifier: ^0.0.8
+    version: 0.0.8(@deck.gl/extensions@8.9.36)(@loaders.gl/core@3.4.15)(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@3.4.15)(@luma.gl/constants@8.5.21)(@luma.gl/core@8.5.21)(@luma.gl/engine@8.5.21)(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@8.5.21)(@luma.gl/webgl@8.5.21)(@math.gl/core@3.6.3)(@types/node@22.5.5)(@types/react-dom@19.1.5)(@types/react@19.1.4)(react-dom@19.1.0)(react@19.1.0)
   '@rio.js/ui':
     specifier: 0.0.13
     version: 0.0.13(@types/react-dom@19.1.5)(@types/react@19.1.4)(react-dom@19.1.0)(react@19.1.0)(tailwindcss@4.1.10)
@@ -2562,7 +2562,7 @@ packages:
       '@math.gl/core': 3.6.3
       '@math.gl/culling': 3.6.3
       '@math.gl/web-mercator': 3.6.3
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       h3-js: 3.7.2
       long: 3.2.0
     transitivePeerDependencies:
@@ -4002,7 +4002,7 @@ packages:
   /@loaders.gl/schema@3.4.15:
     resolution: {integrity: sha512-8oRtstz0IsqES7eZd2jQbmCnmExCMtL8T6jWd1+BfmnuyZnQ0B6TNccy++NHtffHdYuzEoQgSELwcdmhSApYew==}
     dependencies:
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
     dev: false
 
   /@loaders.gl/terrain@3.4.15:
@@ -6357,8 +6357,8 @@ packages:
       - yaml
     dev: false
 
-  /@rio.js/react-maps@0.0.7(@deck.gl/extensions@8.9.36)(@loaders.gl/core@3.4.15)(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@3.4.15)(@luma.gl/constants@8.5.21)(@luma.gl/core@8.5.21)(@luma.gl/engine@8.5.21)(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@8.5.21)(@luma.gl/webgl@8.5.21)(@math.gl/core@3.6.3)(@types/node@22.5.5)(@types/react-dom@19.1.5)(@types/react@19.1.4)(react-dom@19.1.0)(react@19.1.0):
-    resolution: {integrity: sha512-6Rb2GuY0/nKoXmDO2jq/uRg8JWke3+6LHA2G2Nzmh5gjsa9b26gUSzWamYLzmtZ4XSyC4fSOpsJNdHW5ZOkxVw==}
+  /@rio.js/react-maps@0.0.8(@deck.gl/extensions@8.9.36)(@loaders.gl/core@3.4.15)(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@3.4.15)(@luma.gl/constants@8.5.21)(@luma.gl/core@8.5.21)(@luma.gl/engine@8.5.21)(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@8.5.21)(@luma.gl/webgl@8.5.21)(@math.gl/core@3.6.3)(@types/node@22.5.5)(@types/react-dom@19.1.5)(@types/react@19.1.4)(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-Od3ignj8/ezGvsMpIFp2eAb5iIzmUmRyVL99kNY/otMpVfoylAdeXnVcGIgA8vH6/fu1zrKam09euxC6lGatAg==}
     dependencies:
       '@deck.gl/aggregation-layers': 8.9.35(@deck.gl/core@8.9.35)(@deck.gl/layers@8.9.35)(@luma.gl/core@8.5.21)
       '@deck.gl/core': 8.9.35
@@ -7906,7 +7906,7 @@ packages:
     resolution: {integrity: sha512-Aj4G1GAAy26fmOqMjUk0Z+Lcax5VQ9g1xYDbHLQWXvfTsaueBT+RzdH6XPnZ/seEEnZkio2IxE8V5af/osupgA==}
     dependencies:
       '@turf/helpers': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -7924,7 +7924,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/invariant': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8048,7 +8048,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/invariant': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       point-in-polygon-hao: 1.2.4
       tslib: 2.8.1
     dev: false
@@ -8111,7 +8111,7 @@ packages:
       '@turf/jsts': 2.7.2
       '@turf/meta': 7.2.0
       '@turf/projection': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       d3-geo: 1.7.1
     dev: false
 
@@ -8154,7 +8154,7 @@ packages:
     dependencies:
       '@turf/bbox': 7.2.0
       '@turf/helpers': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8163,7 +8163,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/meta': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8172,7 +8172,7 @@ packages:
     dependencies:
       '@turf/destination': 7.2.0
       '@turf/helpers': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8195,7 +8195,7 @@ packages:
     resolution: {integrity: sha512-JlGUT+/5qoU5jqZmf6NMFIoLDY3O7jKd53Up+zbpJ2vzUp6QdwdNzwrsCeONhynWM13F0MVtPXH4AtdkrgFk4g==}
     dependencies:
       '@turf/helpers': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8282,7 +8282,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/invariant': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8291,7 +8291,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/meta': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       polyclip-ts: 0.16.8
       tslib: 2.8.1
     dev: false
@@ -8324,7 +8324,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/invariant': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8335,7 +8335,7 @@ packages:
       '@turf/invariant': 7.2.0
       '@turf/rhumb-destination': 7.2.0
       '@turf/transform-rotate': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8402,7 +8402,7 @@ packages:
   /@turf/helpers@7.2.0:
     resolution: {integrity: sha512-cXo7bKNZoa7aC7ydLmUR02oB3IgDe7MxiPuRz3cCtYQHn+BJ6h1tihmamYDWWUlPHgSNF0i3ATc4WmDECZafKw==}
     dependencies:
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8439,7 +8439,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/meta': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       polyclip-ts: 0.16.8
       tslib: 2.8.1
     dev: false
@@ -8454,7 +8454,7 @@ packages:
     resolution: {integrity: sha512-kV4u8e7Gkpq+kPbAKNC21CmyrXzlbBgFjO1PhrHPgEdNqXqDawoZ3i6ivE3ULJj2rSesCjduUaC/wyvH/sNr2Q==}
     dependencies:
       '@turf/helpers': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8533,7 +8533,7 @@ packages:
     resolution: {integrity: sha512-GhCJVEkc8EmggNi85EuVLoXF5T5jNVxmhIetwppiVyJzMrwkYAkZSYB3IBFYGUUB9qiNFnTwungVSsBV/S8ZiA==}
     dependencies:
       '@turf/helpers': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       sweepline-intersections: 1.5.0
       tslib: 2.8.1
     dev: false
@@ -8638,7 +8638,7 @@ packages:
     resolution: {integrity: sha512-igzTdHsQc8TV1RhPuOLVo74Px/hyPrVgVOTgjWQZzt3J9BVseCdpfY/0cJBdlSRI4S/yTmmHl7gAqjhpYH5Yaw==}
     dependencies:
       '@turf/helpers': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
     dev: false
 
   /@turf/midpoint@7.2.0:
@@ -8648,7 +8648,7 @@ packages:
       '@turf/destination': 7.2.0
       '@turf/distance': 7.2.0
       '@turf/helpers': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8684,7 +8684,7 @@ packages:
       '@turf/helpers': 7.2.0
       '@turf/invariant': 7.2.0
       '@turf/meta': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8754,7 +8754,7 @@ packages:
       '@turf/projection': 7.2.0
       '@turf/rhumb-bearing': 7.2.0
       '@turf/rhumb-distance': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8808,7 +8808,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/invariant': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8830,7 +8830,7 @@ packages:
       '@turf/clone': 7.2.0
       '@turf/helpers': 7.2.0
       '@turf/meta': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8886,7 +8886,7 @@ packages:
       '@turf/helpers': 7.2.0
       '@turf/invariant': 7.2.0
       '@turf/meta': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8895,7 +8895,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/invariant': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8904,7 +8904,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/invariant': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -8913,7 +8913,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/invariant': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -9034,7 +9034,7 @@ packages:
       '@turf/rhumb-bearing': 7.2.0
       '@turf/rhumb-destination': 7.2.0
       '@turf/rhumb-distance': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -9051,7 +9051,7 @@ packages:
       '@turf/rhumb-bearing': 7.2.0
       '@turf/rhumb-destination': 7.2.0
       '@turf/rhumb-distance': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -9063,7 +9063,7 @@ packages:
       '@turf/invariant': 7.2.0
       '@turf/meta': 7.2.0
       '@turf/rhumb-destination': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       tslib: 2.8.1
     dev: false
 
@@ -9211,7 +9211,7 @@ packages:
     dependencies:
       '@turf/helpers': 7.2.0
       '@turf/meta': 7.2.0
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
       polyclip-ts: 0.16.8
       tslib: 2.8.1
     dev: false
@@ -9402,7 +9402,7 @@ packages:
   /@types/mapbox-gl@2.7.21:
     resolution: {integrity: sha512-Dx9MuF2kKgT/N22LsMUB4b3acFZh9clVqz9zv1fomoiPoBrJolwYxpWA/9LPO/2N0xWbKi4V+pkjTaFkkx/4wA==}
     dependencies:
-      '@types/geojson': 7946.0.10
+      '@types/geojson': 7946.0.16
     dev: false
 
   /@types/mapbox__point-geometry@0.1.4:
