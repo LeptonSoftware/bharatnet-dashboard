@@ -523,29 +523,33 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
             Failed to load attendance data: {attendanceError.message}
           </div>
         ) : attendanceData ? (
-          <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3 mb-8">
-            <StatusCard
-              title="Total Users"
-              value={attendanceData.total_users}
-              icon={<Icon icon="mdi:account-group" className="size-6" />}
-              description="Total registered users"
-              className="bg-slate-50 dark:bg-slate-950/20"
-            />
-            <StatusCard
-              title="Present Today"
-              value={attendanceData.total_punch_in}
-              icon={<Icon icon="mdi:account-check" className="size-6" />}
-              description={`${attendanceData.total_users > 0 ? ((attendanceData.total_punch_in / attendanceData.total_users) * 100).toFixed(1) : 0}% attendance rate`}
-              className="bg-green-50 dark:bg-green-950/20"
-            />
-            <StatusCard
-              title="Absent Today"
-              value={attendanceData.total_absent}
-              icon={<Icon icon="mdi:account-remove" className="size-6" />}
-              description={`${attendanceData.total_users > 0 ? ((attendanceData.total_absent / attendanceData.total_users) * 100).toFixed(1) : 0}% absent rate`}
-              className="bg-red-50 dark:bg-red-950/20"
-            />
-          </div>
+          <a
+            href={`https://glitscrm.digitalrupay.com/monitoring_dashboard/dashboard/manpower/${attendanceData.package_name.replace(" ", "-")}`}
+          >
+            <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3 mb-8">
+              <StatusCard
+                title="Total Users"
+                value={attendanceData.total_users}
+                icon={<Icon icon="mdi:account-group" className="size-6" />}
+                description="Total registered users"
+                className="bg-slate-50 dark:bg-slate-950/20"
+              />
+              <StatusCard
+                title="Present Today"
+                value={attendanceData.total_punch_in}
+                icon={<Icon icon="mdi:account-check" className="size-6" />}
+                description={`${attendanceData.total_users > 0 ? ((attendanceData.total_punch_in / attendanceData.total_users) * 100).toFixed(1) : 0}% attendance rate`}
+                className="bg-green-50 dark:bg-green-950/20"
+              />
+              <StatusCard
+                title="Absent Today"
+                value={attendanceData.total_absent}
+                icon={<Icon icon="mdi:account-remove" className="size-6" />}
+                description={`${attendanceData.total_users > 0 ? ((attendanceData.total_absent / attendanceData.total_users) * 100).toFixed(1) : 0}% absent rate`}
+                className="bg-red-50 dark:bg-red-950/20"
+              />
+            </div>
+          </a>
         ) : null}
       </div>
 
