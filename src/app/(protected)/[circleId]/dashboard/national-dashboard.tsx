@@ -298,6 +298,37 @@ export function NationalDashboard({
     return parseFloat(cleaned) || 0
   }
 
+  // Calculate national target based on milestones
+  const calculateNationalHotoTarget = () => {
+    const currentDate = new Date()
+    let nationalTarget = 0
+
+    data.forEach((state) => {
+      if (state.agreementSigningDate && state.agreementSigningDate !== "") {
+        try {
+          const agreementDate = parseDate(state.agreementSigningDate)
+          const milestones = createMilestones(agreementDate, "hoto")
+          const target = calculateCurrentTarget(
+            milestones,
+            currentDate,
+            state.hotoGPsTodo,
+          )
+
+          // Use the last milestone target or current expected target
+          if (target.lastMilestone) {
+            nationalTarget += Math.round(
+              (target.lastMilestone.targetPercentage / 100) * state.hotoGPsTodo,
+            )
+          }
+        } catch (error) {
+          console.warn("Failed to calculate target for", state.state, error)
+        }
+      }
+    })
+
+    return nationalTarget
+  }
+
   // Calculate national summaries
   const nationalSummary = data.reduce(
     (acc, state) => {
@@ -340,6 +371,8 @@ export function NationalDashboard({
       totalDesktopSurveyTarget: 0,
     },
   )
+
+  const nationalHotoTarget = calculateNationalHotoTarget()
 
   // Prepare chart data
   const progressChartData = data.map((state) => ({
@@ -1175,14 +1208,20 @@ export function NationalDashboard({
             icon={<Icon icon="lineicons:handshake" className="size-6" />}
             description={
               <>
+                <span className="text-muted-foreground italic">
+                  (For existing GPs only)
+                </span>
+                <br />
                 {(nationalSummary.totalHotoTarget > 0
                   ? (nationalSummary.totalHotoCompleted /
                       nationalSummary.totalHotoTarget) *
                     100
                   : 0
                 ).toFixed(1)}
-                % completed
-                <br /> (For existing GPs only)
+                % completed <br />
+                {nationalHotoTarget > 0
+                  ? `Target: ${nationalHotoTarget.toLocaleString()} GPs (${((nationalSummary.totalHotoCompleted / nationalHotoTarget) * 100).toFixed(1)}% achieved)`
+                  : "No milestone targets set"}
               </>
             }
             className="bg-emerald-50 dark:bg-emerald-950/20"

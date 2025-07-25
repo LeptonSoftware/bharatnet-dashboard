@@ -20,6 +20,7 @@ interface StatusCardProps {
   description?: string | React.ReactNode
   icon?: React.ReactNode
   className?: string
+  tooltip?: string | React.ReactNode
   trend?: {
     value: number
     direction: "up" | "down" | "neutral"
@@ -127,7 +128,7 @@ export function StatusCard({
         </div>
 
         {description && (
-          <p className="text-base text-muted-foreground line-clamp-2">
+          <p className="text-base text-muted-foreground line-clamp-4">
             {description}
           </p>
         )}
