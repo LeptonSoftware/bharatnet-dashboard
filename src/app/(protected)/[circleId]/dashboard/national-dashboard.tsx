@@ -851,7 +851,10 @@ export function NationalDashboard({
             {trend.hasData ? (
               <TrendIndicator trend={trend} size="xs" />
             ) : (
-              <Badge variant={"default"} className="font-mono">
+              <Badge
+                variant={milestoneInfo?.isOnTrack ? "secondary" : "destructive"}
+                className="font-mono"
+              >
                 {percentage.toFixed(0)}%
               </Badge>
             )}
@@ -999,6 +1002,7 @@ export function NationalDashboard({
             ) : (
               <Badge
                 variant={
+                  // milestoneInfo.isOnTrack ? "secondary" : "destructive"
                   // percentage >= 100
                   //   ? "default"
                   //   : percentage >= 75
