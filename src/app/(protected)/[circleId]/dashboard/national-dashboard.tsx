@@ -899,12 +899,18 @@ export function NationalDashboard({
               </>
             }
             icon={<Icon icon="lineicons:handshake" className="size-6" />}
-            description={`${(nationalSummary.totalHotoTarget > 0
-              ? (nationalSummary.totalHotoCompleted /
-                  nationalSummary.totalHotoTarget) *
-                100
-              : 0
-            ).toFixed(1)}% completed`}
+            description={
+              <>
+                {(nationalSummary.totalHotoTarget > 0
+                  ? (nationalSummary.totalHotoCompleted /
+                      nationalSummary.totalHotoTarget) *
+                    100
+                  : 0
+                ).toFixed(1)}
+                % completed
+                <br /> (HOTO is done for old GPs only)
+              </>
+            }
             className="bg-emerald-50 dark:bg-emerald-950/20"
             valueFormatter={(value) => `${value.toFixed(1)}%`}
             trend={

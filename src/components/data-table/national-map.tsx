@@ -166,7 +166,7 @@ export function NationalMap({ data, table }: NationalMapProps) {
         initialViewState={viewState}
         initialStyle={{
           baseProvider: "mapbox",
-          baseStyle: "mapbox://styles/mapbox/streets-v12",
+          baseStyle: `${window.location.origin}/mapbox-styles.json`,
         }}
       >
         <MapCanvas />

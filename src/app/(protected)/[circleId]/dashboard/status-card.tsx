@@ -6,6 +6,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@rio.js/ui/components/card"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rio.js/ui/components/tooltip"
 import { cn } from "@rio.js/ui/lib/utils"
 
 interface StatusCardProps {
@@ -33,9 +39,10 @@ export function StatusCard({
   icon,
   className,
   trend,
+  tooltip,
   valueFormatter = (value) => value.toLocaleString(),
 }: StatusCardProps) {
-  return (
+  const card = (
     <Card className={cn("transition-all hover:shadow-md", className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
@@ -127,4 +134,19 @@ export function StatusCard({
       </CardContent>
     </Card>
   )
+
+  if (tooltip) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{card}</TooltipTrigger>
+          <TooltipContent className="text-lg max-w-xs">
+            {tooltip}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
+  }
+
+  return card
 }
