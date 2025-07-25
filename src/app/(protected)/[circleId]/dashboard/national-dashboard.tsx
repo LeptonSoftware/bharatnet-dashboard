@@ -226,7 +226,7 @@ function calculateCurrentTarget(
       0,
       Math.min(1, daysSinceStart / totalDaysToMilestone),
     )
-    const expectedPercentage = progress * currentMilestone.targetPercentage
+    const expectedPercentage = currentMilestone.targetPercentage
 
     return {
       expectedPercentage,
@@ -242,10 +242,7 @@ function calculateCurrentTarget(
   const elapsed = currentDate.getTime() - previousMilestone.date.getTime()
   const progress = Math.max(0, Math.min(1, elapsed / totalDuration))
 
-  const expectedPercentage =
-    previousMilestone.targetPercentage +
-    (currentMilestone.targetPercentage - previousMilestone.targetPercentage) *
-      progress
+  const expectedPercentage = previousMilestone.targetPercentage
 
   return {
     expectedPercentage,
@@ -854,16 +851,7 @@ export function NationalDashboard({
             {trend.hasData ? (
               <TrendIndicator trend={trend} size="xs" />
             ) : (
-              <Badge
-                variant={
-                  percentage >= 100
-                    ? "default"
-                    : percentage >= 75
-                      ? "secondary"
-                      : "destructive"
-                }
-                className="font-mono"
-              >
+              <Badge variant={"default"} className="font-mono">
                 {percentage.toFixed(0)}%
               </Badge>
             )}
@@ -935,11 +923,12 @@ export function NationalDashboard({
             ) : (
               <Badge
                 variant={
-                  percentage >= 100
-                    ? "default"
-                    : percentage >= 75
-                      ? "secondary"
-                      : "destructive"
+                  // percentage >= 100
+                  //   ? "default"
+                  //   : percentage >= 75
+                  //     ? "secondary"
+                  //     : "destructive"
+                  "default"
                 }
                 className="font-mono"
               >
@@ -1010,11 +999,12 @@ export function NationalDashboard({
             ) : (
               <Badge
                 variant={
-                  percentage >= 100
-                    ? "default"
-                    : percentage >= 75
-                      ? "secondary"
-                      : "destructive"
+                  // percentage >= 100
+                  //   ? "default"
+                  //   : percentage >= 75
+                  //     ? "secondary"
+                  //     : "destructive"
+                  "default"
                 }
                 className="font-mono"
               >
