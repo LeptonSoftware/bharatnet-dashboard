@@ -232,7 +232,7 @@ function calculateCurrentTarget(
       expectedPercentage,
       expectedGps: Math.round((expectedPercentage / 100) * totalGps),
       currentMilestone,
-      lastMilestone: lastMilestone || finalMilestone,
+      lastMilestone: lastMilestone,
     }
   }
 
@@ -248,7 +248,7 @@ function calculateCurrentTarget(
     expectedPercentage,
     expectedGps: Math.round((expectedPercentage / 100) * totalGps),
     currentMilestone,
-    lastMilestone: lastMilestone || finalMilestone,
+    lastMilestone: lastMilestone,
   }
 }
 
