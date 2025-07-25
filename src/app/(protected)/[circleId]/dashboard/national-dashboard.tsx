@@ -374,6 +374,44 @@ export function NationalDashboard({
 
   const nationalHotoTarget = calculateNationalHotoTarget()
 
+  // Calculate national target for physical survey based on milestones
+  const calculateNationalSurveyTarget = () => {
+    const currentDate = new Date()
+    let nationalTarget = 0
+
+    data.forEach((state) => {
+      if (state.agreementSigningDate && state.agreementSigningDate !== "") {
+        try {
+          const agreementDate = parseDate(state.agreementSigningDate)
+          const milestones = createMilestones(agreementDate, "feasibility")
+          const target = calculateCurrentTarget(
+            milestones,
+            currentDate,
+            state.physicalSurveyGPsTodo,
+          )
+
+          // Use the last milestone target or current expected target
+          if (target.lastMilestone) {
+            nationalTarget += Math.round(
+              (target.lastMilestone.targetPercentage / 100) *
+                state.physicalSurveyGPsTodo,
+            )
+          }
+        } catch (error) {
+          console.warn(
+            "Failed to calculate survey target for",
+            state.state,
+            error,
+          )
+        }
+      }
+    })
+
+    return nationalTarget
+  }
+
+  const nationalSurveyTarget = calculateNationalSurveyTarget()
+
   // Prepare chart data
   const progressChartData = data.map((state) => ({
     state: state.state.replace(" & A&N", "").substring(0, 15),
@@ -1271,12 +1309,20 @@ export function NationalDashboard({
               </>
             }
             icon={<FileText />}
-            description={`${(nationalSummary.totalSurveyTarget > 0
-              ? (nationalSummary.totalSurveyCompleted /
-                  nationalSummary.totalSurveyTarget) *
-                100
-              : 0
-            ).toFixed(1)}% completed`}
+            description={
+              <>
+                {(nationalSummary.totalSurveyTarget > 0
+                  ? (nationalSummary.totalSurveyCompleted /
+                      nationalSummary.totalSurveyTarget) *
+                    100
+                  : 0
+                ).toFixed(1)}
+                % completed <br />
+                {nationalSurveyTarget > 0
+                  ? `Target: ${nationalSurveyTarget.toLocaleString()} GPs (${((nationalSummary.totalSurveyCompleted / nationalSurveyTarget) * 100).toFixed(1)}% achieved)`
+                  : "No milestone targets set"}
+              </>
+            }
             className="bg-blue-50 dark:bg-blue-950/20"
             valueFormatter={(value) => `${value.toFixed(1)}%`}
             trend={
