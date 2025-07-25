@@ -19,6 +19,7 @@ import { circleMap } from "@/lib/utils"
 import { NationalRowData } from "@/types"
 import { Icon } from "@iconify/react"
 import { ColumnDef } from "@tanstack/react-table"
+import { addMonths, format } from "date-fns"
 import {
   BarChart3,
   Building2,
@@ -79,6 +80,180 @@ import { AestheticCard } from "@/components/ui/aesthetic-card"
 
 import { NationalDashboardSkeleton } from "./loading-skeleton"
 import { StatusCard } from "./status-card"
+
+interface Milestone {
+  id: number
+  name: string
+  targetPercentage: number
+  date: Date
+  monthsFromStart: number
+}
+
+function createMilestones(
+  agreementDate: Date,
+  type: "feasibility" | "hoto" = "feasibility",
+): Milestone[] {
+  if (type === "hoto") {
+    return [
+      {
+        id: 1,
+        name: "Milestone I",
+        targetPercentage: 25,
+        date: addMonths(agreementDate, 1),
+        monthsFromStart: 1,
+      },
+      {
+        id: 2,
+        name: "Milestone II",
+        targetPercentage: 50,
+        date: addMonths(agreementDate, 2),
+        monthsFromStart: 2,
+      },
+      {
+        id: 3,
+        name: "Milestone III",
+        targetPercentage: 75,
+        date: addMonths(agreementDate, 4),
+        monthsFromStart: 4,
+      },
+      {
+        id: 4,
+        name: "Milestone IV",
+        targetPercentage: 90,
+        date: addMonths(agreementDate, 5),
+        monthsFromStart: 5,
+      },
+      {
+        id: 5,
+        name: "Milestone V",
+        targetPercentage: 100,
+        date: addMonths(agreementDate, 6),
+        monthsFromStart: 6,
+      },
+    ]
+  }
+
+  // Default feasibility milestones
+  return [
+    {
+      id: 1,
+      name: "Milestone I",
+      targetPercentage: 5,
+      date: addMonths(agreementDate, 3),
+      monthsFromStart: 3,
+    },
+    {
+      id: 2,
+      name: "Milestone II",
+      targetPercentage: 15,
+      date: addMonths(agreementDate, 6),
+      monthsFromStart: 6,
+    },
+    {
+      id: 3,
+      name: "Milestone III",
+      targetPercentage: 40,
+      date: addMonths(agreementDate, 9),
+      monthsFromStart: 9,
+    },
+    {
+      id: 4,
+      name: "Milestone IV",
+      targetPercentage: 95,
+      date: addMonths(agreementDate, 12),
+      monthsFromStart: 12,
+    },
+  ]
+}
+
+const parseDate = (date: string) => {
+  const [day, month, year] = date.split(".")
+  return new Date(Number(year), Number(month) - 1, Number(day))
+}
+
+function calculateCurrentTarget(
+  milestones: Milestone[],
+  currentDate: Date,
+  totalGps: number,
+): {
+  expectedPercentage: number
+  expectedGps: number
+  currentMilestone?: Milestone
+  lastMilestone?: Milestone
+} {
+  // Find the current milestone period
+  const currentMilestone = milestones.find((m) => currentDate <= m.date)
+  const lastMilestone = [...milestones]
+    .reverse()
+    .find((m) => currentDate > m.date)
+  const finalMilestone = milestones[milestones.length - 1]
+
+  if (!currentMilestone && lastMilestone) {
+    // Past all milestones
+    return {
+      expectedPercentage: lastMilestone.targetPercentage,
+      expectedGps: Math.round(
+        (lastMilestone.targetPercentage / 100) * totalGps,
+      ),
+      lastMilestone,
+    }
+  }
+
+  if (!currentMilestone) {
+    // Past all milestones but no milestone has been completed yet
+    return {
+      expectedPercentage: finalMilestone.targetPercentage,
+      expectedGps: Math.round(
+        (finalMilestone.targetPercentage / 100) * totalGps,
+      ),
+      lastMilestone: finalMilestone,
+    }
+  }
+
+  const currentIndex = milestones.indexOf(currentMilestone)
+  const previousMilestone =
+    currentIndex > 0 ? milestones[currentIndex - 1] : null
+
+  if (!previousMilestone) {
+    // Before first milestone
+    const daysSinceStart =
+      (currentDate.getTime() -
+        milestones[0].date.getTime() +
+        currentMilestone.monthsFromStart * 30 * 24 * 60 * 60 * 1000) /
+      (1000 * 60 * 60 * 24)
+    const totalDaysToMilestone = currentMilestone.monthsFromStart * 30
+    const progress = Math.max(
+      0,
+      Math.min(1, daysSinceStart / totalDaysToMilestone),
+    )
+    const expectedPercentage = progress * currentMilestone.targetPercentage
+
+    return {
+      expectedPercentage,
+      expectedGps: Math.round((expectedPercentage / 100) * totalGps),
+      currentMilestone,
+      lastMilestone: lastMilestone || finalMilestone,
+    }
+  }
+
+  // Between two milestones - linear interpolation
+  const totalDuration =
+    currentMilestone.date.getTime() - previousMilestone.date.getTime()
+  const elapsed = currentDate.getTime() - previousMilestone.date.getTime()
+  const progress = Math.max(0, Math.min(1, elapsed / totalDuration))
+
+  const expectedPercentage =
+    previousMilestone.targetPercentage +
+    (currentMilestone.targetPercentage - previousMilestone.targetPercentage) *
+      progress
+
+  return {
+    expectedPercentage,
+    expectedGps: Math.round((expectedPercentage / 100) * totalGps),
+    currentMilestone,
+    lastMilestone: lastMilestone || finalMilestone,
+  }
+}
 
 interface NationalDashboardProps {
   timePeriod?: TimePeriod
@@ -645,7 +820,34 @@ export function NationalDashboard({
         const todo = row.original.hotoGPsTodo
         const percentage = todo > 0 ? (done / todo) * 100 : 0
         const trend = getCircleTrend(row.original.state, "hotoGPsDone")
-        console.log(trend)
+
+        // Calculate milestone information
+        let milestoneInfo = null
+        if (
+          row.original.agreementSigningDate &&
+          row.original.agreementSigningDate !== ""
+        ) {
+          try {
+            const agreementDate = parseDate(row.original.agreementSigningDate)
+            const currentDate = new Date()
+            const milestones = createMilestones(agreementDate, "hoto")
+            const target = calculateCurrentTarget(milestones, currentDate, todo)
+
+            milestoneInfo = {
+              lastMilestone: target.lastMilestone,
+              currentTarget: target.expectedPercentage,
+              currentTargetGps: target.expectedGps,
+              isOnTrack: percentage >= target.expectedPercentage,
+            }
+          } catch (error) {
+            console.warn(
+              "Failed to parse agreement date:",
+              row.original.agreementSigningDate,
+            )
+          }
+        }
+
+        console.log(milestoneInfo)
 
         return (
           <div className="flex flex-col items-center gap-1">
@@ -668,6 +870,32 @@ export function NationalDashboard({
             <div className="text-xs text-muted-foreground">
               {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
             </div>
+
+            {/* Milestone information */}
+            {milestoneInfo && milestoneInfo.lastMilestone && (
+              <div className="text-xs text-center space-y-0.5">
+                <div className="text-muted-foreground">
+                  Target: {milestoneInfo.lastMilestone.name}
+                </div>
+                <div
+                  className={cn(
+                    "font-mono text-xs",
+                    milestoneInfo.isOnTrack
+                      ? "text-emerald-600"
+                      : "text-orange-600",
+                  )}
+                >
+                  {milestoneInfo.lastMilestone.targetPercentage}% (
+                  {Math.round(
+                    (milestoneInfo.lastMilestone.targetPercentage / 100) * todo,
+                  )}{" "}
+                  GPs)
+                </div>
+                <div className="text-muted-foreground">
+                  by {format(milestoneInfo.lastMilestone.date, "dd MMM yyyy")}
+                </div>
+              </div>
+            )}
           </div>
         )
       },
@@ -749,6 +977,32 @@ export function NationalDashboard({
           "physicalSurveyGPsDone",
         )
 
+        // Calculate milestone information for physical survey
+        let milestoneInfo = null
+        if (
+          row.original.agreementSigningDate &&
+          row.original.agreementSigningDate !== ""
+        ) {
+          try {
+            const agreementDate = parseDate(row.original.agreementSigningDate)
+            const currentDate = new Date()
+            const milestones = createMilestones(agreementDate, "feasibility")
+            const target = calculateCurrentTarget(milestones, currentDate, todo)
+
+            milestoneInfo = {
+              lastMilestone: target.lastMilestone,
+              currentTarget: target.expectedPercentage,
+              currentTargetGps: target.expectedGps,
+              isOnTrack: percentage >= target.expectedPercentage,
+            }
+          } catch (error) {
+            console.warn(
+              "Failed to parse agreement date:",
+              row.original.agreementSigningDate,
+            )
+          }
+        }
+
         return (
           <div className="flex flex-col items-center gap-1">
             {trend.hasData ? (
@@ -770,6 +1024,32 @@ export function NationalDashboard({
             <div className="text-xs text-muted-foreground">
               {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
             </div>
+
+            {/* Milestone information */}
+            {milestoneInfo && milestoneInfo.lastMilestone && (
+              <div className="text-xs text-center space-y-0.5">
+                <div className="text-muted-foreground">
+                  Target: {milestoneInfo.lastMilestone.name}
+                </div>
+                <div
+                  className={cn(
+                    "font-mono text-xs",
+                    milestoneInfo.isOnTrack
+                      ? "text-emerald-600"
+                      : "text-orange-600",
+                  )}
+                >
+                  {milestoneInfo.lastMilestone.targetPercentage}% (
+                  {Math.round(
+                    (milestoneInfo.lastMilestone.targetPercentage / 100) * todo,
+                  )}{" "}
+                  GPs)
+                </div>
+                <div className="text-muted-foreground">
+                  by {format(milestoneInfo.lastMilestone.date, "dd MMM yyyy")}
+                </div>
+              </div>
+            )}
           </div>
         )
       },
@@ -908,7 +1188,7 @@ export function NationalDashboard({
                   : 0
                 ).toFixed(1)}
                 % completed
-                <br /> (HOTO is done for old GPs only)
+                <br /> (For existing GPs only)
               </>
             }
             className="bg-emerald-50 dark:bg-emerald-950/20"

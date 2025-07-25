@@ -17,7 +17,7 @@ import { cn } from "@rio.js/ui/lib/utils"
 interface StatusCardProps {
   title: string
   value: number | string | React.ReactNode
-  description?: string
+  description?: string | React.ReactNode
   icon?: React.ReactNode
   className?: string
   trend?: {
