@@ -235,7 +235,7 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
             value={data.snocStatus}
             tooltip={data.snocStatus}
             icon={<CheckCircle />}
-            description={`Target: ${data.snocTargetDate}`}
+            description={``}
             className="bg-amber-50 dark:bg-amber-950/20"
           />
           <StatusCard
