@@ -665,6 +665,12 @@ const DISPLAY_FIELDS = [
     icon: Zap,
     type: "number",
   },
+  {
+    key: "electricityConnection",
+    label: "Electricity Connection Done",
+    icon: Zap,
+    type: "number",
+  },
   { key: "ofcLaidKMs", label: "OFC Laid (KMs)", icon: Cable, type: "number" },
   {
     key: "snocStatus",

@@ -152,6 +152,7 @@ export interface NationalRowData {
   ofcTotalKMs: number
   ofcExistingKMs: number
   ofcNewKms: number
+  electricityConnection: number
 
   ofcLaidKMs: number
 }

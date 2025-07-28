@@ -1492,6 +1492,38 @@ export function NationalDashboard({
       },
     },
     {
+      accessorKey: "electricityConnection",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          className="mx-auto"
+          column={column}
+          title={
+            <>
+              Electricity
+              <br />
+              Connection
+              <br />
+              Done
+            </>
+          }
+        />
+      ),
+      cell: ({ row }) => {
+        const connections = row.original.electricityConnection ?? 0
+        const trend = getCircleTrend(
+          row.original.state,
+          "electricityConnection",
+        )
+
+        return (
+          <div className="flex flex-col items-center gap-1 text-base font-bold">
+            <TrendIndicator trend={trend} size="xs" />
+            <div className="font-mono">{connections.toLocaleString()}</div>
+          </div>
+        )
+      },
+    },
+    {
       accessorKey: "ofcTotalKMs",
       header: ({ column }) => (
         <DataTableColumnHeader
@@ -1916,6 +1948,7 @@ export function NationalDashboard({
             gPsExisting: 0,
             hotoGPsTodo: 0,
             hotoGPsDone: 0,
+            electricityConnection: 0,
             hotoKMsDone: "",
             hotoKMsTodo: "",
             physicalSurveyGPsTodo: 0,
