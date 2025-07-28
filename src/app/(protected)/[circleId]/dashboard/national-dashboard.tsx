@@ -1497,15 +1497,7 @@ export function NationalDashboard({
         <DataTableColumnHeader
           className="mx-auto"
           column={column}
-          title={
-            <>
-              Electricity
-              <br />
-              Connection
-              <br />
-              Done
-            </>
-          }
+          title={"Electricity Connected"}
         />
       ),
       cell: ({ row }) => {
