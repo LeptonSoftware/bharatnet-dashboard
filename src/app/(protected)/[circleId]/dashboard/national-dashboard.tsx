@@ -1,6 +1,6 @@
 "use no memo"
 
-import { useAttendance } from "@/hooks/use-attendance"
+import { useAttendance, useCircleAttendance } from "@/hooks/use-attendance"
 import { useEvents } from "@/hooks/use-events"
 import { useNationalDashboard } from "@/hooks/use-national-dashboard"
 import { fetchNationalData, fetchUserCircleRoles } from "@/lib/api"
@@ -65,6 +65,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rio.js/ui/components/select"
+import { Skeleton } from "@rio.js/ui/components/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@rio.js/ui/components/tabs"
 import { cn } from "@rio.js/ui/lib/utils"
 
@@ -73,7 +74,10 @@ import { DataTable } from "@/components/data-table/data-table"
 import { DataTableAdvancedToolbar } from "@/components/data-table/data-table-advanced-toolbar"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
 import { DataTableFilterList } from "@/components/data-table/data-table-filter-list"
-import { DataTableProvider } from "@/components/data-table/data-table-provider"
+import {
+  DataTableProvider,
+  useDataTableContext,
+} from "@/components/data-table/data-table-provider"
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list"
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar"
 import { AestheticCard } from "@/components/ui/aesthetic-card"
@@ -1006,7 +1010,7 @@ export function NationalDashboard({
         const todo = row.original.hotoGPsTodo
         const percentage = todo > 0 ? (done / todo) * 100 : 0
         const trend = getCircleTrend(row.original.state, "hotoGPsDone")
-
+        const { view } = useDataTableContext()
         // Calculate milestone information
         let milestoneInfo = null
         if (
@@ -1055,30 +1059,33 @@ export function NationalDashboard({
             {milestoneInfo && (
               <div className="text-xs text-center space-y-0.5">
                 {/* Current Target */}
-                <div className="space-y-0.5 border-b border-gray-200 pb-1">
-                  <div className="text-muted-foreground">
-                    Next: {milestoneInfo.currentMilestone?.name}
-                  </div>
-                  <div className={cn("font-mono text-xs", "text-blue-600")}>
-                    {milestoneInfo.currentMilestone?.targetPercentage.toFixed(
-                      1,
-                    )}
-                    % (
-                    {((milestoneInfo.currentMilestone?.targetPercentage ?? 0) /
-                      100) *
-                      row.original.hotoGPsTodo}{" "}
-                    GPs)
-                  </div>
-                  {milestoneInfo.currentMilestone && (
+                {view === "list" && (
+                  <div className="space-y-0.5 border-b border-gray-200 pb-1">
                     <div className="text-muted-foreground">
-                      by{" "}
-                      {format(
-                        milestoneInfo.currentMilestone.date,
-                        "dd MMM yyyy",
-                      )}
+                      Next: {milestoneInfo.currentMilestone?.name}
                     </div>
-                  )}
-                </div>
+                    <div className={cn("font-mono text-xs", "text-blue-600")}>
+                      {milestoneInfo.currentMilestone?.targetPercentage.toFixed(
+                        1,
+                      )}
+                      % (
+                      {((milestoneInfo.currentMilestone?.targetPercentage ??
+                        0) /
+                        100) *
+                        row.original.hotoGPsTodo}{" "}
+                      GPs)
+                    </div>
+                    {milestoneInfo.currentMilestone && (
+                      <div className="text-muted-foreground">
+                        by{" "}
+                        {format(
+                          milestoneInfo.currentMilestone.date,
+                          "dd MMM yyyy",
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Previous Milestone */}
                 {milestoneInfo.previousMilestone && (
@@ -1142,6 +1149,8 @@ export function NationalDashboard({
           "physicalSurveyGPsDone",
         )
 
+        const { view } = useDataTableContext()
+
         // Calculate milestone information for physical survey
         let milestoneInfo = null
         if (
@@ -1198,31 +1207,34 @@ export function NationalDashboard({
             {milestoneInfo && (
               <div className="text-xs text-center space-y-0.5">
                 {/* Current Target */}
-                <div className="space-y-0.5 border-b border-gray-200 pb-1">
-                  <div className="text-muted-foreground">
-                    Next: {milestoneInfo.currentMilestone?.name}
-                  </div>
-                  <div className={cn("font-mono text-xs", "text-blue-600")}>
-                    {milestoneInfo.currentMilestone?.targetPercentage.toFixed(
-                      1,
-                    )}
-                    % (
-                    {Math.round(
-                      ((milestoneInfo.currentMilestone?.targetPercentage ?? 0) /
-                        100) *
-                        row.original.physicalSurveyGPsTodo,
-                    )}{" "}
-                    GPs)
-                  </div>
-                  <div className="text-muted-foreground">
-                    by{" "}
-                    {milestoneInfo.currentMilestone?.date &&
-                      format(
-                        milestoneInfo.currentMilestone.date,
-                        "dd MMM yyyy",
+                {view === "list" && (
+                  <div className="space-y-0.5 border-b border-gray-200 pb-1">
+                    <div className="text-muted-foreground">
+                      Next: {milestoneInfo.currentMilestone?.name}
+                    </div>
+                    <div className={cn("font-mono text-xs", "text-blue-600")}>
+                      {milestoneInfo.currentMilestone?.targetPercentage.toFixed(
+                        1,
                       )}
+                      % (
+                      {Math.round(
+                        ((milestoneInfo.currentMilestone?.targetPercentage ??
+                          0) /
+                          100) *
+                          row.original.physicalSurveyGPsTodo,
+                      )}{" "}
+                      GPs)
+                    </div>
+                    <div className="text-muted-foreground">
+                      by{" "}
+                      {milestoneInfo.currentMilestone?.date &&
+                        format(
+                          milestoneInfo.currentMilestone.date,
+                          "dd MMM yyyy",
+                        )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Previous Milestone */}
                 {milestoneInfo.previousMilestone && (
@@ -1269,7 +1281,7 @@ export function NationalDashboard({
         const todo = row.original.gPsCommissionedTodo
         const percentage = todo > 0 ? (done / todo) * 100 : 0
         const trend = getCircleTrend(row.original.state, "gPsCommissionedDone")
-
+        const { view } = useDataTableContext()
         // Calculate milestone information for GPS commissioned
         let milestoneInfo = null
         if (
@@ -1321,31 +1333,34 @@ export function NationalDashboard({
             {milestoneInfo && (
               <div className="text-xs text-center space-y-0.5">
                 {/* Current Target */}
-                <div className="space-y-0.5 border-b border-gray-200 pb-1">
-                  <div className="text-muted-foreground">
-                    Next: {milestoneInfo.currentMilestone?.name}
-                  </div>
-                  <div className={cn("font-mono text-xs", "text-blue-600")}>
-                    {milestoneInfo.currentMilestone?.targetPercentage.toFixed(
-                      1,
-                    )}
-                    % (
-                    {Math.round(
-                      ((milestoneInfo.currentMilestone?.targetPercentage ?? 0) /
-                        100) *
-                        row.original.gPsCommissionedTodo,
-                    )}{" "}
-                    GPs)
-                  </div>
-                  <div className="text-muted-foreground">
-                    by{" "}
-                    {milestoneInfo.currentMilestone?.date &&
-                      format(
-                        milestoneInfo.currentMilestone.date,
-                        "dd MMM yyyy",
+                {view === "list" && (
+                  <div className="space-y-0.5 border-b border-gray-200 pb-1">
+                    <div className="text-muted-foreground">
+                      Next: {milestoneInfo.currentMilestone?.name}
+                    </div>
+                    <div className={cn("font-mono text-xs", "text-blue-600")}>
+                      {milestoneInfo.currentMilestone?.targetPercentage.toFixed(
+                        1,
                       )}
+                      % (
+                      {Math.round(
+                        ((milestoneInfo.currentMilestone?.targetPercentage ??
+                          0) /
+                          100) *
+                          row.original.gPsCommissionedTodo,
+                      )}{" "}
+                      GPs)
+                    </div>
+                    <div className="text-muted-foreground">
+                      by{" "}
+                      {milestoneInfo.currentMilestone?.date &&
+                        format(
+                          milestoneInfo.currentMilestone.date,
+                          "dd MMM yyyy",
+                        )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Previous Milestone */}
                 {milestoneInfo.previousMilestone && (
@@ -1430,6 +1445,48 @@ export function NationalDashboard({
           <div className="flex flex-col items-center gap-1 text-base font-bold">
             <TrendIndicator trend={trend} size="xs" />
             <div className="font-mono">{connections.toLocaleString()}</div>
+          </div>
+        )
+      },
+    },
+    {
+      id: "manpower",
+      header: ({ column }) => {
+        return (
+          <DataTableColumnHeader
+            className="mx-auto"
+            column={column}
+            title="Manpower"
+          />
+        )
+      },
+      cell: ({ row }) => {
+        const {
+          data: attendanceData,
+          isLoading: attendanceLoading,
+          error: attendanceError,
+        } = useCircleAttendance(row.original.abbreviation)
+
+        if (attendanceLoading) {
+          return <Skeleton />
+        }
+
+        if (attendanceError || !attendanceData) {
+          return <div className="text-red-500"></div>
+        }
+
+        console.log(row.original.abbreviation, attendanceData)
+
+        return (
+          <div className="flex flex-col items-center gap-1 text-base font-bold">
+            <div className="">
+              {attendanceData.total_users}{" "}
+              <span className="text-muted-foreground">registered</span>
+            </div>
+            <div className="">
+              {attendanceData.total_punch_in}{" "}
+              <span className="text-muted-foreground">present</span>
+            </div>
           </div>
         )
       },
@@ -1754,18 +1811,31 @@ export function NationalDashboard({
           <StatusCard
             title="GPS Commissioned"
             value={
-              nationalSummary.totalGpsCommissioned > 0
-                ? (nationalSummary.totalGpsCommissionedDone /
-                    nationalSummary.totalGpsCommissioned) *
-                  100
-                : 0
+              <>
+                <span>
+                  {nationalSummary.totalGpsCommissionedDone.toLocaleString()}
+                </span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  / {nationalSummary.totalGpsCommissioned.toLocaleString()}
+                </span>
+              </>
             }
             icon={<Zap />}
-            description={`${nationalSummary.totalGpsCommissionedDone.toLocaleString()}/${nationalSummary.totalGpsCommissioned.toLocaleString()} commissioned | National Target: ${nationalGpsCommissionedTarget.toLocaleString()} GPs | ${
-              nationalGpsCommissionedTarget > 0
-                ? `${((nationalSummary.totalGpsCommissionedDone / nationalGpsCommissionedTarget) * 100).toFixed(1)}% of milestone target achieved`
-                : "No milestone targets set"
-            }`}
+            description={
+              <>
+                {(nationalSummary.totalGpsCommissionedDone > 0
+                  ? (nationalSummary.totalGpsCommissionedDone /
+                      nationalSummary.totalGpsCommissioned) *
+                    100
+                  : 0
+                ).toFixed(1)}
+                % completed <br />
+                {nationalGpsCommissionedTarget > 0
+                  ? `Target: ${nationalGpsCommissionedTarget.toLocaleString()} GPs (${((nationalSummary.totalGpsCommissionedDone / nationalGpsCommissionedTarget) * 100).toFixed(1)}% achieved)`
+                  : "No milestone targets set"}
+              </>
+            }
             className="bg-amber-50 dark:bg-amber-950/20"
             valueFormatter={(value) => `${value.toFixed(1)}%`}
           />
