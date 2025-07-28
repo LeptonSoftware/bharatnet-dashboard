@@ -91,7 +91,7 @@ interface Milestone {
 
 function createMilestones(
   agreementDate: Date,
-  type: "feasibility" | "hoto" = "feasibility",
+  type: "feasibility" | "hoto" | "gps-commissioned" = "feasibility",
 ): Milestone[] {
   if (type === "hoto") {
     return [
@@ -129,6 +129,46 @@ function createMilestones(
         targetPercentage: 100,
         date: addMonths(agreementDate, 6),
         monthsFromStart: 6,
+      },
+    ]
+  }
+
+  if (type === "gps-commissioned") {
+    return [
+      {
+        id: 1,
+        name: "Milestone I",
+        targetPercentage: 10,
+        date: addMonths(agreementDate, 6), // T0 + 180 days
+        monthsFromStart: 6,
+      },
+      {
+        id: 2,
+        name: "Milestone II",
+        targetPercentage: 30,
+        date: addMonths(agreementDate, 12), // T0 + 360 days
+        monthsFromStart: 12,
+      },
+      {
+        id: 3,
+        name: "Milestone III",
+        targetPercentage: 50,
+        date: addMonths(agreementDate, 18), // T0 + 540 days
+        monthsFromStart: 18,
+      },
+      {
+        id: 4,
+        name: "Milestone IV",
+        targetPercentage: 75,
+        date: addMonths(agreementDate, 24), // T0 + 720 days
+        monthsFromStart: 24,
+      },
+      {
+        id: 5,
+        name: "Milestone V",
+        targetPercentage: 90,
+        date: addMonths(agreementDate, 30), // T0 + 900 days
+        monthsFromStart: 30,
       },
     ]
   }
@@ -396,6 +436,37 @@ export function NationalDashboard({
   }
 
   const nationalSurveyTarget = calculateNationalSurveyTarget()
+
+  // Calculate national target for GPS commissioned based on milestones
+  const calculateNationalGpsCommissionedTarget = () => {
+    const currentDate = new Date()
+    let nationalTarget = 0
+
+    data.forEach((state) => {
+      if (state.agreementSigningDate && state.agreementSigningDate !== "") {
+        try {
+          const agreementDate = parseDate(state.agreementSigningDate)
+          const milestones = createMilestones(agreementDate, "gps-commissioned")
+
+          // Use the final milestone target
+          const finalMilestone = milestones[milestones.length - 1]
+          nationalTarget += Math.round(
+            (finalMilestone.targetPercentage / 100) * state.gPsCommissionedTodo,
+          )
+        } catch (error) {
+          console.warn(
+            "Failed to calculate GPS commissioned target for",
+            state.state,
+            error,
+          )
+        }
+      }
+    })
+
+    return nationalTarget
+  }
+
+  const nationalGpsCommissionedTarget = calculateNationalGpsCommissionedTarget()
 
   // Prepare chart data
   const progressChartData = data.map((state) => ({
@@ -874,6 +945,53 @@ export function NationalDashboard({
       ),
     },
     {
+      accessorKey: "desktopSurveyDone",
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          className="mx-auto"
+          column={column}
+          title="Desktop Survey"
+        />
+      ),
+      accessorFn: (row) => {
+        const done = Number(row.desktopSurveyDone)
+        const todo = Number(row.desktopSurveyTarget)
+        const percentage = todo > 0 ? (done / todo) * 100 : 0
+        return percentage
+      },
+      cell: ({ row }) => {
+        const done = Number(row.original.desktopSurveyDone)
+        const todo = Number(row.original.desktopSurveyTarget)
+        const percentage = todo > 0 ? (done / todo) * 100 : 0
+        const trend = getCircleTrend(row.original.state, "desktopSurveyDone")
+
+        return (
+          <div className="flex flex-col items-center gap-1 text-base font-bold">
+            {trend.hasData ? (
+              <TrendIndicator trend={trend} size="xs" />
+            ) : (
+              <Badge
+                variant={
+                  // percentage >= 100
+                  //   ? "default"
+                  //   : percentage >= 75
+                  //     ? "secondary"
+                  //     : "destructive"
+                  "default"
+                }
+                className="font-mono"
+              >
+                {percentage.toFixed(0)}%
+              </Badge>
+            )}
+            <div className="text-xs text-muted-foreground">
+              {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
+            </div>
+          </div>
+        )
+      },
+    },
+    {
       id: "hotoProgress",
       accessorFn: (row) => {
         const done = row.hotoGPsDone
@@ -999,53 +1117,7 @@ export function NationalDashboard({
         />
       ),
     },
-    {
-      accessorKey: "desktopSurveyDone",
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          className="mx-auto"
-          column={column}
-          title="Desktop Survey"
-        />
-      ),
-      accessorFn: (row) => {
-        const done = Number(row.desktopSurveyDone)
-        const todo = Number(row.desktopSurveyTarget)
-        const percentage = todo > 0 ? (done / todo) * 100 : 0
-        return percentage
-      },
-      cell: ({ row }) => {
-        const done = Number(row.original.desktopSurveyDone)
-        const todo = Number(row.original.desktopSurveyTarget)
-        const percentage = todo > 0 ? (done / todo) * 100 : 0
-        const trend = getCircleTrend(row.original.state, "desktopSurveyDone")
 
-        return (
-          <div className="flex flex-col items-center gap-1 text-base font-bold">
-            {trend.hasData ? (
-              <TrendIndicator trend={trend} size="xs" />
-            ) : (
-              <Badge
-                variant={
-                  // percentage >= 100
-                  //   ? "default"
-                  //   : percentage >= 75
-                  //     ? "secondary"
-                  //     : "destructive"
-                  "default"
-                }
-                className="font-mono"
-              >
-                {percentage.toFixed(0)}%
-              </Badge>
-            )}
-            <div className="text-xs text-muted-foreground">
-              {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
-            </div>
-          </div>
-        )
-      },
-    },
     {
       accessorKey: "physicalSurveyGPsDone",
       header: ({ column }) => (
@@ -1135,17 +1207,20 @@ export function NationalDashboard({
                       1,
                     )}
                     % (
-                    {((milestoneInfo.currentMilestone?.targetPercentage ?? 0) /
-                      100) *
-                      row.original.physicalSurveyGPsTodo}{" "}
+                    {Math.round(
+                      ((milestoneInfo.currentMilestone?.targetPercentage ?? 0) /
+                        100) *
+                        row.original.physicalSurveyGPsTodo,
+                    )}{" "}
                     GPs)
                   </div>
                   <div className="text-muted-foreground">
                     by{" "}
-                    {format(
-                      milestoneInfo.currentMilestone?.date,
-                      "dd MMM yyyy",
-                    )}
+                    {milestoneInfo.currentMilestone?.date &&
+                      format(
+                        milestoneInfo.currentMilestone.date,
+                        "dd MMM yyyy",
+                      )}
                   </div>
                 </div>
 
@@ -1178,6 +1253,136 @@ export function NationalDashboard({
           </div>
         )
       },
+    },
+    {
+      id: "gpsCommissionedProgress",
+      accessorFn: (row) => {
+        const done = toNumber(row.gPsCommissionedDone)
+        const todo = row.gPsCommissionedTodo
+        const percentage = todo > 0 ? (done / todo) * 100 : 0
+        return percentage
+      },
+
+      cell: ({ row }) => {
+        "use no memo"
+        const done = toNumber(row.original.gPsCommissionedDone)
+        const todo = row.original.gPsCommissionedTodo
+        const percentage = todo > 0 ? (done / todo) * 100 : 0
+        const trend = getCircleTrend(row.original.state, "gPsCommissionedDone")
+
+        // Calculate milestone information for GPS commissioned
+        let milestoneInfo = null
+        if (
+          row.original.agreementSigningDate &&
+          row.original.agreementSigningDate !== ""
+        ) {
+          try {
+            const agreementDate = parseDate(row.original.agreementSigningDate)
+            const currentDate = new Date()
+            const milestones = createMilestones(
+              agreementDate,
+              "gps-commissioned",
+            )
+            const target = calculateCurrentTarget(milestones, currentDate, todo)
+
+            milestoneInfo = {
+              previousMilestone: target.lastMilestone, // The milestone that has been passed
+              currentMilestone: target.currentMilestone,
+              finalMilestone: milestones[milestones.length - 1], // The actual final milestone
+              currentTarget: target.expectedPercentage,
+              currentTargetGps: target.expectedGps,
+              isOnTrack: percentage >= target.expectedPercentage,
+            }
+          } catch (error) {
+            console.warn(
+              "Failed to parse agreement date:",
+              row.original.agreementSigningDate,
+            )
+          }
+        }
+
+        return (
+          <div className="flex flex-col items-center gap-1 text-base font-bold">
+            {trend.hasData ? (
+              <TrendIndicator trend={trend} size="xs" />
+            ) : (
+              <Badge
+                variant={milestoneInfo?.isOnTrack ? "secondary" : "destructive"}
+                className="font-mono"
+              >
+                {percentage.toFixed(0)}%
+              </Badge>
+            )}
+            <div className="text-xs text-muted-foreground">
+              {(done ?? 0).toLocaleString()}/{(todo ?? 0).toLocaleString()}
+            </div>
+
+            {/* Milestone information */}
+            {milestoneInfo && (
+              <div className="text-xs text-center space-y-0.5">
+                {/* Current Target */}
+                <div className="space-y-0.5 border-b border-gray-200 pb-1">
+                  <div className="text-muted-foreground">
+                    Next: {milestoneInfo.currentMilestone?.name}
+                  </div>
+                  <div className={cn("font-mono text-xs", "text-blue-600")}>
+                    {milestoneInfo.currentMilestone?.targetPercentage.toFixed(
+                      1,
+                    )}
+                    % (
+                    {Math.round(
+                      ((milestoneInfo.currentMilestone?.targetPercentage ?? 0) /
+                        100) *
+                        row.original.gPsCommissionedTodo,
+                    )}{" "}
+                    GPs)
+                  </div>
+                  <div className="text-muted-foreground">
+                    by{" "}
+                    {milestoneInfo.currentMilestone?.date &&
+                      format(
+                        milestoneInfo.currentMilestone.date,
+                        "dd MMM yyyy",
+                      )}
+                  </div>
+                </div>
+
+                {/* Previous Milestone */}
+                {milestoneInfo.previousMilestone && (
+                  <div className="space-y-0.5 pb-1">
+                    <div className="text-muted-foreground">
+                      Previous: {milestoneInfo.previousMilestone.name}
+                    </div>
+                    <div className="font-mono text-xs text-green-600">
+                      {milestoneInfo.previousMilestone.targetPercentage}% (
+                      {Math.round(
+                        (milestoneInfo.previousMilestone.targetPercentage /
+                          100) *
+                          todo,
+                      )}{" "}
+                      GPs) ✓
+                    </div>
+                    <div className="text-muted-foreground">
+                      by{" "}
+                      {format(
+                        milestoneInfo.previousMilestone.date,
+                        "dd MMM yyyy",
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      },
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          className="mx-auto"
+          column={column}
+          title="GPs in Ring"
+        />
+      ),
     },
     {
       accessorKey: "gPs >98%Uptime",
@@ -1556,7 +1761,11 @@ export function NationalDashboard({
                 : 0
             }
             icon={<Zap />}
-            description={`${nationalSummary.totalGpsCommissionedDone.toLocaleString()}/${nationalSummary.totalGpsCommissioned.toLocaleString()} commissioned`}
+            description={`${nationalSummary.totalGpsCommissionedDone.toLocaleString()}/${nationalSummary.totalGpsCommissioned.toLocaleString()} commissioned | National Target: ${nationalGpsCommissionedTarget.toLocaleString()} GPs | ${
+              nationalGpsCommissionedTarget > 0
+                ? `${((nationalSummary.totalGpsCommissionedDone / nationalGpsCommissionedTarget) * 100).toFixed(1)}% of milestone target achieved`
+                : "No milestone targets set"
+            }`}
             className="bg-amber-50 dark:bg-amber-950/20"
             valueFormatter={(value) => `${value.toFixed(1)}%`}
           />

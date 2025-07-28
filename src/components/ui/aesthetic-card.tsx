@@ -182,7 +182,7 @@ export function AestheticCard<TData extends NationalRowData>({
 
   return (
     <Card
-      className="py-0! group/card is-card"
+      className="py-0! group/card is-card h-[75vh] overflow-y-auto"
       // className={cn(
       //   "overflow-hidden border-0 bg-gradient-to-br from-white to-gray-50/80",
       //   "dark:from-gray-900/50 dark:to-gray-950/30",
@@ -660,7 +660,7 @@ const DISPLAY_FIELDS = [
     type: "number",
   },
   {
-    key: "noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone",
+    key: "gPsCommissionedDone",
     label: "GPs Commissioned in Ring",
     icon: Zap,
     type: "number",
