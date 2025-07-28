@@ -147,8 +147,8 @@ export interface NationalRowData {
   snocStatus: string
   "gPs >98%Uptime": number
   activeFtthConnections: number
-  noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone: number
-  noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone: string | number
+  gPsCommissionedTodo: number
+  gPsCommissionedDone: string | number
   ofcTotalKMs: number
   ofcExistingKMs: number
   ofcNewKms: number

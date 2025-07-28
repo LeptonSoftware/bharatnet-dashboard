@@ -43,6 +43,7 @@ export function DataTableList({
                   <TableHead
                     key={header.id}
                     colSpan={header.colSpan}
+                    className="border-l border-r"
                     style={{
                       ...getCommonPinningStyles({ column: header.column }),
                     }}
@@ -68,6 +69,7 @@ export function DataTableList({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
+                      className="border-l border-r"
                       style={{
                         ...getCommonPinningStyles({ column: cell.column }),
                       }}

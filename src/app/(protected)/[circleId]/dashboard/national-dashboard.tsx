@@ -308,18 +308,12 @@ export function NationalDashboard({
         try {
           const agreementDate = parseDate(state.agreementSigningDate)
           const milestones = createMilestones(agreementDate, "hoto")
-          const target = calculateCurrentTarget(
-            milestones,
-            currentDate,
-            state.hotoGPsTodo,
-          )
 
-          // Use the last milestone target or current expected target
-          if (target.lastMilestone) {
-            nationalTarget += Math.round(
-              (target.lastMilestone.targetPercentage / 100) * state.hotoGPsTodo,
-            )
-          }
+          // Use the final milestone target
+          const finalMilestone = milestones[milestones.length - 1]
+          nationalTarget += Math.round(
+            (finalMilestone.targetPercentage / 100) * state.hotoGPsTodo,
+          )
         } catch (error) {
           console.warn("Failed to calculate target for", state.state, error)
         }
@@ -343,11 +337,8 @@ export function NationalDashboard({
         acc.totalOfcLength += state.ofcTotalKMs
         acc.totalOfcExisting += state.ofcExistingKMs
         acc.totalOfcNew += state.ofcNewKms
-        acc.totalGpsCommissioned +=
-          state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone
-        acc.totalGpsCommissionedDone += toNumber(
-          state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone,
-        )
+        acc.totalGpsCommissioned += state.gPsCommissionedTodo
+        acc.totalGpsCommissionedDone += toNumber(state.gPsCommissionedDone)
         acc.totalDesktopSurveyDone += state.desktopSurveyDone
         acc.totalDesktopSurveyTarget += toNumber(state.desktopSurveyTarget)
       }
@@ -384,19 +375,13 @@ export function NationalDashboard({
         try {
           const agreementDate = parseDate(state.agreementSigningDate)
           const milestones = createMilestones(agreementDate, "feasibility")
-          const target = calculateCurrentTarget(
-            milestones,
-            currentDate,
-            state.physicalSurveyGPsTodo,
-          )
 
-          // Use the last milestone target or current expected target
-          if (target.lastMilestone) {
-            nationalTarget += Math.round(
-              (target.lastMilestone.targetPercentage / 100) *
-                state.physicalSurveyGPsTodo,
-            )
-          }
+          // Use the final milestone target
+          const finalMilestone = milestones[milestones.length - 1]
+          nationalTarget += Math.round(
+            (finalMilestone.targetPercentage / 100) *
+              state.physicalSurveyGPsTodo,
+          )
         } catch (error) {
           console.warn(
             "Failed to calculate survey target for",
@@ -422,9 +407,8 @@ export function NationalDashboard({
         ? (state.physicalSurveyGPsDone / state.physicalSurveyGPsTodo) * 100
         : 0,
     gpsCommissionedProgress:
-      state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone > 0
-        ? (toNumber(state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone) /
-            state.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone) *
+      state.gPsCommissionedTodo > 0
+        ? (toNumber(state.gPsCommissionedDone) / state.gPsCommissionedTodo) *
           100
         : 0,
   }))
@@ -777,7 +761,7 @@ export function NationalDashboard({
         ) {
           return (
             <Link
-              className="font-bold text-base text-blue-500 hover:underline text-wrap"
+              className="font-bold text-base text-blue-500 hover:underline text-wrap text-base"
               to={`/${row.original.abbreviation}`}
             >
               {row.getValue("state")}
@@ -811,7 +795,7 @@ export function NationalDashboard({
         return (
           <div
             className={cn(
-              "font-medium text-center",
+              "font-bold text-center text-base",
               isNotPia && "text-destructive",
             )}
           >
@@ -830,7 +814,7 @@ export function NationalDashboard({
         />
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-center text-base font-bold">
           {row.getValue("agreementSigningDate") || "N/A"}
         </div>
       ),
@@ -848,7 +832,7 @@ export function NationalDashboard({
         return (
           <div
             className={cn(
-              "font-medium text-center",
+              "font-bold text-center text-base",
               isNotIE && "text-destructive",
             )}
           >
@@ -860,16 +844,32 @@ export function NationalDashboard({
     {
       accessorKey: "gPsTotal",
       enableSorting: true,
-      cell: ({ row }) => (
-        <div className="text-center font-mono">
-          {row.original.gPsTotal.toLocaleString()}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const total = row.original.gPsTotal
+        const newGPs = row.original.gPsNew
+        const existing = row.original.gPsExisting
+
+        return (
+          <div className="flex flex-col items-center text-base gap-1 font-bold">
+            <div className="font-bold tabular-nums">
+              {total.toLocaleString()}
+            </div>
+            <div className="text-xs flex flex-col items-center">
+              <span className="text-blue-600">
+                {existing.toLocaleString()} existing
+              </span>
+              <span className="text-emerald-600">
+                {newGPs.toLocaleString()} new
+              </span>
+            </div>
+          </div>
+        )
+      },
       header: ({ column }) => (
         <DataTableColumnHeader
           className="mx-auto"
           column={column}
-          title="Total GPs"
+          title="Total GPs (Existing, New)"
         />
       ),
     },
@@ -902,7 +902,9 @@ export function NationalDashboard({
             const target = calculateCurrentTarget(milestones, currentDate, todo)
 
             milestoneInfo = {
-              lastMilestone: target.lastMilestone,
+              previousMilestone: target.lastMilestone, // The milestone that has been passed
+              currentMilestone: target.currentMilestone,
+              finalMilestone: milestones[milestones.length - 1], // The actual final milestone
               currentTarget: target.expectedPercentage,
               currentTargetGps: target.expectedGps,
               isOnTrack: percentage >= target.expectedPercentage,
@@ -915,10 +917,8 @@ export function NationalDashboard({
           }
         }
 
-        console.log(milestoneInfo)
-
         return (
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col items-center gap-1 text-base font-bold">
             {trend.hasData ? (
               <TrendIndicator trend={trend} size="xs" />
             ) : (
@@ -934,28 +934,58 @@ export function NationalDashboard({
             </div>
 
             {/* Milestone information */}
-            {milestoneInfo && milestoneInfo.lastMilestone && (
+            {milestoneInfo && (
               <div className="text-xs text-center space-y-0.5">
-                <div className="text-muted-foreground">
-                  Target: {milestoneInfo.lastMilestone.name}
-                </div>
-                <div
-                  className={cn(
-                    "font-mono text-xs",
-                    milestoneInfo.isOnTrack
-                      ? "text-emerald-600"
-                      : "text-orange-600",
+                {/* Current Target */}
+                <div className="space-y-0.5 border-b border-gray-200 pb-1">
+                  <div className="text-muted-foreground">
+                    Next: {milestoneInfo.currentMilestone?.name}
+                  </div>
+                  <div className={cn("font-mono text-xs", "text-blue-600")}>
+                    {milestoneInfo.currentMilestone?.targetPercentage.toFixed(
+                      1,
+                    )}
+                    % (
+                    {((milestoneInfo.currentMilestone?.targetPercentage ?? 0) /
+                      100) *
+                      row.original.hotoGPsTodo}{" "}
+                    GPs)
+                  </div>
+                  {milestoneInfo.currentMilestone && (
+                    <div className="text-muted-foreground">
+                      by{" "}
+                      {format(
+                        milestoneInfo.currentMilestone.date,
+                        "dd MMM yyyy",
+                      )}
+                    </div>
                   )}
-                >
-                  {milestoneInfo.lastMilestone.targetPercentage}% (
-                  {Math.round(
-                    (milestoneInfo.lastMilestone.targetPercentage / 100) * todo,
-                  )}{" "}
-                  GPs)
                 </div>
-                <div className="text-muted-foreground">
-                  by {format(milestoneInfo.lastMilestone.date, "dd MMM yyyy")}
-                </div>
+
+                {/* Previous Milestone */}
+                {milestoneInfo.previousMilestone && (
+                  <div className="space-y-0.5 pb-1">
+                    <div className="text-muted-foreground">
+                      Previous: {milestoneInfo.previousMilestone.name}
+                    </div>
+                    <div className="font-mono text-xs text-green-600">
+                      {milestoneInfo.previousMilestone.targetPercentage}% (
+                      {Math.round(
+                        (milestoneInfo.previousMilestone.targetPercentage /
+                          100) *
+                          todo,
+                      )}{" "}
+                      GPs) ✓
+                    </div>
+                    <div className="text-muted-foreground">
+                      by{" "}
+                      {format(
+                        milestoneInfo.previousMilestone.date,
+                        "dd MMM yyyy",
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -991,7 +1021,7 @@ export function NationalDashboard({
         const trend = getCircleTrend(row.original.state, "desktopSurveyDone")
 
         return (
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col items-center gap-1 text-base font-bold">
             {trend.hasData ? (
               <TrendIndicator trend={trend} size="xs" />
             ) : (
@@ -1053,7 +1083,9 @@ export function NationalDashboard({
             const target = calculateCurrentTarget(milestones, currentDate, todo)
 
             milestoneInfo = {
-              lastMilestone: target.lastMilestone,
+              previousMilestone: target.lastMilestone, // The milestone that has been passed
+              currentMilestone: target.currentMilestone,
+              finalMilestone: milestones[milestones.length - 1], // The actual final milestone
               currentTarget: target.expectedPercentage,
               currentTargetGps: target.expectedGps,
               isOnTrack: percentage >= target.expectedPercentage,
@@ -1067,7 +1099,7 @@ export function NationalDashboard({
         }
 
         return (
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col items-center gap-1 text-base font-bold">
             {trend.hasData ? (
               <TrendIndicator trend={trend} size="xs" />
             ) : (
@@ -1091,28 +1123,56 @@ export function NationalDashboard({
             </div>
 
             {/* Milestone information */}
-            {milestoneInfo && milestoneInfo.lastMilestone && (
+            {milestoneInfo && (
               <div className="text-xs text-center space-y-0.5">
-                <div className="text-muted-foreground">
-                  Target: {milestoneInfo.lastMilestone.name}
+                {/* Current Target */}
+                <div className="space-y-0.5 border-b border-gray-200 pb-1">
+                  <div className="text-muted-foreground">
+                    Next: {milestoneInfo.currentMilestone?.name}
+                  </div>
+                  <div className={cn("font-mono text-xs", "text-blue-600")}>
+                    {milestoneInfo.currentMilestone?.targetPercentage.toFixed(
+                      1,
+                    )}
+                    % (
+                    {((milestoneInfo.currentMilestone?.targetPercentage ?? 0) /
+                      100) *
+                      row.original.physicalSurveyGPsTodo}{" "}
+                    GPs)
+                  </div>
+                  <div className="text-muted-foreground">
+                    by{" "}
+                    {format(
+                      milestoneInfo.currentMilestone?.date,
+                      "dd MMM yyyy",
+                    )}
+                  </div>
                 </div>
-                <div
-                  className={cn(
-                    "font-mono text-xs",
-                    milestoneInfo.isOnTrack
-                      ? "text-emerald-600"
-                      : "text-orange-600",
-                  )}
-                >
-                  {milestoneInfo.lastMilestone.targetPercentage}% (
-                  {Math.round(
-                    (milestoneInfo.lastMilestone.targetPercentage / 100) * todo,
-                  )}{" "}
-                  GPs)
-                </div>
-                <div className="text-muted-foreground">
-                  by {format(milestoneInfo.lastMilestone.date, "dd MMM yyyy")}
-                </div>
+
+                {/* Previous Milestone */}
+                {milestoneInfo.previousMilestone && (
+                  <div className="space-y-0.5 pb-1">
+                    <div className="text-muted-foreground">
+                      Previous: {milestoneInfo.previousMilestone.name}
+                    </div>
+                    <div className="font-mono text-xs text-green-600">
+                      {milestoneInfo.previousMilestone.targetPercentage}% (
+                      {Math.round(
+                        (milestoneInfo.previousMilestone.targetPercentage /
+                          100) *
+                          todo,
+                      )}{" "}
+                      GPs) ✓
+                    </div>
+                    <div className="text-muted-foreground">
+                      by{" "}
+                      {format(
+                        milestoneInfo.previousMilestone.date,
+                        "dd MMM yyyy",
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1135,7 +1195,7 @@ export function NationalDashboard({
         const trend = getCircleTrend(row.original.state, "gPs >98%Uptime")
 
         return (
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col items-center gap-1 text-base font-bold">
             <div className="font-mono">{uptime.toLocaleString()}</div>
             <div className="text-xs text-muted-foreground">
               {percentage.toFixed(1)}%
@@ -1162,7 +1222,7 @@ export function NationalDashboard({
         )
 
         return (
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col items-center gap-1 text-base font-bold">
             <TrendIndicator trend={trend} size="xs" />
             <div className="font-mono">{connections.toLocaleString()}</div>
           </div>
@@ -1186,7 +1246,7 @@ export function NationalDashboard({
         const percentage = total > 0 ? (laid / total) * 100 : 0
 
         return (
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col items-center gap-1 text-base font-bold">
             <Badge
               variant={
                 percentage >= 80
@@ -1593,8 +1653,8 @@ export function NationalDashboard({
             snocStatus: "",
             "gPs >98%Uptime": 0,
             activeFtthConnections: 0,
-            noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone: 0,
-            noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone: "",
+            gPsCommissionedTodo: 0,
+            gPsCommissionedDone: "",
             ofcTotalKMs: 0,
             ofcExistingKMs: 0,
             ofcNewKms: 0,

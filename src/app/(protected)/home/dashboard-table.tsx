@@ -116,7 +116,7 @@ export function DashboardTable() {
         ) {
           return (
             <Link
-              className="font-medium text-blue-500 hover:underline text-wrap min-w-[200px]"
+              className="font-bold text-blue-500 hover:underline text-wrap min-w-[200px] text-base"
               to={`/${row.original.abbreviation}`}
             >
               {row.getValue("state")}
@@ -124,7 +124,7 @@ export function DashboardTable() {
           )
         }
         return (
-          <div className="font-medium text-wrap min-w-[200px]">
+          <div className="font-bold text-base text-wrap min-w-[200px]">
             {row.getValue("state")}
           </div>
         )
@@ -147,7 +147,7 @@ export function DashboardTable() {
         return (
           <div
             className={cn(
-              "font-medium text-center",
+              "font-bold text-center text-base",
               isNotPia && "text-destructive",
             )}
           >
@@ -166,7 +166,7 @@ export function DashboardTable() {
         />
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-center text-base font-bold">
           {row.getValue("agreementSigningDate") || "N/A"}
         </div>
       ),
@@ -184,7 +184,7 @@ export function DashboardTable() {
         return (
           <div
             className={cn(
-              "font-medium text-center",
+              "font-bold text-center text-base",
               isNotIE && "text-destructive",
             )}
           >
@@ -208,8 +208,8 @@ export function DashboardTable() {
         const existing = row.original.gPsExisting
 
         return (
-          <div className="flex flex-col items-center gap-1">
-            <div className="font-medium tabular-nums">
+          <div className="flex flex-col items-center text-base gap-1 font-bold">
+            <div className="font-bold tabular-nums">
               {total.toLocaleString()}
             </div>
             <div className="text-xs">
@@ -240,8 +240,8 @@ export function DashboardTable() {
         const newKms = row.original.ofcNewKms
 
         return (
-          <div className="flex flex-col items-center gap-1">
-            <div className="font-medium tabular-nums">
+          <div className="flex flex-col items-center text-base gap-1 font-bold">
+            <div className="font-bold tabular-nums">
               {total.toLocaleString()}
             </div>
             <div className="text-xs">
@@ -276,8 +276,8 @@ export function DashboardTable() {
         const date = parts[1] || ""
 
         return (
-          <div className="flex flex-col items-center gap-1">
-            <div className="font-medium">₹ {amount}</div>
+          <div className="flex flex-col items-center gap-1 text-base font-bold">
+            <div className="font-bold">₹ {amount}</div>
             {date && (
               <div className="text-xs text-muted-foreground">{date}</div>
             )}
@@ -332,8 +332,8 @@ export function DashboardTable() {
           snocStatus: "",
           "gPs >98%Uptime": 0,
           activeFtthConnections: 0,
-          noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone: 0,
-          noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone: 0,
+          gPsCommissionedTodo: 0,
+          gPsCommissionedDone: 0,
           ofcTotalKMs: 0,
           ofcExistingKMs: 0,
           ofcNewKms: 0,

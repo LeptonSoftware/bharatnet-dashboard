@@ -475,16 +475,14 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
           <StatusCard
             title="GPS Commissioned Target"
-            value={data.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone}
+            value={data.gPsCommissionedTodo}
             icon={<Zap />}
             description="Target GPs to be commissioned"
             className="bg-yellow-50 dark:bg-yellow-950/20"
           />
           <StatusCard
             title="GPS Commissioned Done"
-            value={toNumber(
-              data.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone,
-            )}
+            value={toNumber(data.gPsCommissionedDone)}
             icon={<CheckCircle />}
             description="GPs already commissioned"
             className="bg-green-50 dark:bg-green-950/20"
@@ -492,11 +490,9 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
           <StatusCard
             title="Commissioning Progress"
             value={
-              data.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone > 0
-                ? (toNumber(
-                    data.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsDone,
-                  ) /
-                    data.noOfGPsCommissionedInRingAndVisibleInCNocOrEmsMilestone) *
+              data.gPsCommissionedTodo > 0
+                ? (toNumber(data.gPsCommissionedDone) /
+                    data.gPsCommissionedTodo) *
                   100
                 : 0
             }
