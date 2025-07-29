@@ -352,12 +352,15 @@ export function NationalDashboard({
         try {
           const agreementDate = parseDate(state.agreementSigningDate)
           const milestones = createMilestones(agreementDate, "hoto")
+          const target = calculateCurrentTarget(
+            milestones,
+            currentDate,
+            state.hotoGPsTodo,
+          )
 
           // Use the final milestone target
-          const finalMilestone = milestones[milestones.length - 1]
-          nationalTarget += Math.round(
-            (finalMilestone.targetPercentage / 100) * state.hotoGPsTodo,
-          )
+          // const finalMilestone = milestones[milestones.length - 1]
+          nationalTarget += target.expectedGps
         } catch (error) {
           console.warn("Failed to calculate target for", state.state, error)
         }
@@ -419,13 +422,14 @@ export function NationalDashboard({
         try {
           const agreementDate = parseDate(state.agreementSigningDate)
           const milestones = createMilestones(agreementDate, "feasibility")
-
-          // Use the final milestone target
-          const finalMilestone = milestones[milestones.length - 1]
-          nationalTarget += Math.round(
-            (finalMilestone.targetPercentage / 100) *
-              state.physicalSurveyGPsTodo,
+          const target = calculateCurrentTarget(
+            milestones,
+            currentDate,
+            state.physicalSurveyGPsTodo,
           )
+          // Use the final milestone target
+          // const finalMilestone = milestones[milestones.length - 1]
+          nationalTarget += target.expectedGps
         } catch (error) {
           console.warn(
             "Failed to calculate survey target for",
@@ -451,12 +455,15 @@ export function NationalDashboard({
         try {
           const agreementDate = parseDate(state.agreementSigningDate)
           const milestones = createMilestones(agreementDate, "gps-commissioned")
+          const target = calculateCurrentTarget(
+            milestones,
+            currentDate,
+            state.gPsCommissionedTodo,
+          )
 
           // Use the final milestone target
-          const finalMilestone = milestones[milestones.length - 1]
-          nationalTarget += Math.round(
-            (finalMilestone.targetPercentage / 100) * state.gPsCommissionedTodo,
-          )
+          // const finalMilestone = milestones[milestones.length - 1]
+          nationalTarget += target.expectedGps
         } catch (error) {
           console.warn(
             "Failed to calculate GPS commissioned target for",
