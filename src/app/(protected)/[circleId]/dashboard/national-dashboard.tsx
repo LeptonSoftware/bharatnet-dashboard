@@ -1890,7 +1890,7 @@ export function NationalDashboard({
             Failed to load attendance data: {attendanceError.message}
           </div>
         ) : attendanceData ? (
-          <a href="https://glitscrm.digitalrupay.com/monitoring_dashboard/dashboard/manpower/Package-1">
+          <a href="https://abp-pmtool.bsnl.co.in/cnoc/overall/dashboard/manpower/package1">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
               <StatusCard
                 title="Total Users"

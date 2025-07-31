@@ -521,7 +521,7 @@ export function OverviewDashboard({ circle }: OverviewDashboardProps) {
           </div>
         ) : attendanceData ? (
           <a
-            href={`https://glitscrm.digitalrupay.com/monitoring_dashboard/dashboard/manpower/${attendanceData.package_name.replace(" ", "-")}`}
+            href={`https://abp-pmtool.bsnl.co.in/cnoc/overall/dashboard/manpower/${attendanceData.package_name.replace(" ", "").toLowerCase()}`}
           >
             <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3 mb-8">
               <StatusCard
