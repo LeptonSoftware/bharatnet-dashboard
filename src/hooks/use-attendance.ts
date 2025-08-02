@@ -36,7 +36,7 @@ export function useCircleAttendance(circleId: string) {
     queryKey: ["attendance", "circle"],
     queryFn: async () => {
       const response = await fetch(
-        "https://glitscrm.digitalrupay.com/apirt1/crm/attendance/package/stats",
+        "https://abp-pmtool.bsnl.co.in/apirt1/cnoc/attendance/package/stats",
       )
       const data = await response.json()
       return Object.values(data.data)

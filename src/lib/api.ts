@@ -131,7 +131,7 @@ export async function fetchNationalData(): Promise<NationalRowData[]> {
 export async function fetchAttendanceData(): Promise<AttendanceData> {
   try {
     const response = await fetch(
-      "https://glitscrm.digitalrupay.com/apirt1/crm/attendance/overallstats",
+      "https://abp-pmtool.bsnl.co.in/apirt1/cnoc/attendance/overallstats",
     )
 
     if (!response.ok) {
