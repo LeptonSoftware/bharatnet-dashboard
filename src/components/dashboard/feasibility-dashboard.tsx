@@ -21,6 +21,8 @@ import {
   LayoutDashboard,
   Building2,
   Table,
+  Users,
+  FileText,
 } from "lucide-react";
 
 interface FeasibilityDashboardProps {
@@ -66,6 +68,17 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
     data: [stats.completedKm || 0, stats.pendingKm || 0],
   };
 
+  // Calculate total number of teams
+  const totalTeams = data.reduce(
+    (sum, item) => sum + (item.fNoOfAblTeams || 0),
+    0
+  );
+
+  // Calculate total completed survey reports
+  const completedReports = data.filter(
+    (item) => item.surveyReportSubmissionStatus?.toLowerCase() === "done"
+  ).length;
+
   return (
     <div className="space-y-6">
       <div>
@@ -100,6 +113,20 @@ export function FeasibilityDashboard({ circle }: FeasibilityDashboardProps) {
             icon={<FileQuestion />}
             description="Blocks pending survey"
             className="bg-amber-50 dark:bg-amber-950/20"
+          />
+          <StatusCard
+            title="Number of Teams"
+            value={totalTeams}
+            icon={<Users />}
+            description="Total number of survey teams"
+            className="bg-indigo-50 dark:bg-indigo-950/20"
+          />
+          <StatusCard
+            title="Reports Submitted"
+            value={completedReports}
+            icon={<FileText />}
+            description="Count of BOQ Submitted"
+            className="bg-purple-50 dark:bg-purple-950/20"
           />
         </div>
       </div>
