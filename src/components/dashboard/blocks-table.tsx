@@ -22,7 +22,7 @@ interface BlocksTableProps {
 
 export function BlocksTable({ data }: BlocksTableProps) {
   const [filterValue, setFilterValue] = useState("");
-  
+
   const columns: ColumnDef<BlockData>[] = [
     {
       accessorKey: "nameOfDistrict",
@@ -69,22 +69,22 @@ export function BlocksTable({ data }: BlocksTableProps) {
       accessorKey: "dtpStatus",
       header: "Desktop Planning Status",
       cell: ({ row }) => {
-        const status = row.getValue("dtpStatus") as string;
-        
+        const status = String(row.getValue("dtpStatus") || "");
+
         if (!status) return <Badge variant="outline">Pending</Badge>;
-        
-        if (status.toLowerCase().includes('approved')) {
+
+        if (status.toLowerCase().includes("approved")) {
           return <Badge className="bg-emerald-500">Approved</Badge>;
         }
-        
-        if (status.toLowerCase().includes('submitted')) {
+
+        if (status.toLowerCase().includes("submitted")) {
           return <Badge className="bg-blue-500">Submitted</Badge>;
         }
-        
-        if (status.toLowerCase().includes('hold')) {
+
+        if (status.toLowerCase().includes("hold")) {
           return <Badge variant="destructive">Hold</Badge>;
         }
-        
+
         return <Badge variant="outline">{status}</Badge>;
       },
     },
@@ -93,7 +93,9 @@ export function BlocksTable({ data }: BlocksTableProps) {
       header: "Existing (km)",
       cell: ({ row }) => {
         const value = row.getValue("existingOfc") as number;
-        return <div className="text-right">{Number(value)?.toFixed(1) || '0.0'}</div>;
+        return (
+          <div className="text-right">{Number(value)?.toFixed(1) || "0.0"}</div>
+        );
       },
     },
     {
@@ -101,15 +103,17 @@ export function BlocksTable({ data }: BlocksTableProps) {
       header: "Planned (km)",
       cell: ({ row }) => {
         const value = row.getValue("proposedOfc") as number;
-        return <div className="text-right">{Number(value)?.toFixed(1) || '0.0'}</div>;
+        return (
+          <div className="text-right">{Number(value)?.toFixed(1) || "0.0"}</div>
+        );
       },
     },
   ];
 
-  const filteredData = data.filter(item => {
+  const filteredData = data.filter((item) => {
     const searchTerm = filterValue.toLowerCase();
-    const district = (item.nameOfDistrict || '').toLowerCase();
-    const block = (item.nameOfBlock || '').toLowerCase();
+    const district = (item.nameOfDistrict || "").toLowerCase();
+    const block = (item.nameOfBlock || "").toLowerCase();
     return district.includes(searchTerm) || block.includes(searchTerm);
   });
 
@@ -135,18 +139,32 @@ export function BlocksTable({ data }: BlocksTableProps) {
               <thead className="sticky top-0 bg-muted border-b [&_tr]:border-b-0">
                 <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   {columns.map((column, index) => (
-                    <th key={index} className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                      {typeof column.header === 'function' ? column.header({}) : column.header}
+                    <th
+                      key={index}
+                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground"
+                    >
+                      {typeof column.header === "function"
+                        ? column.header({})
+                        : column.header}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
                 {filteredData.map((row, rowIndex) => (
-                  <tr key={rowIndex} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                  <tr
+                    key={rowIndex}
+                    className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                  >
                     {columns.map((column, colIndex) => (
                       <td key={colIndex} className="p-4 align-middle">
-                        {column.cell?.({ row: { getValue: () => row[column.accessorKey as keyof BlockData], original: row } })}
+                        {column.cell?.({
+                          row: {
+                            getValue: () =>
+                              row[column.accessorKey as keyof BlockData],
+                            original: row,
+                          },
+                        })}
                       </td>
                     ))}
                   </tr>
